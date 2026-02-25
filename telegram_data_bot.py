@@ -15,7 +15,7 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 # Define states for the ConversationHandler
-EMAIL, PASSWORD, APPOINTMENT_EMAIL, APPOINTMENT_PASSWORD, CONSULATE, CONSULATE_ASC, MIN_DATE, MAX_DATE = range(8)
+EMAIL, PASSWORD, APPOINTMENT_EMAIL, EDIT_OR_NEW_APPOINTMENT, APPOINTMENT_PASSWORD, CONSULATE, CONSULATE_ASC, MIN_DATE, MAX_DATE = range(9)
 
 # Database Configuration - Update these or use environment variables
 DB_CONFIG = {
@@ -85,10 +85,66 @@ async def password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         return ConversationHandler.END
 
 async def appointment_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Stores the appointment email and asks for the appointment password."""
-    context.user_data["appt_email"] = update.message.text
-    await update.message.reply_text("Correo de citas guardado.\n\nAhora ingresa la **Contraseña de la cuenta de Visas**:", parse_mode='Markdown')
+    """Stores the appointment email, checks if it exists, and asks for the appointment password."""
+    appt_email = update.message.text
+    context.user_data["appt_email"] = appt_email
+    user_id = context.user_data.get("user_id")
+
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        sql = "SELECT id FROM user_appointments WHERE user_id = %s AND email = %s"
+        cursor.execute(sql, (user_id, appt_email))
+        existing = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if existing:
+            context.user_data["is_editing"] = True
+            context.user_data["appointment_id"] = existing["id"]
+            
+            reply_keyboard = [["Sí", "No"]]
+            
+            await update.message.reply_text(
+                "⚠️ Este correo de citas ya está registrado.\n"
+                "¿Deseas editar la información de configuración de este usuario?",
+                reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True)
+            )
+            return EDIT_OR_NEW_APPOINTMENT
+    except mysql.connector.Error as err:
+        logger.error(f"Database Error: {err}")
+        # Proceed silently if DB error to avoid breaking the flow completely
+    
+    context.user_data["is_editing"] = False
+    await update.message.reply_text(
+        "Correo de citas guardado.\n\nAhora ingresa la **Contraseña de la cuenta de Visas**:",
+        reply_markup=ReplyKeyboardRemove(),
+        parse_mode='Markdown'
+    )
     return APPOINTMENT_PASSWORD
+
+async def edit_or_new_appointment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handles the user's choice to edit an existing appointment or provide a new email."""
+    text = update.message.text.lower()
+    if text in ['sí', 'si', 'yes', 'y', 's']:
+        await update.message.reply_text(
+            "Perfecto. Vamos a actualizar la información.\n\n"
+            "Por favor ingresa la nueva **Contraseña de la cuenta de Visas**:", 
+            reply_markup=ReplyKeyboardRemove(),
+            parse_mode='Markdown'
+        )
+        return APPOINTMENT_PASSWORD
+    else:
+        context.user_data["is_editing"] = False
+        if "appointment_id" in context.user_data:
+            del context.user_data["appointment_id"]
+            
+        await update.message.reply_text(
+            "Entendido. Por favor ingresa un **Correo Electrónico de la cuenta de Visas** diferente:", 
+            reply_markup=ReplyKeyboardRemove(),
+            parse_mode='Markdown'
+        )
+        return APPOINTMENT_EMAIL
 
 async def appointment_password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Stores the appointment password and asks for the consulate."""
@@ -156,24 +212,38 @@ async def max_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor()
         
-        sql = """INSERT INTO user_appointments 
-                 (telegram_user_id, user_id, email, password, consulate, consulate_asc, 
-                  min_consulate_date, max_consulate_date, min_asc_date, max_asc_date, status) 
-                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')"""
-        
-        val = (telegram_user_id, user_id, user_data["appt_email"], user_data["appt_password"], 
-               user_data["consulate"], user_data["consulate_asc"], 
-               user_data["min_consulate_date"], user_data["max_consulate_date"], 
-               user_data["min_asc_date"], user_data["max_asc_date"])
-        
-        cursor.execute(sql, val)
+        if user_data.get("is_editing") and "appointment_id" in user_data:
+            sql = """UPDATE user_appointments SET
+                     telegram_user_id = %s, password = %s, consulate = %s, consulate_asc = %s,
+                     min_consulate_date = %s, max_consulate_date = %s,
+                     min_asc_date = %s, max_asc_date = %s, status = 'pending'
+                     WHERE id = %s"""
+            val = (telegram_user_id, user_data["appt_password"], 
+                   user_data["consulate"], user_data["consulate_asc"], 
+                   user_data["min_consulate_date"], user_data["max_consulate_date"], 
+                   user_data["min_asc_date"], user_data["max_asc_date"],
+                   user_data["appointment_id"])
+            cursor.execute(sql, val)
+            action_text = "actualizada"
+        else:
+            sql = """INSERT INTO user_appointments 
+                     (telegram_user_id, user_id, email, password, consulate, consulate_asc, 
+                      min_consulate_date, max_consulate_date, min_asc_date, max_asc_date, status) 
+                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')"""
+            val = (telegram_user_id, user_id, user_data["appt_email"], user_data["appt_password"], 
+                   user_data["consulate"], user_data["consulate_asc"], 
+                   user_data["min_consulate_date"], user_data["max_consulate_date"], 
+                   user_data["min_asc_date"], user_data["max_asc_date"])
+            cursor.execute(sql, val)
+            action_text = "guardada"
+            
         conn.commit()
         
         cursor.close()
         conn.close()
         
         await update.message.reply_text(
-            "¡Información guardada exitosamente en la base de datos!\n"
+            f"¡Información {action_text} exitosamente en la base de datos!\n"
             "El bot comenzará a buscar citas con estos parámetros pronto."
         )
     except mysql.connector.Error as err:
@@ -204,6 +274,7 @@ def main() -> None:
             EMAIL: [MessageHandler(filters.TEXT & ~filters.COMMAND, email)],
             PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, password)],
             APPOINTMENT_EMAIL: [MessageHandler(filters.TEXT & ~filters.COMMAND, appointment_email)],
+            EDIT_OR_NEW_APPOINTMENT: [MessageHandler(filters.TEXT & ~filters.COMMAND, edit_or_new_appointment)],
             APPOINTMENT_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, appointment_password)],
             CONSULATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, consulate)],
             CONSULATE_ASC: [MessageHandler(filters.TEXT & ~filters.COMMAND, consulate_asc)],
