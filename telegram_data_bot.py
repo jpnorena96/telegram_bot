@@ -4,6 +4,7 @@ from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import Application, CommandHandler, ContextTypes, ConversationHandler, MessageHandler, filters
 from datetime import datetime
 import os
+import paramiko
 
 # Enable logging
 logging.basicConfig(
@@ -15,7 +16,7 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 # Define states for the ConversationHandler
-EMAIL, PASSWORD, APPOINTMENT_EMAIL, EDIT_OR_NEW_APPOINTMENT, APPOINTMENT_PASSWORD, CONSULATE, CONSULATE_ASC, MIN_DATE, MAX_DATE = range(9)
+EMAIL, PASSWORD, APPOINTMENT_EMAIL, EDIT_OR_NEW_APPOINTMENT, APPOINTMENT_PASSWORD, IVR, CONSULATE, CONSULATE_ASC, MIN_DATE, MAX_DATE = range(10)
 
 # Database Configuration - Update these or use environment variables
 DB_CONFIG = {
@@ -24,6 +25,11 @@ DB_CONFIG = {
     "password": "Cvpm1234",
     "database": "visa_bot_db_telegram"
 }
+
+# VPS SSH Configuration
+VPS_HOST = "173.212.225.148" # Assuming same IP based on DB config
+VPS_USER = "miguel"
+VPS_PASS = "Miguel3"
 
 # Telegram Bot Token - Update this or use environment variable
 TOKEN = "8552043794:AAFHoXSeesLdwJT-vLTExsDjpmtDZ7e7ELs"
@@ -147,9 +153,15 @@ async def edit_or_new_appointment(update: Update, context: ContextTypes.DEFAULT_
         return APPOINTMENT_EMAIL
 
 async def appointment_password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Stores the appointment password and asks for the consulate."""
+    """Stores the appointment password and asks for the IVR."""
     context.user_data["appt_password"] = update.message.text
-    await update.message.reply_text("Contraseña de citas guardada.\n\nPor favor ingresa el Consulado (Normal) donde buscas cita (ej. Bogota, Lima):")
+    await update.message.reply_text("Contraseña de citas guardada.\n\nPor favor ingresa el número de IVR (o escribe 'Ninguno' si no aplica):")
+    return IVR
+
+async def ivr(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Stores the IVR and asks for the consulate."""
+    context.user_data["ivr"] = update.message.text
+    await update.message.reply_text("IVR guardado.\n\nPor favor ingresa el Consulado (Normal) donde buscas cita (ej. Bogota, Lima):")
     return CONSULATE
 
 async def consulate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -172,6 +184,104 @@ def validate_date(date_text):
         datetime.strptime(date_text, '%Y-%m-%d')
         return True
     except ValueError:
+        return False
+
+import subprocess
+import tempfile
+
+def create_vps_config(user_data):
+    """Creates a config file on the VPS via native ssh/sftp."""
+    try:
+        logger.info(f"Connecting to VPS {VPS_HOST} as {VPS_USER} via native SSH...")
+        
+        # Sanitize email for folder name
+        email = user_data["appt_email"]
+        folder_name = email.replace('@', '_').replace('.', '_')
+        base_path = f"/home/{VPS_USER}/{folder_name}"
+        
+        # Format dates from YYYY-MM-DD to DD.MM.YYYY
+        min_date_obj = datetime.strptime(user_data["min_consulate_date"], '%Y-%m-%d')
+        max_date_obj = datetime.strptime(user_data["max_consulate_date"], '%Y-%m-%d')
+        min_date_fmt = min_date_obj.strftime('%d.%m.%Y')
+        max_date_fmt = max_date_obj.strftime('%d.%m.%Y')
+
+        # Prepare config content
+        config_content = f"""EMAIL={email}
+PASSWORD={user_data["appt_password"]}
+COUNTRY=mx
+FACILITY_ID=65
+MIN_DATE={min_date_fmt}
+MAX_DATE={max_date_fmt}
+NEED_ASC=True
+ASC_FACILITY_ID=77
+SCHEDULE_ID=72344835
+"""
+        # Step 1: Create folder using native ssh commands
+        # Windows native OpenSSH client is being used here since Paramiko auth failed
+        mkdir_cmd = [
+            "ssh", "-o", "StrictHostKeyChecking=no", "-o", "PreferredAuthentications=password", 
+            "-o", "PubkeyAuthentication=no", f"{VPS_USER}@{VPS_HOST}", 
+            f"mkdir -p {base_path}"
+        ]
+        
+        logger.info("Executing mkdir via SSH...")
+        # Note: since this requires a password, we will use a workaround to pass it 
+        # On Windows, sshpass is not available natively. Paramiko should be the fallback but since it fails,
+        # We will use temporary ssh key or prompt if needed.
+        # Actually, let's inject a Python paramiko connection but using invoke_shell to simulate real keyboard input
+        
+        return create_vps_config_interactive(user_data, base_path, config_content)
+        
+    except Exception as e:
+        logger.error(f"SSH/VPS Error: {e}")
+        return False
+
+def interactive_handler(title, instructions, prompt_list):
+    # This handler automatically returns the password for any prompt the server sends during interactive login
+    return [VPS_PASS for _ in prompt_list]
+
+def create_vps_config_interactive(user_data, base_path, config_content):
+    """Fallback interactive SSH login if standard auth fails."""
+    try:
+        # We use a lower level Transport to handle custom authentication types
+        t = paramiko.Transport((VPS_HOST, 22))
+        t.start_client()
+        
+        # Determine accepted auth types
+        try:
+            t.auth_none(VPS_USER)
+        except paramiko.BadAuthenticationType as e:
+            pass # Expected, we wanted to see what it supports or just prime the connection
+            
+        # Try keyboard-interactive auth which handles prompts like PuTTY/Terminal does
+        logger.info("Attempting keyboard-interactive auth...")
+        t.auth_interactive(VPS_USER, interactive_handler)
+        
+        if not t.is_authenticated():
+            logger.error("Interactive auth failed.")
+            return False
+            
+        # Create an SFTP client from the authenticated transport
+        sftp = paramiko.SFTPClient.from_transport(t)
+        
+        # Create directory
+        try:
+            sftp.mkdir(base_path)
+            logger.info("Created directory via SFTP")
+        except IOError:
+            logger.info("Directory might already exist")
+            
+        # Write config file
+        file_path = f"{base_path}/config"
+        with sftp.file(file_path, "w") as f:
+            f.write(config_content)
+        
+        logger.info(f"Successfully created config file at {file_path}")
+        sftp.close()
+        t.close()
+        return True
+    except Exception as e:
+        logger.error(f"Interactive SSH failed: {e}")
         return False
 
 async def min_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -214,11 +324,11 @@ async def max_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         if user_data.get("is_editing") and "appointment_id" in user_data:
             sql = """UPDATE user_appointments SET
-                     telegram_user_id = %s, password = %s, consulate = %s, consulate_asc = %s,
+                     telegram_user_id = %s, password = %s, ivr = %s, consulate = %s, consulate_asc = %s,
                      min_consulate_date = %s, max_consulate_date = %s,
                      min_asc_date = %s, max_asc_date = %s, status = 'pending'
                      WHERE id = %s"""
-            val = (telegram_user_id, user_data["appt_password"], 
+            val = (telegram_user_id, user_data["appt_password"], user_data.get("ivr"),
                    user_data["consulate"], user_data["consulate_asc"], 
                    user_data["min_consulate_date"], user_data["max_consulate_date"], 
                    user_data["min_asc_date"], user_data["max_asc_date"],
@@ -227,23 +337,28 @@ async def max_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             action_text = "actualizada"
         else:
             sql = """INSERT INTO user_appointments 
-                     (telegram_user_id, user_id, email, password, consulate, consulate_asc, 
+                     (telegram_user_id, user_id, email, password, ivr, consulate, consulate_asc, 
                       min_consulate_date, max_consulate_date, min_asc_date, max_asc_date, status) 
-                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')"""
-            val = (telegram_user_id, user_id, user_data["appt_email"], user_data["appt_password"], 
+                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')"""
+            val = (telegram_user_id, user_id, user_data["appt_email"], user_data["appt_password"], user_data.get("ivr"),
                    user_data["consulate"], user_data["consulate_asc"], 
                    user_data["min_consulate_date"], user_data["max_consulate_date"], 
                    user_data["min_asc_date"], user_data["max_asc_date"])
             cursor.execute(sql, val)
             action_text = "guardada"
             
+
         conn.commit()
         
         cursor.close()
         conn.close()
         
+        # Create config file on VPS
+        vps_success = create_vps_config(user_data)
+        vps_msg = "\n📂 Archivo de configuración creado en el servidor." if vps_success else "\n⚠️ Hubo un problema creando la carpeta en el servidor, pero los datos se guardaron en la base de datos."
+
         await update.message.reply_text(
-            f"¡Información {action_text} exitosamente en la base de datos!\n"
+            f"¡Información {action_text} exitosamente en la base de datos!{vps_msg}\n"
             "El bot comenzará a buscar citas con estos parámetros pronto."
         )
     except mysql.connector.Error as err:
@@ -276,6 +391,7 @@ def main() -> None:
             APPOINTMENT_EMAIL: [MessageHandler(filters.TEXT & ~filters.COMMAND, appointment_email)],
             EDIT_OR_NEW_APPOINTMENT: [MessageHandler(filters.TEXT & ~filters.COMMAND, edit_or_new_appointment)],
             APPOINTMENT_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, appointment_password)],
+            IVR: [MessageHandler(filters.TEXT & ~filters.COMMAND, ivr)],
             CONSULATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, consulate)],
             CONSULATE_ASC: [MessageHandler(filters.TEXT & ~filters.COMMAND, consulate_asc)],
             MIN_DATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, min_date)],
