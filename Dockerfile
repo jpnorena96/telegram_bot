@@ -2,18 +2,19 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-# Install system dependencies if any are needed (e.g. for mysqlclient)
-# RUN apt-get update && apt-get install -y default-libmysqlclient-dev build-essential
+# Install system dependencies for paramiko (SSH)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY telegram_data_bot.py .
-# Copy config files if needed, though better to use ENV variables
-# COPY config . 
 
-# Set environment variables (Defaults can be overridden in Easypanel)
+# Set environment variables (can be overridden in Easypanel)
 ENV VISA_DB_HOST=173.212.225.148
 ENV VISA_DB_USER=root
 ENV VISA_DB_PASS=Cvpm1234
