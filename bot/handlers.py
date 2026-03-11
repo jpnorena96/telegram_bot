@@ -34,6 +34,7 @@ async def show_main_menu(update_or_query, context: ContextTypes.DEFAULT_TYPE, te
         [InlineKeyboardButton("✏️ Editar usuario", callback_data="menu_edit")],
         [InlineKeyboardButton("👁️ Ver mis usuarios", callback_data="menu_view")],
         [InlineKeyboardButton("🗑️ Eliminar usuario", callback_data="menu_delete")],
+        [InlineKeyboardButton("🚪 Cerrar sesión", callback_data="menu_logout")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -74,6 +75,15 @@ async def main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     elif query.data == "menu_delete":
         return await show_appointment_list(update, context, action="delete")
+    
+    elif query.data == "menu_logout":
+        context.user_data.clear()
+        await query.edit_message_text(
+            "👋 Sesión cerrada exitosamente.\n\n"
+            "Usa el comando /start para volver a iniciar sesión.",
+            parse_mode='Markdown'
+        )
+        return ConversationHandler.END
 
     return MAIN_MENU
 
@@ -258,9 +268,16 @@ async def email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 async def password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Stores the password, validates against DB, and shows main menu."""
-    password_text = update.message.text
+    """Stores the password, validates against DB, shows main menu, and deletes password msg."""
+    password_message = update.message
+    password_text = password_message.text
     email_text = context.user_data["email"]
+
+    # Attempt to delete the user's password message for security
+    try:
+        await password_message.delete()
+    except Exception as e:
+        logger.warning(f"Could not delete password message: {e}")
 
     try:
         user = db.verify_user(email_text, password_text)

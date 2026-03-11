@@ -952,12 +952,22 @@ class Bot:
                     self.init_current_data()
                     
                     if appointment_datetime != self.appointment_datetime:
-                        log = f'=====================\n#                   #\n#                   #\n#     Reservado en     #\n#                   #\n#                   #\n# {self.appointment_datetime.strftime(DATE_TIME_FORMAT)} #\n'
+                        # 🎯 Formato profesional para Telegram
+                        msg = (
+                            f"🎉 *¡Cita Reprogramada con Éxito!* 🎉\n\n"
+                            f"👤 *Usuario:* `{self.config.email}`\n"
+                            f"🏛️ *Cita Consular (Normal):*\n"
+                            f"  └ 📅 {self.appointment_datetime.strftime('%Y-%m-%d')} a las ⏰ {self.appointment_datetime.strftime('%H:%M')}\n"
+                        )
                         if asc_available_date_str and asc_available_time_str:
-                            log += f'#                   #\n#                   #\n#     con  ASC     #\n# {asc_available_time_str}  {asc_available_date_str} #\n'
-                        log += f'#                   #\n#                   #\n# User: {self.config.email} #\n====================='
-                        self.logger(log)
-                        telegram_messages.append(log)
+                            msg += (
+                                f"\n🏢 *Cita ASC (CAS):*\n"
+                                f"  └ 📅 {asc_available_date_str} a las ⏰ {asc_available_time_str}\n"
+                            )
+                        msg += "\n✅ *Estado actualizado en el sistema a 'agendado'*."
+
+                        self.logger("Cita agendada exitosamente (log interno)")
+                        telegram_messages.append(msg)
                         booked = True
                         cita_programada = True
 

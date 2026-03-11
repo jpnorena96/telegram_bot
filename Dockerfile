@@ -18,6 +18,11 @@ COPY main.py .
 COPY backend/ ./backend/
 COPY bot/ ./bot/
 
+# Copy VPS scripts
+COPY script.py .
+COPY script_requirements.txt .
+COPY restart_pm2.sh .
+
 # Copy .env file (can be overridden with Docker env vars)
 COPY .env .
 
