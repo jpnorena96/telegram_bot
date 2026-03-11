@@ -23,7 +23,6 @@ COPY script.py .
 COPY script_requirements.txt .
 COPY restart_pm2.sh .
 
-# Copy .env file (can be overridden with Docker env vars)
-COPY .env .
+# ENV variables should be injected by Easypanel directly.
 
 CMD ["python", "main.py"]
