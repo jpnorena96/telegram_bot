@@ -241,24 +241,17 @@ def interactive_handler(title, instructions, prompt_list):
     return [VPS_PASS for _ in prompt_list]
 
 def create_vps_config_interactive(user_data, base_path, config_content):
-    """Fallback interactive SSH login if standard auth fails."""
+    """SSH login using password auth and SFTP to create config on VPS."""
     try:
-        # We use a lower level Transport to handle custom authentication types
         t = paramiko.Transport((VPS_HOST, 22))
         t.start_client()
         
-        # Determine accepted auth types
-        try:
-            t.auth_none(VPS_USER)
-        except paramiko.BadAuthenticationType as e:
-            pass # Expected, we wanted to see what it supports or just prime the connection
-            
-        # Try keyboard-interactive auth which handles prompts like PuTTY/Terminal does
-        logger.info("Attempting keyboard-interactive auth...")
-        t.auth_interactive(VPS_USER, interactive_handler)
+        # Try password auth first (server allows: publickey, password)
+        logger.info("Attempting password auth...")
+        t.auth_password(VPS_USER, VPS_PASS)
         
         if not t.is_authenticated():
-            logger.error("Interactive auth failed.")
+            logger.error("Password auth failed.")
             return False
             
         # Create an SFTP client from the authenticated transport
@@ -281,7 +274,7 @@ def create_vps_config_interactive(user_data, base_path, config_content):
         t.close()
         return True
     except Exception as e:
-        logger.error(f"Interactive SSH failed: {e}")
+        logger.error(f"SSH failed: {e}")
         return False
 
 async def min_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
