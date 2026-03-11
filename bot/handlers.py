@@ -9,6 +9,13 @@ from bot.states import *
 
 logger = logging.getLogger(__name__)
 
+# Mapping: consulate name → (facility_id, asc_facility_id)
+CONSULATE_FACILITY_MAP = {
+    "bogota": {"facility_id": "25", "asc_facility_id": "26"},
+    # Default (México)
+    "_default": {"facility_id": "65", "asc_facility_id": "77"},
+}
+
 
 # ─────────────────────────────────────────────
 # MAIN MENU
@@ -260,6 +267,7 @@ async def password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
         if user:
             context.user_data["user_id"] = user["id"]
+            context.user_data["country"] = user.get("country", "co")
             return await show_main_menu(
                 update, context,
                 text=(
@@ -349,35 +357,176 @@ async def edit_or_new_appointment(update: Update, context: ContextTypes.DEFAULT_
         return APPOINTMENT_EMAIL
 
 
+# Country → consulates with their facility IDs
+COUNTRY_CONSULATES = {
+    "co": [
+        {"name": "Bogota", "facility_id": "25", "asc_facility_id": "26"},
+    ],
+    "mx": [
+        {"name": "Ciudad Juarez", "facility_id": "65", "asc_facility_id": "76"},
+        {"name": "Guadalajara", "facility_id": "66", "asc_facility_id": "77"},
+        {"name": "Hermosillo", "facility_id": "67", "asc_facility_id": "78"},
+        {"name": "Matamoros", "facility_id": "68", "asc_facility_id": "79"},
+        {"name": "Merida", "facility_id": "69", "asc_facility_id": "81"},
+        {"name": "Mexico City", "facility_id": "70", "asc_facility_id": "82"},
+        {"name": "Monterrey", "facility_id": "71", "asc_facility_id": "83"},
+        {"name": "Nogales", "facility_id": "72", "asc_facility_id": "84"},
+        {"name": "Nuevo Laredo", "facility_id": "73", "asc_facility_id": "85"},
+        {"name": "Tijuana", "facility_id": "74", "asc_facility_id": "88"},
+    ],
+}
+
+
 async def appointment_password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Stores the appointment password and asks for the IVR."""
+    """Stores the appointment password and shows consulate options."""
     context.user_data["appt_password"] = update.message.text
-    await update.message.reply_text(
-        "Contraseña de citas guardada.\n\n"
-        "Por favor ingresa el número de IVR (o escribe 'Ninguno' si no aplica):"
-    )
-    return IVR
+    context.user_data["ivr"] = "Ninguno"
 
+    country = context.user_data.get("country", "").lower()
+    consulates = COUNTRY_CONSULATES.get(country)
 
-async def ivr(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Stores the IVR and asks for the consulate."""
-    context.user_data["ivr"] = update.message.text
-    await update.message.reply_text(
-        "IVR guardado.\n\n"
-        "Por favor ingresa el Consulado (Normal) donde buscas cita (ej. Bogota, Lima):"
-    )
+    if consulates:
+        # Known country → show inline buttons
+        keyboard = []
+        for c in consulates:
+            keyboard.append([InlineKeyboardButton(f"🏛️ {c['name']}", callback_data=f"consul_{c['name']}")])
+
+        await update.message.reply_text(
+            "Contraseña guardada.\n\n"
+            "🏛️ *Selecciona el Consulado:*",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='Markdown'
+        )
+    else:
+        # Unknown country → text input
+        await update.message.reply_text(
+            "Contraseña de citas guardada.\n\n"
+            "Por favor ingresa el Consulado (Normal) donde buscas cita:"
+        )
+
     return CONSULATE
 
 
+async def consulate_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handles consulate button selection for known countries."""
+    query = update.callback_query
+    await query.answer()
+
+    consulate_name = query.data.replace("consul_", "")
+    context.user_data["consulate"] = consulate_name
+
+    # Auto-lookup facility IDs from the mapping
+    country = context.user_data.get("country", "").lower()
+    consulates = COUNTRY_CONSULATES.get(country, [])
+    selected = next((c for c in consulates if c["name"] == consulate_name), None)
+
+    if selected and selected.get("asc_facility_id"):
+        # Has CAS → ask if needed
+        keyboard = [
+            [InlineKeyboardButton("✅ Sí, necesito CAS", callback_data="cas_yes"),
+             InlineKeyboardButton("❌ No necesito CAS", callback_data="cas_no")]
+        ]
+        await query.edit_message_text(
+            f"🏛️ Consulado: *{consulate_name}*\n\n"
+            "🏢 *¿Necesitas cita en el Consulado ASC (CAS)?*",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='Markdown'
+        )
+        return NEED_CAS
+    else:
+        # No CAS available → skip
+        context.user_data["need_cas"] = False
+        context.user_data["consulate_asc"] = "Ninguno"
+        await query.edit_message_text(
+            f"🏛️ Consulado: *{consulate_name}*\n\n"
+            "Ahora ingresa la *FECHA MÍNIMA* en formato YYYY-MM-DD (ej. 2026-01-01):",
+            parse_mode='Markdown'
+        )
+        return MIN_DATE
+
+
 async def consulate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Stores the consulate and asks for the ASC consulate."""
+    """Handles consulate text input (for unknown countries)."""
     context.user_data["consulate"] = update.message.text
-    await update.message.reply_text("Entendido. Ahora ingresa el Consulado ASC (CAS):")
-    return CONSULATE_ASC
+
+    keyboard = [
+        [InlineKeyboardButton("✅ Sí, necesito CAS", callback_data="cas_yes"),
+         InlineKeyboardButton("❌ No necesito CAS", callback_data="cas_no")]
+    ]
+
+    await update.message.reply_text(
+        "🏢 *¿Necesitas cita en el Consulado ASC (CAS)?*",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode='Markdown'
+    )
+    return NEED_CAS
+
+
+async def need_cas_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handles CAS choice: if yes shows CAS consulate options, if no skips to dates."""
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == "cas_yes":
+        context.user_data["need_cas"] = True
+
+        # Check if country has known CAS consulates
+        country = context.user_data.get("country", "").lower()
+        consulates = COUNTRY_CONSULATES.get(country)
+
+        if consulates:
+            # Show CAS consulate buttons
+            keyboard = []
+            for c in consulates:
+                if c.get("asc_facility_id"):
+                    keyboard.append([InlineKeyboardButton(
+                        f"🏢 {c['name']} (CAS)", callback_data=f"cas_consul_{c['name']}"
+                    )])
+
+            if keyboard:
+                await query.edit_message_text(
+                    "🏢 *Selecciona el Consulado ASC (CAS):*",
+                    reply_markup=InlineKeyboardMarkup(keyboard),
+                    parse_mode='Markdown'
+                )
+                return CONSULATE_ASC
+
+        # Unknown country → text input
+        await query.edit_message_text(
+            "Entendido. Ahora ingresa el *Consulado ASC (CAS)*:",
+            parse_mode='Markdown'
+        )
+        return CONSULATE_ASC
+    else:
+        context.user_data["need_cas"] = False
+        context.user_data["consulate_asc"] = "Ninguno"
+        await query.edit_message_text(
+            "Entendido, sin cita CAS.\n\n"
+            "Ahora necesito las fechas para la cita CONSULAR (Normal).\n"
+            "Por favor ingresa la *FECHA MÍNIMA* (desde cuando puedes asistir) en formato YYYY-MM-DD (ej. 2026-01-01):",
+            parse_mode='Markdown'
+        )
+        return MIN_DATE
+
+
+async def consulate_asc_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handles CAS consulate button selection."""
+    query = update.callback_query
+    await query.answer()
+
+    consulate_name = query.data.replace("cas_consul_", "")
+    context.user_data["consulate_asc"] = consulate_name
+
+    await query.edit_message_text(
+        f"🏢 CAS: *{consulate_name}*\n\n"
+        "Ahora ingresa la *FECHA MÍNIMA* en formato YYYY-MM-DD (ej. 2026-01-01):",
+        parse_mode='Markdown'
+    )
+    return MIN_DATE
 
 
 async def consulate_asc(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Stores the ASC consulate and asks for the minimum date."""
+    """Stores the ASC consulate (text input) and asks for the minimum date."""
     context.user_data["consulate_asc"] = update.message.text
     await update.message.reply_text(
         "Ahora necesito las fechas para la cita CONSULAR (Normal).\n"
@@ -414,7 +563,7 @@ async def min_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 async def max_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Stores the maximum date and saves everything to the database."""
+    """Stores the maximum date, deploys to VPS, and runs schedule ID discovery."""
     date_text = update.message.text
     if not validate_date(date_text):
         await update.message.reply_text("Formato de fecha inválido. Por favor usa YYYY-MM-DD (ej. 2026-01-01):")
@@ -426,15 +575,13 @@ async def max_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     context.user_data["min_asc_date"] = context.user_data["min_consulate_date"]
     context.user_data["max_asc_date"] = context.user_data["max_consulate_date"]
 
-    await update.message.reply_text(
-        "Fechas consulares guardadas.\n"
-        "Configurando automáticamente las mismas fechas para la cita ASC (CAS)..."
-    )
-
     # Save to database
     user_data = context.user_data
     telegram_user_id = update.effective_user.id
     user_id = user_data.get("user_id")
+
+    # Capture Telegram chat_id for VPS notifications
+    user_data["telegram_chat_id"] = str(update.effective_chat.id)
 
     try:
         if user_data.get("is_editing") and "appointment_id" in user_data:
@@ -442,17 +589,85 @@ async def max_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         else:
             action_text = db.save_appointment(telegram_user_id, user_id, user_data)
 
-        # Create config file on VPS
-        vps_success = vps.create_vps_config(user_data)
-        vps_msg = (
-            "\n📂 Archivo de configuración creado en el servidor."
-            if vps_success
-            else "\n⚠️ Hubo un problema creando la carpeta en el servidor, pero los datos se guardaron en la base de datos."
+        await update.message.reply_text(
+            f"✅ Información {action_text} exitosamente en la base de datos!\n\n"
+            "⏳ Desplegando archivos en el servidor..."
         )
 
+        # Phase 1: Deploy files and create venv (without PM2)
+        vps_success = vps.create_vps_config(user_data)
+        if not vps_success:
+            await update.message.reply_text(
+                "⚠️ Error al desplegar archivos en el servidor.\n"
+                "Los datos se guardaron en la base de datos."
+            )
+            return await show_main_menu(update, context, text="🎯 *Menú Principal*\n\nSelecciona una opción:")
+
+        appt_email = user_data["appt_email"]
+        ivr_value = user_data.get("ivr", "").strip()
+
+        # If IVR is a valid number → use it as SCHEDULE_ID directly, skip discovery
+        if ivr_value and ivr_value.lower() != "ninguno" and ivr_value.isdigit():
+            await update.message.reply_text(
+                f"📂 Archivos desplegados.\n\n"
+                f"🆔 Usando IVR como SCHEDULE\\_ID: `{ivr_value}`\n"
+                "🚀 Iniciando script en el servidor...",
+                parse_mode='Markdown'
+            )
+            success = vps.set_schedule_id_and_start(appt_email, ivr_value)
+            if success:
+                return await show_main_menu(
+                    update, context,
+                    text=(
+                        f"✅ *Script iniciado correctamente!*\n\n"
+                        f"🆔 SCHEDULE\\_ID: `{ivr_value}`\n"
+                        f"📧 Email: `{appt_email}`\n\n"
+                        "🎯 *Menú Principal*\n\nSelecciona una opción:"
+                    )
+                )
+            else:
+                return await show_main_menu(
+                    update, context,
+                    text="⚠️ Hubo un problema iniciando el script.\n\n🎯 *Menú Principal*\n\nSelecciona una opción:"
+                )
+
+        # No IVR → run discovery to find Schedule IDs
         await update.message.reply_text(
-            f"¡Información {action_text} exitosamente en la base de datos!{vps_msg}"
+            "📂 Archivos desplegados en el servidor.\n\n"
+            "🔍 Buscando Schedule IDs... esto puede tomar un momento."
         )
+
+        schedule_ids, error_detail = vps.discover_schedule_ids(appt_email)
+
+        if not schedule_ids:
+            error_msg = "⚠️ No se pudieron descubrir los Schedule IDs automáticamente."
+            if error_detail:
+                error_msg += f"\n\n📋 Detalle:\n{error_detail[:500]}"
+            error_msg += (
+                "\n\n✏️ Puedes ingresar el *SCHEDULE\\_ID* manualmente.\n"
+                "Escribe el número de Schedule ID:"
+            )
+            await update.message.reply_text(error_msg, parse_mode='Markdown')
+            return MANUAL_SCHEDULE_ID
+
+        # Store for callback and present as buttons
+        context.user_data["discovered_schedule_ids"] = schedule_ids
+
+        keyboard = []
+        for sid, description in schedule_ids.items():
+            label = f"🆔 {sid} — {description[:50]}"
+            keyboard.append([InlineKeyboardButton(label, callback_data=f"schedule_{sid}")])
+
+        keyboard.append([InlineKeyboardButton("◀️ Cancelar", callback_data="schedule_cancel")])
+
+        await update.message.reply_text(
+            "🔎 *Schedule IDs encontrados:*\n\n"
+            "Selecciona el que deseas usar:",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='Markdown'
+        )
+        return SCHEDULE_SELECT
+
     except mysql.connector.Error as err:
         logger.error(f"Error: {err}")
         await update.message.reply_text(f"Hubo un error al guardar en la base de datos: {err}")
@@ -460,11 +675,91 @@ async def max_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         logger.error(f"Error: {e}")
         await update.message.reply_text(f"Ocurrió un error inesperado: {e}")
 
-    # Return to main menu
-    return await show_main_menu(
-        update, context,
-        text="🎯 *Menú Principal*\n\nSelecciona una opción:"
+    return await show_main_menu(update, context, text="🎯 *Menú Principal*\n\nSelecciona una opción:")
+
+
+async def schedule_select_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handles schedule ID selection. Updates config on VPS and starts PM2."""
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == "schedule_cancel":
+        return await show_main_menu(
+            update, context,
+            text="❌ Selección cancelada.\n\n🎯 *Menú Principal*\n\nSelecciona una opción:"
+        )
+
+    # Extract schedule_id from callback data: "schedule_73159045"
+    schedule_id = query.data.replace("schedule_", "")
+    appt_email = context.user_data.get("appt_email", "")
+    schedule_ids = context.user_data.get("discovered_schedule_ids", {})
+    description = schedule_ids.get(schedule_id, "")
+
+    await query.edit_message_text(
+        f"⏳ Configurando SCHEDULE\\_ID=`{schedule_id}`\n"
+        f"📝 {description}\n\n"
+        "Iniciando el script en el servidor...",
+        parse_mode='Markdown'
     )
+
+    # Phase 3: Update config with selected SCHEDULE_ID and start PM2
+    success = vps.set_schedule_id_and_start(appt_email, schedule_id)
+
+    if success:
+        return await show_main_menu(
+            update, context,
+            text=(
+                f"✅ *Script iniciado correctamente!*\n\n"
+                f"🆔 SCHEDULE\\_ID: `{schedule_id}`\n"
+                f"📧 Email: `{appt_email}`\n\n"
+                "🎯 *Menú Principal*\n\nSelecciona una opción:"
+            )
+        )
+    else:
+        return await show_main_menu(
+            update, context,
+            text=(
+                "⚠️ Hubo un problema iniciando el script en el servidor.\n\n"
+                "🎯 *Menú Principal*\n\nSelecciona una opción:"
+            )
+        )
+
+
+async def manual_schedule_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handles manual SCHEDULE_ID entry when discovery fails."""
+    schedule_id = update.message.text.strip()
+    appt_email = context.user_data.get("appt_email", "")
+
+    if not schedule_id.isdigit():
+        await update.message.reply_text(
+            "❌ El SCHEDULE\\_ID debe ser un número. Inténtalo de nuevo:",
+            parse_mode='Markdown'
+        )
+        return MANUAL_SCHEDULE_ID
+
+    await update.message.reply_text(
+        f"⏳ Configurando SCHEDULE\\_ID=`{schedule_id}`\n"
+        "🚀 Iniciando script en el servidor...",
+        parse_mode='Markdown'
+    )
+
+    success = vps.set_schedule_id_and_start(appt_email, schedule_id)
+
+    if success:
+        return await show_main_menu(
+            update, context,
+            text=(
+                f"✅ *Script iniciado correctamente!*\n\n"
+                f"🆔 SCHEDULE\\_ID: `{schedule_id}`\n"
+                f"📧 Email: `{appt_email}`\n\n"
+                "🎯 *Menú Principal*\n\nSelecciona una opción:"
+            )
+        )
+    else:
+        return await show_main_menu(
+            update, context,
+            text="⚠️ Hubo un problema iniciando el script.\n\n🎯 *Menú Principal*\n\nSelecciona una opción:"
+        )
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:

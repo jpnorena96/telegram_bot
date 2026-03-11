@@ -10,7 +10,7 @@ def verify_user(email: str, password: str) -> dict | None:
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor(dictionary=True)
-        sql = "SELECT id FROM users WHERE email = %s AND password = %s"
+        sql = "SELECT id, country FROM users WHERE email = %s AND password = %s"
         cursor.execute(sql, (email, password))
         user = cursor.fetchone()
         cursor.close()

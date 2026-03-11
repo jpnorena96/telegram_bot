@@ -10,8 +10,10 @@ from bot.states import *
 from bot.handlers import (
     start, email, password, main_menu_callback,
     appointment_email, edit_or_new_appointment, appointment_password,
-    ivr, consulate, consulate_asc, min_date, max_date,
-    select_appointment_callback, confirm_delete_callback, cancel
+    consulate, consulate_callback, need_cas_callback,
+    consulate_asc, consulate_asc_callback, min_date, max_date,
+    select_appointment_callback, confirm_delete_callback, schedule_select_callback,
+    manual_schedule_id, cancel
 )
 
 # Enable logging
@@ -34,13 +36,21 @@ def main() -> None:
             APPOINTMENT_EMAIL: [MessageHandler(filters.TEXT & ~filters.COMMAND, appointment_email)],
             EDIT_OR_NEW_APPOINTMENT: [CallbackQueryHandler(edit_or_new_appointment)],
             APPOINTMENT_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, appointment_password)],
-            IVR: [MessageHandler(filters.TEXT & ~filters.COMMAND, ivr)],
-            CONSULATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, consulate)],
-            CONSULATE_ASC: [MessageHandler(filters.TEXT & ~filters.COMMAND, consulate_asc)],
+            CONSULATE: [
+                CallbackQueryHandler(consulate_callback),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, consulate),
+            ],
+            NEED_CAS: [CallbackQueryHandler(need_cas_callback)],
+            CONSULATE_ASC: [
+                CallbackQueryHandler(consulate_asc_callback),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, consulate_asc),
+            ],
             MIN_DATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, min_date)],
             MAX_DATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, max_date)],
             SELECT_APPOINTMENT: [CallbackQueryHandler(select_appointment_callback)],
             CONFIRM_DELETE: [CallbackQueryHandler(confirm_delete_callback)],
+            SCHEDULE_SELECT: [CallbackQueryHandler(schedule_select_callback)],
+            MANUAL_SCHEDULE_ID: [MessageHandler(filters.TEXT & ~filters.COMMAND, manual_schedule_id)],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
     )

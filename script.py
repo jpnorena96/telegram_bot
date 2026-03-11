@@ -72,8 +72,20 @@ LOG_FILE = 'log.txt'
 LOG_FORMAT = '%(asctime)s  %(message)s'
 
 
-TELEGRAM_BOT_TOKEN = 'TU_TOKEN_BOT_AQUI'
-TELEGRAM_CHAT_ID = 'TU_CHAT_ID_AQUI'
+# Telegram — se leen desde el archivo config
+TELEGRAM_BOT_TOKEN = None
+TELEGRAM_CHAT_ID = None
+
+
+def send_telegram_message(token: str, chat_id: str, text: str):
+    """Sends a message via Telegram Bot API."""
+    if not token or not chat_id:
+        return
+    try:
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        requests.post(url, data={"chat_id": chat_id, "text": text}, timeout=10)
+    except Exception:
+        pass
 
 # Proxy configurado por el usuario (fallback)
 DEFAULT_PROXY = "http://yhjxpuut:voge365lc96q@45.38.107.97:6014"
@@ -330,6 +342,19 @@ class Config:
         else:
             self.facility_id = None
             self.asc_facility_id = None
+
+        # Telegram config (dinámico por usuario)
+        global TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+        if config_data.get('TELEGRAM_BOT_TOKEN'):
+            TELEGRAM_BOT_TOKEN = config_data['TELEGRAM_BOT_TOKEN']
+        if config_data.get('TELEGRAM_CHAT_ID'):
+            TELEGRAM_CHAT_ID = config_data['TELEGRAM_CHAT_ID']
+            
+        # DB config
+        self.db_host = config_data.get('DB_HOST')
+        self.db_user = config_data.get('DB_USER')
+        self.db_pass = config_data.get('DB_PASS')
+        self.db_name = config_data.get('DB_NAME')
         
         # Guardar la configuración inicial si se ingresaron nuevos valores
         if not config_data.get('MIN_DATE') or not config_data.get('NEED_ASC'):
@@ -788,12 +813,33 @@ class Bot:
         self.init()
         telegram_messages = []
         cita_programada = False
+        last_status_time = datetime.now()
+        checks_count = 0
+        errors_count = 0
         
         while not cita_programada:
             time.sleep(1.5)
             
             try:
                 now = datetime.now()
+
+                # === HOURLY STATUS REPORT ===
+                elapsed = (now - last_status_time).total_seconds()
+                if elapsed >= 3600:  # 1 hora
+                    status_msg = (
+                        f"📊 *Estado del bot - {self.config.email}*\n"
+                        f"⏱️ Última hora:\n"
+                        f"  🔍 Consultas realizadas: {checks_count}\n"
+                        f"  ⚠️ Errores: {errors_count}\n"
+                        f"  📅 Cita actual: {(self.appointment_datetime.strftime(DATE_TIME_FORMAT) if self.appointment_datetime else 'No agendado')}\n"
+                        f"  🌐 Proxy actual: {self.current_proxy or 'N/A'}\n"
+                        f"  ✅ Estado: Monitoreando"
+                    )
+                    send_telegram_message(TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, status_msg)
+                    last_status_time = now
+                    checks_count = 0
+                    errors_count = 0
+
                 mod = now.minute % 5
                 if mod != 0 or now.second < 0:
                     if now.second % 10 == 0:
@@ -802,9 +848,11 @@ class Bot:
             except KeyboardInterrupt:
                 break
             
+            checks_count += 1
             try:
                 available_dates = self.get_available_dates()
             except HTTPError as err:
+                errors_count += 1
                 # Si es error 401, reiniciar sesión con nuevo proxy
                 if err.response.status_code == 401:
                     self.logger('Get 401 - Reiniciando sesión y rotando proxy')
@@ -912,6 +960,29 @@ class Bot:
                         telegram_messages.append(log)
                         booked = True
                         cita_programada = True
+
+                        # Update DB to 'agendado'
+                        if self.config.db_host and self.config.db_user:
+                            try:
+                                import mysql.connector
+                                conn = mysql.connector.connect(
+                                    host=self.config.db_host,
+                                    user=self.config.db_user,
+                                    password=self.config.db_pass,
+                                    database=self.config.db_name
+                                )
+                                cursor = conn.cursor()
+                                cursor.execute(
+                                    "UPDATE user_appointments SET status = 'agendado' WHERE email = %s",
+                                    (self.config.email,)
+                                )
+                                conn.commit()
+                                cursor.close()
+                                conn.close()
+                                self.logger("DB Status actualizado a 'agendado'")
+                            except Exception as db_err:
+                                self.logger(f"Error actualizando DB: {db_err}")
+
                         break
                     
                     reinit_asc = True
@@ -935,13 +1006,120 @@ def main(cli_email: Optional[str] = None, cli_password: Optional[str] = None):
     return True
 
 
+def discover(cli_email: Optional[str] = None, cli_password: Optional[str] = None):
+    """Discovery mode: logs in, gets schedule IDs, outputs JSON, exits.
+    Has limited retries to avoid hanging forever."""
+    MAX_RETRIES = 5
+
+    try:
+        config = Config(CONFIG_FILE, cli_email, cli_password)
+        logger = Logger(LOG_FILE, LOG_FORMAT)
+
+        proxy_mgr = WebshareManager(logger_func=logger)
+        proxy_mgr.fetch_proxies()
+
+        url = f'https://{HOST}/en-{config.country}/niv'
+
+        session = requests.Session()
+        proxy_dict = proxy_mgr.get_proxy_dict()
+        session.proxies.update(proxy_dict)
+        logger(f"[DISCOVER] Proxy: {proxy_dict.get('http', 'none')}")
+
+        # === LOGIN with retry limit ===
+        cookie = None
+        for attempt in range(1, MAX_RETRIES + 1):
+            logger(f'[DISCOVER] Login intento {attempt}/{MAX_RETRIES}')
+            try:
+                response = session.get(
+                    f'{url}/users/sign_in',
+                    headers={COOKIE_HEADER: '', REFERER: f'{url}/users/sign_in', **DOCUMENT_HEADERS},
+                    timeout=30
+                )
+                response.raise_for_status()
+
+                cookies = response.headers.get(SET_COOKIE)
+                csrf = BeautifulSoup(response.text, HTML_PARSER).find('meta', {'name': 'csrf-token'})['content']
+
+                response = session.post(
+                    f'{url}/users/sign_in',
+                    headers={
+                        **DEFAULT_HEADERS,
+                        X_CSRF_TOKEN_HEADER: csrf,
+                        COOKIE_HEADER: cookies,
+                        ACCEPT: '*/*;q=0.5, text/javascript, application/javascript, application/ecmascript, application/x-ecmascript',
+                        REFERER: f'{url}/users/sign_in',
+                        CONTENT_TYPE: 'application/x-www-form-urlencoded; charset=UTF-8'
+                    },
+                    data=urlencode({
+                        'user[email]': config.email,
+                        'user[password]': config.password,
+                        'policy_confirmed': '1',
+                        'commit': 'Sign In'
+                    }),
+                    timeout=30
+                )
+                response.raise_for_status()
+                cookie = response.headers.get(SET_COOKIE)
+                logger('[DISCOVER] Login exitoso')
+                break
+
+            except Exception as e:
+                logger(f'[DISCOVER] Login fallo (intento {attempt}): {e}')
+                # Rotate proxy for next attempt
+                proxy_dict = proxy_mgr.get_proxy_dict()
+                session.close()
+                session = requests.Session()
+                session.proxies.update(proxy_dict)
+                time.sleep(2)
+
+        if not cookie:
+            error_msg = f"Login fallido despues de {MAX_RETRIES} intentos"
+            logger(f'[DISCOVER] {error_msg}')
+            print(f"DISCOVER_ERROR:{error_msg}", flush=True)
+            return {}
+
+        # === GET APPLICATIONS ===
+        logger('[DISCOVER] Obteniendo aplicaciones...')
+        headers = {COOKIE_HEADER: cookie, **DOCUMENT_HEADERS}
+        response = session.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        applications = BeautifulSoup(response.text, HTML_PARSER).find_all('div', {'class': 'application'})
+
+        schedule_ids = {}
+        for application in applications:
+            schedule_id = re.search(r'\d+', str(application.find('a')))
+            if schedule_id:
+                schedule_id = schedule_id.group(0)
+                description = ' '.join([x.get_text() for x in application.find_all('td')][0:4])
+                schedule_ids[schedule_id] = description
+
+        session.close()
+
+        if schedule_ids:
+            result = json.dumps(schedule_ids, ensure_ascii=False)
+            print(f"DISCOVER_RESULT:{result}", flush=True)
+            logger(f'[DISCOVER] Encontrados {len(schedule_ids)} schedule IDs')
+        else:
+            logger('[DISCOVER] No se encontraron aplicaciones')
+            print("DISCOVER_ERROR:No se encontraron aplicaciones en la cuenta", flush=True)
+
+        return schedule_ids
+
+    except Exception as e:
+        error_msg = f"{type(e).__name__}: {str(e)}"
+        print(f"DISCOVER_ERROR:{error_msg}", flush=True)
+        return {}
+
+
 if __name__ == '__main__':
     try:
         # Verificar si se pasaron credenciales como argumentos
         email_arg = None
         password_arg = None
+        discover_mode = False
         
-        # Formato: python mains.py --email="user@example.com" --password="pass" --gui-mode
+        # Formato: python script.py --email="user@example.com" --password="pass" --gui-mode --discover
         for arg in sys.argv[1:]:
             if arg.startswith('--email='):
                 email_arg = arg.split('=', 1)[1]
@@ -949,9 +1127,14 @@ if __name__ == '__main__':
                 password_arg = arg.split('=', 1)[1]
             elif arg == '--gui-mode':
                 GUI_MODE = True
+            elif arg == '--discover':
+                discover_mode = True
         
-        # Si se pasaron credenciales desde GUI, usarlas
-        if email_arg and password_arg:
+        if discover_mode:
+            # Discovery mode: get schedule IDs and exit
+            print("Modo descubrimiento: buscando schedule IDs...")
+            discover(cli_email=email_arg, cli_password=password_arg)
+        elif email_arg and password_arg:
             if GUI_MODE:
                 print(f"Usando credenciales de GUI para: {email_arg}")
             else:
@@ -973,3 +1156,4 @@ if __name__ == '__main__':
             pass
         print(f"\nERROR: {e}\nRevisa el log en: {LOG_FILE}")
         input("Presiona Enter para cerrar...")
+
