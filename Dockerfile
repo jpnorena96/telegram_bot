@@ -12,13 +12,13 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY telegram_data_bot.py .
+# Copy project files
+COPY config.py .
+COPY main.py .
+COPY backend/ ./backend/
+COPY bot/ ./bot/
 
-# Set environment variables (can be overridden in Easypanel)
-ENV VISA_DB_HOST=173.212.225.148
-ENV VISA_DB_USER=root
-ENV VISA_DB_PASS=Cvpm1234
-ENV VISA_DB_NAME=visa_bot_db_telegram
-# ENV TELEGRAM_BOT_TOKEN=... (Set this in Easypanel secrets)
+# Copy .env file (can be overridden with Docker env vars)
+COPY .env .
 
-CMD ["python", "telegram_data_bot.py"]
+CMD ["python", "main.py"]
