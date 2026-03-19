@@ -100,7 +100,11 @@ async def main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         limit = PLAN_LIMITS.get(plan, 3)
 
         if count >= limit:
-            await query.answer(f"❌ Has alcanzado el límite de {limit} usuarios para el plan {plan.capitalize()}.", show_alert=True)
+            msg = (
+                f"❌ Has alcanzado el límite de {limit} usuarios para tu plan {plan.capitalize()}.\n\n"
+                "Para expandir tu cuota, por favor comunícate por WhatsApp aquí: wa.me/3027365127"
+            )
+            await query.message.reply_text(msg, parse_mode='Markdown', disable_web_page_preview=True)
             return MAIN_MENU
 
         context.user_data["is_editing"] = False
