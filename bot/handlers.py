@@ -54,7 +54,6 @@ async def show_main_menu(update_or_query, context: ContextTypes.DEFAULT_TYPE, te
         [InlineKeyboardButton("➕ Crear nuevo usuario", callback_data="menu_create")],
         [InlineKeyboardButton("✏️ Editar usuario", callback_data="menu_edit")],
         [InlineKeyboardButton("👁️ Ver mis usuarios", callback_data="menu_view")],
-        [InlineKeyboardButton("🗑️ Eliminar usuario", callback_data="menu_delete")],
         [InlineKeyboardButton("🚪 Cerrar sesión", callback_data="menu_logout")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
