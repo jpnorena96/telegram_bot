@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `visa_bot_db_telegram`.`users` (
   `email` VARCHAR(255) NOT NULL,
   `password` VARCHAR(255) NOT NULL,
   `device_id` VARCHAR(255) NULL DEFAULT NULL,
-  `country` VARCHAR(10) NOT NULL,
+  `country` VARCHAR(255) NOT NULL,
   `min_date` DATE NULL DEFAULT NULL,
   `max_date` DATE NULL DEFAULT NULL,
   `need_asc` TINYINT(1) NULL DEFAULT NULL,
@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS `visa_bot_db_telegram`.`users` (
   `facility_id` VARCHAR(255) NULL DEFAULT NULL,
   `asc_facility_id` VARCHAR(255) NULL DEFAULT NULL,
   `is_authorized` TINYINT(1) NULL DEFAULT '0',
+  `plan` VARCHAR(20) NULL DEFAULT 'platino',
   PRIMARY KEY (`id`),
   UNIQUE INDEX `email` (`email` ASC) VISIBLE)
 ENGINE = InnoDB
@@ -65,6 +66,7 @@ CREATE TABLE IF NOT EXISTS `visa_bot_db_telegram`.`user_appointments` (
   `email` VARCHAR(255) NULL DEFAULT NULL,
   `consulate_asc` VARCHAR(255) NULL DEFAULT NULL,
   `password` VARCHAR(255) NULL DEFAULT NULL,
+  `country` VARCHAR(10) NULL DEFAULT 'co',
   `consulate` VARCHAR(255) NULL DEFAULT 'Lima',
   `min_consulate_date` DATE NULL DEFAULT NULL,
   `max_consulate_date` DATE NULL DEFAULT NULL,

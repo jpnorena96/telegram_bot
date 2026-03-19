@@ -1,16 +1,17 @@
 import logging
 import mysql.connector
+from typing import Optional, List
 from config import DB_CONFIG
 
 logger = logging.getLogger(__name__)
 
 
-def verify_user(email: str, password: str) -> dict | None:
+def verify_user(email: str, password: str) -> Optional[dict]:
     """Verifies user credentials against the database. Returns user dict or None."""
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor(dictionary=True)
-        sql = "SELECT id, country FROM users WHERE email = %s AND password = %s"
+        sql = "SELECT id, country, plan FROM users WHERE email = %s AND password = %s"
         cursor.execute(sql, (email, password))
         user = cursor.fetchone()
         cursor.close()
@@ -21,7 +22,7 @@ def verify_user(email: str, password: str) -> dict | None:
         raise
 
 
-def check_existing_appointment(user_id: int, email: str) -> dict | None:
+def check_existing_appointment(user_id: int, email: str) -> Optional[dict]:
     """Checks if an appointment with this email already exists for the user."""
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
@@ -37,7 +38,7 @@ def check_existing_appointment(user_id: int, email: str) -> dict | None:
         raise
 
 
-def get_appointments(user_id: int) -> list:
+def get_appointments(user_id: int) -> List[dict]:
     """Returns all appointments for a user."""
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
@@ -53,7 +54,7 @@ def get_appointments(user_id: int) -> list:
         raise
 
 
-def get_appointment_list(user_id: int) -> list:
+def get_appointment_list(user_id: int) -> List[dict]:
     """Returns a simplified list of appointments (id, email, consulate) for selection."""
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
@@ -69,7 +70,7 @@ def get_appointment_list(user_id: int) -> list:
         raise
 
 
-def get_appointment(appointment_id: int) -> dict | None:
+def get_appointment(appointment_id: int) -> Optional[dict]:
     """Returns a single appointment by ID."""
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
@@ -90,12 +91,15 @@ def save_appointment(telegram_user_id: int, user_id: int, user_data: dict) -> st
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor()
-        sql = """INSERT INTO user_appointments 
-                 (telegram_user_id, user_id, email, password, ivr, consulate, consulate_asc, 
-                  min_consulate_date, max_consulate_date, min_asc_date, max_asc_date, status) 
-                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')"""
+        sql = """INSERT INTO user_appointments (
+                 telegram_user_id, user_id, email, password, ivr, country,
+                 consulate, consulate_asc,
+                 min_consulate_date, max_consulate_date, min_asc_date, max_asc_date,
+                 status
+                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')"""
         val = (telegram_user_id, user_id, user_data["appt_email"], user_data["appt_password"],
-               user_data.get("ivr"), user_data["consulate"], user_data["consulate_asc"],
+               user_data.get("ivr"), user_data.get("country", "co"),
+               user_data["consulate"], user_data["consulate_asc"],
                user_data["min_consulate_date"], user_data["max_consulate_date"],
                user_data["min_asc_date"], user_data["max_asc_date"])
         cursor.execute(sql, val)
@@ -114,11 +118,13 @@ def update_appointment(telegram_user_id: int, appointment_id: int, user_data: di
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor()
         sql = """UPDATE user_appointments SET
-                 telegram_user_id = %s, password = %s, ivr = %s, consulate = %s, consulate_asc = %s,
+                 telegram_user_id = %s, password = %s, ivr = %s, country = %s,
+                 consulate = %s, consulate_asc = %s,
                  min_consulate_date = %s, max_consulate_date = %s,
                  min_asc_date = %s, max_asc_date = %s, status = 'pending'
                  WHERE id = %s"""
         val = (telegram_user_id, user_data["appt_password"], user_data.get("ivr"),
+               user_data.get("country", "co"),
                user_data["consulate"], user_data["consulate_asc"],
                user_data["min_consulate_date"], user_data["max_consulate_date"],
                user_data["min_asc_date"], user_data["max_asc_date"],
@@ -146,3 +152,17 @@ def delete_appointment(appointment_id: int) -> bool:
     except mysql.connector.Error as err:
         logger.error(f"Database Error in delete_appointment: {err}")
         raise
+def get_appointment_count(user_id: int) -> int:
+    """Returns the number of appointments for a user."""
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+        sql = "SELECT COUNT(*) FROM user_appointments WHERE user_id = %s"
+        cursor.execute(sql, (user_id,))
+        count = cursor.fetchone()[0]
+        cursor.close()
+        conn.close()
+        return count
+    except mysql.connector.Error as err:
+        logger.error(f"Database Error in get_appointment_count: {err}")
+        return 0

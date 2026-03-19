@@ -1,6 +1,6 @@
 import logging
 import mysql.connector
-from telegram import Update, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
 from datetime import datetime
 
@@ -16,6 +16,21 @@ CONSULATE_FACILITY_MAP = {
     "_default": {"facility_id": "65", "asc_facility_id": "77"},
 }
 
+PLAN_LIMITS = {
+    "platino": 3,
+    "oro": 7,
+    "diamante": 10
+}
+
+# Teclado persistente con navegacion rapida
+NAV_KEYBOARD = ReplyKeyboardMarkup(
+    [["◀️ Menú", "🔄 Reiniciar"]],
+    resize_keyboard=True,
+    one_time_keyboard=False
+)
+
+NAV_TRIGGERS = {"◀️ Menú", "🔄 Reiniciar", "/menu", "/cancel"}
+
 
 # ─────────────────────────────────────────────
 # MAIN MENU
@@ -24,8 +39,14 @@ CONSULATE_FACILITY_MAP = {
 async def show_main_menu(update_or_query, context: ContextTypes.DEFAULT_TYPE, text: str = None) -> int:
     """Displays the main menu with inline buttons."""
     if text is None:
+        user_id = context.user_data.get("user_id")
+        plan = context.user_data.get("plan", "platino")
+        count = db.get_appointment_count(user_id)
+        limit = PLAN_LIMITS.get(plan, 3)
+        
         text = (
             "🎯 *Menú Principal*\n\n"
+            f"👤 *Plan:* {plan.capitalize()} ({count}/{limit} usuarios)\n\n"
             "Selecciona una opción:"
         )
 
@@ -50,6 +71,21 @@ async def show_main_menu(update_or_query, context: ContextTypes.DEFAULT_TYPE, te
     return MAIN_MENU
 
 
+async def nav_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handles ◀️ Menú and 🔄 Reiniciar buttons from any text state."""
+    text = (update.message.text or "").strip()
+    if text == "🔄 Reiniciar":
+        context.user_data.clear()
+        await update.message.reply_text(
+            "🔄 *Sesión reiniciada.*\n\nVuelve a ingresar tu correo electrónico:",
+            parse_mode='Markdown',
+            reply_markup=NAV_KEYBOARD
+        )
+        return EMAIL
+    # ◀️ Menú → volver al menú principal
+    return await show_main_menu(update, context)
+
+
 async def main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Handles the main menu button clicks."""
     query = update.callback_query
@@ -59,6 +95,15 @@ async def main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return await show_main_menu(update, context)
 
     if query.data == "menu_create":
+        user_id = context.user_data.get("user_id")
+        plan = context.user_data.get("plan", "platino")
+        count = db.get_appointment_count(user_id)
+        limit = PLAN_LIMITS.get(plan, 3)
+
+        if count >= limit:
+            await query.answer(f"❌ Has alcanzado el límite de {limit} usuarios para el plan {plan.capitalize()}.", show_alert=True)
+            return MAIN_MENU
+
         context.user_data["is_editing"] = False
         await query.edit_message_text(
             "➕ *Crear Nuevo Usuario de Citas*\n\n"
@@ -80,7 +125,7 @@ async def main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         context.user_data.clear()
         await query.edit_message_text(
             "👋 Sesión cerrada exitosamente.\n\n"
-            "Usa el comando /start para volver a iniciar sesión.",
+            "Usa el comando /start o escribe cualquier mensaje para volver a iniciar sesión.",
             parse_mode='Markdown'
         )
         return ConversationHandler.END
@@ -109,6 +154,7 @@ async def view_appointments(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                     f"━━━━━━━━━━━━━━━━━━\n"
                     f"{status_emoji} *Usuario {i}*\n"
                     f"📧 Email: `{appt.get('email', 'N/A')}`\n"
+                    f"🌎 País: `{appt.get('country', 'co').upper()}`\n"
                     f"🏛️ Consulado: {appt.get('consulate', 'N/A')}\n"
                     f"🏢 ASC: {appt.get('consulate_asc', 'N/A')}\n"
                     f"📅 Fechas: {appt.get('min_consulate_date', 'N/A')} → {appt.get('max_consulate_date', 'N/A')}\n"
@@ -185,6 +231,7 @@ async def select_appointment_callback(update: Update, context: ContextTypes.DEFA
             appt = db.get_appointment(appointment_id)
             if appt:
                 context.user_data["appt_email"] = appt["email"]
+                context.user_data["country"] = appt.get("country", "co")
         except mysql.connector.Error:
             pass
 
@@ -254,7 +301,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         "Hola! Soy el bot de citas de visa.\n\n"
         "🔒 **Paso 1: Iniciar Sesión**\n"
         "Por favor ingresa tu correo electrónico registrado en el bot:",
-        reply_markup=ReplyKeyboardRemove(),
+        reply_markup=NAV_KEYBOARD,
         parse_mode='Markdown'
     )
     return EMAIL
@@ -263,7 +310,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Stores the email and asks for the password."""
     context.user_data["email"] = update.message.text
-    await update.message.reply_text("Gracias. Ahora, por favor ingresa tu contraseña:")
+    await update.message.reply_text(
+        "Gracias. Ahora, por favor ingresa tu contraseña:",
+        reply_markup=NAV_KEYBOARD
+    )
     return PASSWORD
 
 
@@ -284,7 +334,11 @@ async def password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
         if user:
             context.user_data["user_id"] = user["id"]
-            context.user_data["country"] = user.get("country", "co")
+            context.user_data["plan"] = user.get("plan", "platino")
+            # Split comma-separated countries (e.g., 'co,mx') into a list
+            countries_str = user.get("country", "co")
+            context.user_data["allowed_countries"] = [c.strip() for c in countries_str.split(",") if c.strip()]
+            
             return await show_main_menu(
                 update, context,
                 text=(
@@ -395,11 +449,47 @@ COUNTRY_CONSULATES = {
 
 
 async def appointment_password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Stores the appointment password and shows consulate options."""
+    """Stores the appointment password and either shows countries or directly consulates."""
     context.user_data["appt_password"] = update.message.text
     context.user_data["ivr"] = "Ninguno"
 
-    country = context.user_data.get("country", "").lower()
+    countries = context.user_data.get("allowed_countries", ["co"])
+    
+    # If the user has multiple assigned countries, ask for selection
+    if len(countries) > 1:
+        keyboard = []
+        for c in countries:
+            c_lower = c.strip().lower()
+            name = "🇨🇴 Colombia" if c_lower == "co" else ("🇲🇽 México" if c_lower == "mx" else c.upper())
+            keyboard.append([InlineKeyboardButton(name, callback_data=f"country_{c_lower}")])
+            
+        await update.message.reply_text(
+            "Contraseña guardada.\n\n"
+            "🌎 *Selecciona el país para esta cita:*",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='Markdown'
+        )
+        return SELECT_COUNTRY
+
+    # Single country, proceed directly
+    country = countries[0].strip().lower() if countries else "co"
+    context.user_data["country"] = country
+    return await _show_consulates_menu(update, country)
+
+
+async def select_country_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handles country selection when a user is assigned multiple countries."""
+    query = update.callback_query
+    await query.answer()
+    
+    country = query.data.replace("country_", "")
+    context.user_data["country"] = country
+    
+    return await _show_consulates_menu(update, country, is_callback=True)
+
+
+async def _show_consulates_menu(update: Update, country: str, is_callback: bool = False) -> int:
+    """Helper to display the consulate options for a selected country."""
     consulates = COUNTRY_CONSULATES.get(country)
 
     if consulates:
@@ -408,18 +498,23 @@ async def appointment_password(update: Update, context: ContextTypes.DEFAULT_TYP
         for c in consulates:
             keyboard.append([InlineKeyboardButton(f"🏛️ {c['name']}", callback_data=f"consul_{c['name']}")])
 
-        await update.message.reply_text(
-            "Contraseña guardada.\n\n"
-            "🏛️ *Selecciona el Consulado:*",
-            reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode='Markdown'
-        )
+        text = "Contraseña guardada.\n\n🏛️ *Selecciona el Consulado:*" if not is_callback else "🏛️ *Selecciona el Consulado:*"
+        
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        if is_callback:
+            await update.callback_query.edit_message_text(text, reply_markup=reply_markup, parse_mode='Markdown')
+        else:
+            await update.message.reply_text(text, reply_markup=reply_markup, parse_mode='Markdown')
     else:
         # Unknown country → text input
-        await update.message.reply_text(
-            "Contraseña de citas guardada.\n\n"
-            "Por favor ingresa el Consulado (Normal) donde buscas cita:"
-        )
+        text = "Por favor ingresa el Consulado (Normal) donde buscas cita:"
+        if not is_callback:
+            text = "Contraseña de citas guardada.\n\n" + text
+        
+        if is_callback:
+            await update.callback_query.edit_message_text(text)
+        else:
+            await update.message.reply_text(text)
 
     return CONSULATE
 

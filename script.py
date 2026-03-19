@@ -175,6 +175,7 @@ class WebshareManager:
 
 COUNTRIES = {
     'co': 'Colombia',
+    'mx': 'Mexico',
 }
 
 
@@ -432,7 +433,7 @@ class Bot:
         self.logger = logger
         self.config = config
         self.asc_file = asc_file
-        self.url = f'https://{HOST}/en-co/niv'
+        self.url = f'https://{HOST}/en-{config.country}/niv'
         self.appointment_datetime = None
         self.csrf = None
         self.cookie = None
@@ -448,8 +449,6 @@ class Bot:
 
     def headers(self) -> dict[str, str]:
         headers = dict()
-        if self.cookie:
-            headers[COOKIE_HEADER] = self.cookie
         if self.csrf:
             headers[X_CSRF_TOKEN_HEADER] = self.csrf
         return headers
@@ -502,7 +501,7 @@ class Bot:
             try:
                 response = self.session.get(
                     f'{self.url}/users/sign_in',
-                    headers={COOKIE_HEADER: '', REFERER: f'{self.url}/users/sign_in', **DOCUMENT_HEADERS},
+                    headers={REFERER: f'{self.url}/users/sign_in', **DOCUMENT_HEADERS},
                     timeout=20
                 )
                 response.raise_for_status()
@@ -558,7 +557,6 @@ class Bot:
                 headers={
                     **DEFAULT_HEADERS,
                     X_CSRF_TOKEN_HEADER: Bot.get_csrf(response),
-                    COOKIE_HEADER: cookies,
                     ACCEPT: '*/*;q=0.5, text/javascript, application/javascript, application/ecmascript, application/x-ecmascript',
                     REFERER: f'{self.url}/users/sign_in',
                     CONTENT_TYPE: 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -993,6 +991,20 @@ class Bot:
                             except Exception as db_err:
                                 self.logger(f"Error actualizando DB: {db_err}")
 
+                        # ✋ Detener el proceso PM2 propio (cita ya agendada, no hay nada más que hacer)
+                        try:
+                            import subprocess
+                            folder_name = self.config.email.replace('@', '_').replace('.', '_')
+                            pm2_name = f"visa_{folder_name}"
+                            self.logger(f"[PM2] Deteniendo proceso PM2: {pm2_name}")
+                            send_telegram_message(
+                                TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID,
+                                f"🛑 Bot detenido automáticamente.\nCita agendada para: {self.config.email}\nPM2 proceso '{pm2_name}' eliminado."
+                            )
+                            subprocess.Popen(["pm2", "delete", pm2_name])
+                        except Exception as pm2_err:
+                            self.logger(f"[PM2] Error deteniendo proceso: {pm2_err}")
+
                         break
                     
                     reinit_asc = True
@@ -1036,18 +1048,17 @@ def discover(cli_email: Optional[str] = None, cli_password: Optional[str] = None
         logger(f"[DISCOVER] Proxy: {proxy_dict.get('http', 'none')}")
 
         # === LOGIN with retry limit ===
-        cookie = None
+        logged_in = False
         for attempt in range(1, MAX_RETRIES + 1):
             logger(f'[DISCOVER] Login intento {attempt}/{MAX_RETRIES}')
             try:
                 response = session.get(
                     f'{url}/users/sign_in',
-                    headers={COOKIE_HEADER: '', REFERER: f'{url}/users/sign_in', **DOCUMENT_HEADERS},
+                    headers={REFERER: f'{url}/users/sign_in', **DOCUMENT_HEADERS},
                     timeout=30
                 )
                 response.raise_for_status()
 
-                cookies = response.headers.get(SET_COOKIE)
                 csrf = BeautifulSoup(response.text, HTML_PARSER).find('meta', {'name': 'csrf-token'})['content']
 
                 response = session.post(
@@ -1055,7 +1066,6 @@ def discover(cli_email: Optional[str] = None, cli_password: Optional[str] = None
                     headers={
                         **DEFAULT_HEADERS,
                         X_CSRF_TOKEN_HEADER: csrf,
-                        COOKIE_HEADER: cookies,
                         ACCEPT: '*/*;q=0.5, text/javascript, application/javascript, application/ecmascript, application/x-ecmascript',
                         REFERER: f'{url}/users/sign_in',
                         CONTENT_TYPE: 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -1069,7 +1079,7 @@ def discover(cli_email: Optional[str] = None, cli_password: Optional[str] = None
                     timeout=30
                 )
                 response.raise_for_status()
-                cookie = response.headers.get(SET_COOKIE)
+                logged_in = True
                 logger('[DISCOVER] Login exitoso')
                 break
 
@@ -1082,7 +1092,7 @@ def discover(cli_email: Optional[str] = None, cli_password: Optional[str] = None
                 session.proxies.update(proxy_dict)
                 time.sleep(2)
 
-        if not cookie:
+        if not logged_in:
             error_msg = f"Login fallido despues de {MAX_RETRIES} intentos"
             logger(f'[DISCOVER] {error_msg}')
             print(f"DISCOVER_ERROR:{error_msg}", flush=True)
@@ -1090,7 +1100,7 @@ def discover(cli_email: Optional[str] = None, cli_password: Optional[str] = None
 
         # === GET APPLICATIONS ===
         logger('[DISCOVER] Obteniendo aplicaciones...')
-        headers = {COOKIE_HEADER: cookie, **DOCUMENT_HEADERS}
+        headers = {**DOCUMENT_HEADERS}
         response = session.get(url, headers=headers, timeout=30)
         response.raise_for_status()
 
@@ -1101,7 +1111,9 @@ def discover(cli_email: Optional[str] = None, cli_password: Optional[str] = None
             schedule_id = re.search(r'\d+', str(application.find('a')))
             if schedule_id:
                 schedule_id = schedule_id.group(0)
-                description = ' '.join([x.get_text() for x in application.find_all('td')][0:4])
+                tds = application.find_all('td')
+                description = ' '.join([x.get_text() for x in filter(None, tds)][0:4])
+                description = description.replace("\n", " ").strip()
                 schedule_ids[schedule_id] = description
 
         session.close()

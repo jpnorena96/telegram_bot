@@ -1,0 +1,13 @@
+2026-03-15 00:32:00,880  [WEBSHARE] Descargando lista de proxies...
+2026-03-15 00:32:00,883  Starting new HTTPS connection (1): proxy.webshare.io:443
+2026-03-15 00:32:04,053  https://proxy.webshare.io:443 "GET /api/v2/proxy/list/?mode=direct&page_size=100 HTTP/1.1" 200 None
+2026-03-15 00:32:04,056  [WEBSHARE] 100 proxies cargados
+2026-03-15 00:32:04,057  [DISCOVER] Proxy: http://yhjxpuut:voge365lc96q@199.180.11.212:6949
+2026-03-15 00:32:04,058  [DISCOVER] Login intento 1/5
+2026-03-15 00:32:04,060  Starting new HTTPS connection (1): ais.usvisa-info.com:443
+2026-03-15 00:32:05,548  https://ais.usvisa-info.com:443 "GET /en-co/niv/users/sign_in HTTP/1.1" 200 None
+2026-03-15 00:32:05,795  https://ais.usvisa-info.com:443 "POST /en-co/niv/users/sign_in HTTP/1.1" 200 None
+2026-03-15 00:32:05,796  [DISCOVER] Login exitoso
+2026-03-15 00:32:05,796  [DISCOVER] Obteniendo aplicaciones...
+2026-03-15 00:32:05,997  https://ais.usvisa-info.com:443 "GET /en-co/niv HTTP/1.1" 200 None
+2026-03-15 00:32:06,014  [DISCOVER] No se encontraron aplicaciones
