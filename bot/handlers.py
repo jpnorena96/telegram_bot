@@ -102,7 +102,7 @@ async def main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         if count >= limit:
             msg = (
                 f"❌ Has alcanzado el límite de {limit} usuarios para tu plan {plan.capitalize()}.\n\n"
-                "Para expandir tu cuota, por favor comunícate por WhatsApp aquí: wa.me/3027365127"
+                "Para expandir tu cuota, por favor comunícate por WhatsApp aquí: wa.me/573027365127"
             )
             await query.message.reply_text(msg, parse_mode='Markdown', disable_web_page_preview=True)
             return MAIN_MENU
