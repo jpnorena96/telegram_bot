@@ -18,13 +18,13 @@ CONSULATE_FACILITY_MAP = {
 
 PLAN_LIMITS = {
     "platino": 3,
-    "oro": 7,
+    "oro": 5,
     "diamante": 10
 }
 
 # Teclado persistente con navegacion rapida
 NAV_KEYBOARD = ReplyKeyboardMarkup(
-    [["◀️ Menú", "🔄 Reiniciar"]],
+    [["🔄 Reiniciar"]],
     resize_keyboard=True,
     one_time_keyboard=False
 )
