@@ -1,8 +1,12 @@
 import logging
+import traceback
+import html
+import json
 from telegram import Update
 from telegram.ext import (
     Application, CommandHandler,
-    ConversationHandler, MessageHandler, CallbackQueryHandler, filters
+    ConversationHandler, MessageHandler, CallbackQueryHandler, filters,
+    ContextTypes
 )
 
 from config import TOKEN
@@ -27,9 +31,36 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 NAV_FILTER = filters.Text(list(NAV_TRIGGERS))
 
 
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Log the error and handle network-related exceptions gracefully."""
+    logger = logging.getLogger(__name__)
+    
+    # Log the error with traceback
+    logger.error("Exception while handling an update:", exc_info=context.error)
+
+    # Handle common network errors silently (they are usually transient)
+    from telegram.error import NetworkError, TimedOut
+    if isinstance(context.error, (NetworkError, TimedOut)):
+        logger.warning(f"Network-related error occurred: {context.error}. These are usually transient.")
+        return
+
+    # For other errors, we could notify the developer if a chat ID is configured,
+    # but for now, we just ensure it's logged and doesn't crash the polling loop.
+    if isinstance(update, Update) and update.effective_message:
+        try:
+            await update.effective_message.reply_text(
+                "❌ Ocurrió un error inesperado al procesar tu solicitud. Por favor, intenta de nuevo más tarde."
+            )
+        except Exception:
+            pass
+
+
 def main() -> None:
     """Run the bot."""
     application = Application.builder().token(TOKEN).build()
+
+    # Register error handler
+    application.add_error_handler(error_handler)
 
     conv_handler = ConversationHandler(
         entry_points=[

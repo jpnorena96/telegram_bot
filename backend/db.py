@@ -22,19 +22,47 @@ def verify_user(email: str, password: str) -> Optional[dict]:
         raise
 
 
-def check_existing_appointment(user_id: int, email: str) -> Optional[dict]:
-    """Checks if an appointment with this email already exists for the user."""
+def check_existing_appointment(user_id: int, email: str, consulate: str = None) -> Optional[dict]:
+    """Checks if an appointment with this email (and optionally consulate) already exists for the user.
+    
+    When consulate is provided, matches on (user_id, email, consulate) so that the same
+    email can have multiple IVR profiles registered under different consulates.
+    """
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor(dictionary=True)
-        sql = "SELECT id FROM user_appointments WHERE user_id = %s AND email = %s"
-        cursor.execute(sql, (user_id, email))
+        if consulate:
+            sql = "SELECT id FROM user_appointments WHERE user_id = %s AND email = %s AND consulate = %s"
+            cursor.execute(sql, (user_id, email, consulate))
+        else:
+            sql = "SELECT id FROM user_appointments WHERE user_id = %s AND email = %s"
+            cursor.execute(sql, (user_id, email))
         existing = cursor.fetchone()
         cursor.close()
         conn.close()
         return existing
     except mysql.connector.Error as err:
         logger.error(f"Database Error in check_existing_appointment: {err}")
+        raise
+
+
+def check_existing_appointments_by_email(user_id: int, email: str) -> List[dict]:
+    """Returns ALL existing appointment profiles for a given (user_id, email) combination.
+    
+    Useful to detect when the same email already has IVR profiles registered so the
+    bot can inform the user and still allow adding a new profile for a different consulate.
+    """
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        sql = "SELECT id, consulate, consulate_asc FROM user_appointments WHERE user_id = %s AND email = %s"
+        cursor.execute(sql, (user_id, email))
+        existing = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return existing
+    except mysql.connector.Error as err:
+        logger.error(f"Database Error in check_existing_appointments_by_email: {err}")
         raise
 
 

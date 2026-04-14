@@ -5,6 +5,7 @@ from telegram.ext import ContextTypes, ConversationHandler
 from datetime import datetime
 
 from backend import db, vps
+from backend.db import check_existing_appointments_by_email
 from bot.states import *
 
 logger = logging.getLogger(__name__)
@@ -372,38 +373,47 @@ async def password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 # ─────────────────────────────────────────────
 
 async def appointment_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Stores the appointment email, checks if it exists, and asks for password."""
-    appt_email = update.message.text
+    """Stores the appointment email. If the email already has profiles, informs the user
+    but still allows adding a new profile (different consulate/IVR). Duplicate check
+    happens later when the consulate is known."""
+    appt_email = update.message.text.strip()
     context.user_data["appt_email"] = appt_email
+    context.user_data["is_editing"] = False
     user_id = context.user_data.get("user_id")
 
+    # Check whether this email ALREADY has profiles registered (informational only)
     try:
-        existing = db.check_existing_appointment(user_id, appt_email)
+        existing_profiles = check_existing_appointments_by_email(user_id, appt_email)
+    except Exception as err:
+        logger.error(f"Database Error checking existing profiles: {err}")
+        existing_profiles = []
 
-        if existing:
-            context.user_data["is_editing"] = True
-            context.user_data["appointment_id"] = existing["id"]
+    if existing_profiles:
+        # Build a summary of existing profiles so the user knows what is already registered
+        profile_lines = ""
+        for p in existing_profiles:
+            profile_lines += f"  • 🏛️ {p.get('consulate', '?')}" + (
+                f" / 🏢 {p['consulate_asc']}" if p.get('consulate_asc') and p['consulate_asc'] != 'Ninguno' else ""
+            ) + "\n"
 
-            keyboard = [
-                [InlineKeyboardButton("✅ Sí", callback_data="edit_yes"),
-                 InlineKeyboardButton("❌ No", callback_data="edit_no")]
-            ]
-
-            await update.message.reply_text(
-                "⚠️ Este correo de citas ya está registrado.\n"
-                "¿Deseas editar la información de configuración de este usuario?",
-                reply_markup=InlineKeyboardMarkup(keyboard)
-            )
-            return EDIT_OR_NEW_APPOINTMENT
-    except mysql.connector.Error as err:
-        logger.error(f"Database Error: {err}")
-
-    context.user_data["is_editing"] = False
-    await update.message.reply_text(
-        "Correo de citas guardado.\n\nAhora ingresa la **Contraseña de la cuenta de Visas**:",
-        reply_markup=ReplyKeyboardRemove(),
-        parse_mode='Markdown'
-    )
+        notice = (
+            f"ℹ️ *Este correo ya tiene {len(existing_profiles)} perfil(es) registrado(s):*\n"
+            f"{profile_lines}\n"
+            "Puedes agregar un *nuevo perfil* con un consulado diferente, "
+            "o continuar con la contraseña para actualizar uno existente.\n\n"
+            "Ingresa la **Contraseña de la cuenta de Visas**:"
+        )
+        await update.message.reply_text(
+            notice,
+            reply_markup=ReplyKeyboardRemove(),
+            parse_mode='Markdown'
+        )
+    else:
+        await update.message.reply_text(
+            "Correo de citas guardado.\n\nAhora ingresa la **Contraseña de la cuenta de Visas**:",
+            reply_markup=ReplyKeyboardRemove(),
+            parse_mode='Markdown'
+        )
     return APPOINTMENT_PASSWORD
 
 
@@ -699,6 +709,9 @@ async def max_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_data["telegram_chat_id"] = str(update.effective_chat.id)
 
     try:
+        # is_editing=True only when the user started from menu_edit (explicit edit).
+        # In the creation flow, always INSERT as a new profile — the same email can
+        # have multiple IVR profiles, each distinguished by their schedule_id.
         if user_data.get("is_editing") and "appointment_id" in user_data:
             action_text = db.update_appointment(telegram_user_id, user_data["appointment_id"], user_data)
         else:
