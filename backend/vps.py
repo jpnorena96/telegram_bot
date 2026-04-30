@@ -162,11 +162,11 @@ DB_NAME={os.getenv("DB_NAME", "")}
         return False
 
 
-def discover_schedule_ids(email: str) -> tuple[dict, str]:
+def discover_schedule_ids(email: str, appointment_id: int = None) -> tuple[dict, str]:
     """Phase 2: Runs script.py --discover on VPS.
     Returns (schedule_ids_dict, error_message). error_message is empty on success."""
     try:
-        base_path, folder_name = _get_base_path(email)
+        base_path, folder_name = _get_base_path(email, appointment_id)
         ssh = _connect_ssh()
 
         discover_cmd = (
@@ -201,10 +201,10 @@ def discover_schedule_ids(email: str) -> tuple[dict, str]:
         return {}, str(e)
 
 
-def set_schedule_id_and_start(email: str, schedule_id: str) -> bool:
+def set_schedule_id_and_start(email: str, schedule_id: str, appointment_id: int = None) -> bool:
     """Phase 3: Updates config with SCHEDULE_ID and starts script via PM2."""
     try:
-        base_path, folder_name = _get_base_path(email)
+        base_path, folder_name = _get_base_path(email, appointment_id)
         ssh = _connect_ssh()
 
         # Read current config, replace SCHEDULE_ID
