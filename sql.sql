@@ -96,3 +96,14 @@ COLLATE = utf8mb4_0900_ai_ci;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Migrations
+-- ─────────────────────────────────────────────────────────────────────────────
+
+-- Agrega columna schedule_id a user_appointments para guardar el Schedule ID
+-- seleccionado cuando se registra o edita un agendamiento.
+ALTER TABLE `visa_bot_db_telegram`.`user_appointments`
+  ADD COLUMN `schedule_id` VARCHAR(64) NULL DEFAULT NULL
+  COMMENT 'Schedule ID seleccionado en el portal de visas (IVR o descubierto automaticamente)'
+  AFTER `ivr`;

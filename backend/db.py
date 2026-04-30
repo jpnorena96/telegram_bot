@@ -123,13 +123,14 @@ def save_appointment(telegram_user_id: int, user_id: int, user_data: dict) -> st
                  telegram_user_id, user_id, email, password, ivr, country,
                  consulate, consulate_asc,
                  min_consulate_date, max_consulate_date, min_asc_date, max_asc_date,
-                 status
-                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')"""
+                 schedule_id, status
+                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')"""
         val = (telegram_user_id, user_id, user_data["appt_email"], user_data["appt_password"],
                user_data.get("ivr"), user_data.get("country", "co"),
                user_data["consulate"], user_data["consulate_asc"],
                user_data["min_consulate_date"], user_data["max_consulate_date"],
-               user_data["min_asc_date"], user_data["max_asc_date"])
+               user_data["min_asc_date"], user_data["max_asc_date"],
+               user_data.get("schedule_id"))
         cursor.execute(sql, val)
         conn.commit()
         cursor.close()
@@ -149,13 +150,15 @@ def update_appointment(telegram_user_id: int, appointment_id: int, user_data: di
                  telegram_user_id = %s, password = %s, ivr = %s, country = %s,
                  consulate = %s, consulate_asc = %s,
                  min_consulate_date = %s, max_consulate_date = %s,
-                 min_asc_date = %s, max_asc_date = %s, status = 'pending'
+                 min_asc_date = %s, max_asc_date = %s,
+                 schedule_id = %s, status = 'pending'
                  WHERE id = %s"""
         val = (telegram_user_id, user_data["appt_password"], user_data.get("ivr"),
                user_data.get("country", "co"),
                user_data["consulate"], user_data["consulate_asc"],
                user_data["min_consulate_date"], user_data["max_consulate_date"],
                user_data["min_asc_date"], user_data["max_asc_date"],
+               user_data.get("schedule_id"),
                appointment_id)
         cursor.execute(sql, val)
         conn.commit()
@@ -194,3 +197,26 @@ def get_appointment_count(user_id: int) -> int:
     except mysql.connector.Error as err:
         logger.error(f"Database Error in get_appointment_count: {err}")
         return 0
+
+
+def save_schedule_id(email: str, schedule_id: str) -> bool:
+    """Updates the schedule_id of the most recent appointment for a given email.
+    Called after the PM2 process starts successfully so the schedule_id is persisted."""
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+        sql = """UPDATE user_appointments
+                 SET schedule_id = %s
+                 WHERE email = %s
+                 ORDER BY id DESC
+                 LIMIT 1"""
+        cursor.execute(sql, (schedule_id, email))
+        conn.commit()
+        affected = cursor.rowcount
+        cursor.close()
+        conn.close()
+        logger.info(f"save_schedule_id: {schedule_id} → email={email}, rows={affected}")
+        return affected > 0
+    except mysql.connector.Error as err:
+        logger.error(f"Database Error in save_schedule_id: {err}")
+        return False
