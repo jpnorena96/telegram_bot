@@ -60,9 +60,11 @@ def _run_ssh_command(ssh_client, command: str, timeout: int = 120) -> tuple[str,
     return out, err
 
 
-def _get_base_path(email: str) -> tuple[str, str]:
+def _get_base_path(email: str, appointment_id: int = None) -> tuple[str, str]:
     """Returns (base_path, folder_name) from email."""
     folder_name = email.replace('@', '_').replace('.', '_')
+    if appointment_id:
+        folder_name = f"{folder_name}_{appointment_id}"
     base_path = f"/home/{VPS_USER}/{folder_name}"
     return base_path, folder_name
 
@@ -73,7 +75,8 @@ def create_vps_config(user_data: dict) -> bool:
         logger.info(f"Connecting to VPS {VPS_HOST} as {VPS_USER}...")
 
         email = user_data["appt_email"]
-        base_path, folder_name = _get_base_path(email)
+        appointment_id = user_data.get("appointment_id")
+        base_path, folder_name = _get_base_path(email, appointment_id)
 
         # Get facility IDs based on consulate
         need_cas = user_data.get("need_cas", True)

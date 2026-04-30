@@ -114,8 +114,8 @@ def get_appointment(appointment_id: int) -> Optional[dict]:
         raise
 
 
-def save_appointment(telegram_user_id: int, user_id: int, user_data: dict) -> str:
-    """Inserts a new appointment. Returns action text."""
+def save_appointment(telegram_user_id: int, user_id: int, user_data: dict) -> tuple[str, int]:
+    """Inserts a new appointment. Returns (action_text, appointment_id)."""
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor()
@@ -133,16 +133,17 @@ def save_appointment(telegram_user_id: int, user_id: int, user_data: dict) -> st
                user_data.get("schedule_id"))
         cursor.execute(sql, val)
         conn.commit()
+        appointment_id = cursor.lastrowid
         cursor.close()
         conn.close()
-        return "guardada"
+        return "guardada", appointment_id
     except mysql.connector.Error as err:
         logger.error(f"Database Error in save_appointment: {err}")
         raise
 
 
-def update_appointment(telegram_user_id: int, appointment_id: int, user_data: dict) -> str:
-    """Updates an existing appointment. Returns action text."""
+def update_appointment(telegram_user_id: int, appointment_id: int, user_data: dict) -> tuple[str, int]:
+    """Updates an existing appointment. Returns (action_text, appointment_id)."""
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor()
@@ -164,7 +165,7 @@ def update_appointment(telegram_user_id: int, appointment_id: int, user_data: di
         conn.commit()
         cursor.close()
         conn.close()
-        return "actualizada"
+        return "actualizada", appointment_id
     except mysql.connector.Error as err:
         logger.error(f"Database Error in update_appointment: {err}")
         raise
@@ -219,4 +220,19 @@ def save_schedule_id(email: str, schedule_id: str) -> bool:
         return affected > 0
     except mysql.connector.Error as err:
         logger.error(f"Database Error in save_schedule_id: {err}")
+        return False
+
+def check_existing_schedule_id(schedule_id: str) -> bool:
+    """Checks if a schedule_id is already registered by any user."""
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        sql = "SELECT id FROM user_appointments WHERE schedule_id = %s"
+        cursor.execute(sql, (schedule_id,))
+        existing = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return bool(existing)
+    except mysql.connector.Error as err:
+        logger.error(f"Database Error in check_existing_schedule_id: {err}")
         return False
