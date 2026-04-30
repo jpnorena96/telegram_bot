@@ -1112,10 +1112,22 @@ def discover(cli_email: Optional[str] = None, cli_password: Optional[str] = None
         # === GET APPLICATIONS ===
         logger('[DISCOVER] Obteniendo aplicaciones...')
         headers = {**DOCUMENT_HEADERS}
-        response = session.get(url, headers=headers, timeout=30)
-        response.raise_for_status()
-
-        applications = BeautifulSoup(response.text, HTML_PARSER).find_all('div', {'class': 'application'})
+        applications = []
+        
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                response = session.get(url, headers=headers, timeout=60)
+                response.raise_for_status()
+                applications = BeautifulSoup(response.text, HTML_PARSER).find_all('div', {'class': 'application'})
+                break
+            except Exception as e:
+                logger(f'[DISCOVER] Error obteniendo aplicaciones (intento {attempt}): {e}')
+                if attempt < MAX_RETRIES:
+                    proxy_dict = proxy_mgr.get_proxy_dict()
+                    session.proxies.update(proxy_dict)
+                    time.sleep(2)
+                else:
+                    raise e
 
         schedule_ids = {}
         for application in applications:
