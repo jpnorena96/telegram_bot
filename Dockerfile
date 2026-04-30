@@ -21,6 +21,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY config.py .
 COPY main.py .
 COPY backend/ ./backend/
+# -- Cache buster for Buildkit error --
 COPY bot/ ./bot/
 
 # ── VPS scripts (se suben al VPS, no corren dentro del contenedor) ─────────────
