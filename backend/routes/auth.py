@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
@@ -18,7 +18,7 @@ SECRET_KEY = "super-secret-key-change-this-in-production"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__truncate_error=False)
 
 router = APIRouter()
 
@@ -36,7 +36,7 @@ class LoginRequest(BaseModel):
 class RegisterRequest(BaseModel):
     full_name: str
     email: EmailStr
-    password: str
+    password: str = Field(..., max_length=72)
     role: str
 
 # --- Security Utilities ---
@@ -49,13 +49,14 @@ def verify_password(plain_password, hashed_password):
     if plain_password == hashed_password:
         return True
     try:
-        return pwd_context.verify(plain_password[:72], hashed_password)
-    except:
+        # Ya no necesitas [:72] aquí
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception:
         return False
 
 def get_password_hash(password):
-    return pwd_context.hash(password[:72])
-
+    #return pwd_context.hash(password[:72])
+    return pwd_context.hash(password)
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
