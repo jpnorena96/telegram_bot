@@ -1,0 +1,35 @@
+FROM python:3.12-slim
+
+# ── Dependencias del sistema (MySQL, Criptografía) ────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        gcc \
+        libffi-dev \
+        libssl-dev \
+        curl \
+        pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── Usuario no-root por seguridad ─────────────────────────────────────────────
+RUN useradd -m -u 1000 apiuser
+
+WORKDIR /app
+
+# ── Instalar dependencias del API ─────────────────────────────────────────────
+# Copiamos específicamente el archivo de requirements del API
+COPY backend/requirements-api.txt .
+RUN pip install --no-cache-dir -r requirements-api.txt
+
+# ── Copiar el código fuente ───────────────────────────────────────────────────
+# Necesitamos config.py de la raíz porque backend/db.py lo importa
+COPY config.py .
+COPY ./backend /app/backend
+
+# ── Permisos correctos ────────────────────────────────────────────────────────
+RUN chown -R apiuser:apiuser /app
+USER apiuser
+
+# ── Exponer el puerto ─────────────────────────────────────────────────────────
+EXPOSE 8000
+
+# ── Iniciar el servidor FastAPI (Uvicorn) ─────────────────────────────────────
+CMD ["uvicorn", "backend.api:app", "--host", "0.0.0.0", "--port", "8000"]
