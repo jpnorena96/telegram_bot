@@ -13,13 +13,16 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import DB_CONFIG
 
-# JWT Configuration
+# --- JWT Configuration ---
 SECRET_KEY = "super-secret-key-change-this-in-production"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__truncate_error=False)
-
+pwd_context = CryptContext(
+    schemes=["bcrypt"], 
+    deprecated="auto",
+    bcrypt__truncate_error=False 
+)
 router = APIRouter()
 
 # --- Schemas ---
@@ -41,15 +44,11 @@ class RegisterRequest(BaseModel):
 
 # --- Security Utilities ---
 def verify_password(plain_password, hashed_password):
-    # Depending on how the current bot handles passwords (currently plain text in SQL DB it seems)
-    # the bot script checks "password = %s".
-    # We should support plain text for existing, but hashing for new ones.
-    # We will just do direct comparison here for simplicity as the legacy bot does.
-    # Or, we can use passlib if they start hashing.
+    # Soporte para contraseñas en texto plano (Legacy)
     if plain_password == hashed_password:
         return True
     try:
-        # Ya no necesitas [:72] aquí
+        # Passlib manejará el límite de 72 bytes internamente ahora
         return pwd_context.verify(plain_password, hashed_password)
     except Exception:
         return False
