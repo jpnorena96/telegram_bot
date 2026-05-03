@@ -47,11 +47,13 @@ CREATE TABLE IF NOT EXISTS `visa_bot_db_telegram`.`users` (
   `facility_id` VARCHAR(255) NULL DEFAULT NULL,
   `asc_facility_id` VARCHAR(255) NULL DEFAULT NULL,
   `is_authorized` TINYINT(1) NULL DEFAULT '0',
+  `full_name` VARCHAR(255) NULL DEFAULT NULL,
+  `role` VARCHAR(50) NULL DEFAULT 'NATURAL_PERSON',
   `plan` VARCHAR(20) NULL DEFAULT 'platino',
   PRIMARY KEY (`id`),
   UNIQUE INDEX `email` (`email` ASC) VISIBLE)
 ENGINE = InnoDB
-AUTO_INCREMENT = 13
+AUTO_INCREMENT = 25
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -79,6 +81,7 @@ CREATE TABLE IF NOT EXISTS `visa_bot_db_telegram`.`user_appointments` (
   `date_created` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   `status` VARCHAR(255) NULL DEFAULT 'pending',
   `ivr` VARCHAR(255) NULL DEFAULT 'null',
+  `schedule_id` VARCHAR(64) NULL DEFAULT NULL COMMENT 'Schedule ID seleccionado en el portal de visas',
   PRIMARY KEY (`id`),
   INDEX `telegram_user_id` (`telegram_user_id` ASC) VISIBLE,
   INDEX `fk_user_appointments_user_id` (`user_id` ASC) VISIBLE,
@@ -88,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `visa_bot_db_telegram`.`user_appointments` (
     ON DELETE SET NULL
     ON UPDATE CASCADE)
 ENGINE = InnoDB
-AUTO_INCREMENT = 91
+AUTO_INCREMENT = 235
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -96,14 +99,3 @@ COLLATE = utf8mb4_0900_ai_ci;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
--- ─────────────────────────────────────────────────────────────────────────────
--- Migrations
--- ─────────────────────────────────────────────────────────────────────────────
-
--- Agrega columna schedule_id a user_appointments para guardar el Schedule ID
--- seleccionado cuando se registra o edita un agendamiento.
-ALTER TABLE `visa_bot_db_telegram`.`user_appointments`
-  ADD COLUMN `schedule_id` VARCHAR(64) NULL DEFAULT NULL
-  COMMENT 'Schedule ID seleccionado en el portal de visas (IVR o descubierto automaticamente)'
-  AFTER `ivr`;

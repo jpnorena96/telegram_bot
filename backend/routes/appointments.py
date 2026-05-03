@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from typing import List, Optional
+from pydantic import BaseModel
+from datetime import date, time
 import mysql.connector
 import sys
 import os
@@ -12,6 +14,20 @@ from .auth import SECRET_KEY, ALGORITHM, get_db
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
+
+class AppointmentCreate(BaseModel):
+    email: str
+    password: str
+    country: str = 'co'
+    consulate: str = 'Lima'
+    consulate_asc: Optional[str] = None
+    min_consulate_date: Optional[date] = None
+    max_consulate_date: Optional[date] = None
+    min_consulate_time: Optional[time] = None
+    max_consulate_time: Optional[time] = None
+    schedule_id: Optional[str] = None
+    ivr: Optional[str] = 'null'
+
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -30,6 +46,35 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     
     return {"email": email, "id": user_id, "roles": roles}
+
+@router.post("/")
+def create_appointment(apt: AppointmentCreate, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    cursor = db.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO user_appointments (
+                user_id, email, password, country, consulate, consulate_asc,
+                min_consulate_date, max_consulate_date, min_consulate_time, max_consulate_time,
+                schedule_id, ivr, status
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, 'pending'
+            )
+        """, (
+            current_user["id"], apt.email, apt.password, apt.country, apt.consulate, apt.consulate_asc,
+            apt.min_consulate_date, apt.max_consulate_date, apt.min_consulate_time, apt.max_consulate_time,
+            apt.schedule_id, apt.ivr
+        ))
+        db.commit()
+        new_id = cursor.lastrowid
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+    
+    return {"message": "Appointment created successfully", "id": new_id}
 
 @router.get("/")
 def get_user_appointments(current_user: dict = Depends(get_current_user), db = Depends(get_db)):

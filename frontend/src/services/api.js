@@ -63,5 +63,14 @@ export const api = {
       headers: getHeaders(),
     });
     return handleResponse(response);
+  },
+
+  async createAppointment(data) {
+    const response = await fetch(`${API_URL}/appointments`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
   }
 };

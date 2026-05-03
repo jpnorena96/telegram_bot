@@ -48,6 +48,80 @@ const Modal = ({ apt, onClose }) => {
   );
 };
 
+/* ── CREATE MODAL ── */
+const CreateModal = ({ onClose, onCreated }) => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    country: 'co',
+    consulate: 'Lima',
+    schedule_id: '',
+    ivr: 'null',
+    min_consulate_date: '',
+    max_consulate_date: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const payload = { ...formData };
+      if (!payload.min_consulate_date) delete payload.min_consulate_date;
+      if (!payload.max_consulate_date) delete payload.max_consulate_date;
+      await api.createAppointment(payload);
+      onCreated();
+    } catch (err) {
+      setError(err.message || 'Error al crear cita');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+      <div onClick={e => e.stopPropagation()} className="animate-in" style={{ width: '100%', maxWidth: '480px', background: 'var(--black-2)', border: '1px solid var(--border-2)' }}>
+        <div style={{ padding: '0.875rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--black-3)' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--lime)' }}>NUEVO AGENDAMIENTO</span>
+          <button type="button" className="btn btn-icon" onClick={onClose} style={{ border: 'none', width: '24px', height: '24px' }}><X size={13} /></button>
+        </div>
+        <form onSubmit={handleSubmit} style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {error && <div style={{ color: 'var(--red)', fontSize: '0.8rem' }}>{error}</div>}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+            <label style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>EMAIL PORTAL</label>
+            <input className="input-field" type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+            <label style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>CONTRASEÑA PORTAL</label>
+            <input className="input-field" type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+            <label style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>SCHEDULE ID</label>
+            <input className="input-field" type="text" value={formData.schedule_id} onChange={e => setFormData({...formData, schedule_id: e.target.value})} required />
+          </div>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1 }}>
+              <label style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>FECHA MIN</label>
+              <input className="input-field" type="date" value={formData.min_consulate_date} onChange={e => setFormData({...formData, min_consulate_date: e.target.value})} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1 }}>
+              <label style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>FECHA MAX</label>
+              <input className="input-field" type="date" value={formData.max_consulate_date} onChange={e => setFormData({...formData, max_consulate_date: e.target.value})} />
+            </div>
+          </div>
+          <div style={{ marginTop: '0.5rem' }}>
+            <button type="submit" className="btn btn-lime" style={{ width: '100%' }} disabled={loading}>
+              {loading ? 'GUARDANDO...' : 'CREAR AGENDAMIENTO'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 /* ── MAIN ── */
 const AppointmentsPage = () => {
   const { role } = useOutletContext();
@@ -59,6 +133,7 @@ const AppointmentsPage = () => {
   const [sortF, setSortF] = useState('id');
   const [sortD, setSortD] = useState('desc');
   const [selected, setSelected] = useState(null);
+  const [isCreating, setIsCreating] = useState(false);
 
   const isAdmin = role === 'ADMINISTRATOR' || role === 'AUDITOR';
   const canEdit = role !== 'AUDITOR';
@@ -102,7 +177,7 @@ const AppointmentsPage = () => {
           <button className="btn btn-sm" onClick={load} style={{ gap: '0.4rem' }}>
             <RefreshCw size={11} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />SYNC
           </button>
-          {canEdit && <button className="btn btn-sm btn-lime"><Plus size={11} /> NUEVA</button>}
+          {canEdit && <button className="btn btn-sm btn-lime" onClick={() => setIsCreating(true)}><Plus size={11} /> NUEVA</button>}
         </div>
       </div>
 
@@ -215,6 +290,12 @@ const AppointmentsPage = () => {
       </div>
 
       <Modal apt={selected} onClose={() => setSelected(null)} />
+      {isCreating && (
+        <CreateModal 
+          onClose={() => setIsCreating(false)} 
+          onCreated={() => { setIsCreating(false); load(); }} 
+        />
+      )}
     </div>
   );
 };
