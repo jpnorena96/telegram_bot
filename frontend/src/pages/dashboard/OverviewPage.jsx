@@ -1,114 +1,249 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Users, CalendarCheck, TrendingUp, Clock } from 'lucide-react';
+import { RefreshCw, TrendingUp, Users, CalendarCheck, Clock } from 'lucide-react';
+import { api } from '../../services/api';
 
-const StatCard = ({ title, value, icon: Icon, color, trend }) => (
-  <div className="glass" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-    <div style={{
-      width: '60px',
-      height: '60px',
-      borderRadius: 'var(--radius-md)',
-      background: `var(--${color}-color)`,
-      opacity: 0.1,
-      position: 'absolute'
-    }} />
-    <div style={{
-      width: '60px',
-      height: '60px',
-      borderRadius: 'var(--radius-md)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: `var(--${color}-color)`,
-      zIndex: 1
-    }}>
-      <Icon size={30} />
-    </div>
-    <div style={{ zIndex: 1 }}>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>{title}</p>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-        <h3 style={{ fontSize: '1.75rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{value}</h3>
-        {trend && <span style={{ fontSize: '0.875rem', color: 'var(--success-color)' }}>{trend}</span>}
-      </div>
-    </div>
+/* ── STAT BLOCK ── */
+const Stat = ({ label, value, accent = false, colorClass = '', delta, loading }) => (
+  <div className="stat-block">
+    <div className="stat-label">{label}</div>
+    {loading
+      ? <div className="skeleton" style={{ height: '40px', width: '80px', marginTop: '4px' }} />
+      : <div className={`stat-value ${colorClass}`}>{value}</div>
+    }
+    {delta && !loading && (
+      <div className={`stat-delta ${delta.startsWith('+') ? 'up' : 'down'}`}>{delta}</div>
+    )}
   </div>
 );
 
-const OverviewPage = () => {
-  const { role } = useOutletContext();
+/* ── LOG LINE ── */
+const LogLine = ({ index, type, msg, time }) => {
+  const colors = { ok: 'var(--lime)', err: 'var(--orange)', warn: 'var(--gold)', info: 'var(--cyan)' };
+  const codes   = { ok: 'OK  ', err: 'ERR ', warn: 'WARN', info: 'INFO' };
+  return (
+    <div style={{
+      display: 'flex', gap: '1rem', alignItems: 'flex-start',
+      padding: '0.5rem 0',
+      borderBottom: '1px solid var(--border)',
+      fontFamily: 'var(--font-mono)',
+      fontSize: '0.75rem',
+    }}>
+      <span style={{ color: 'var(--text-3)', minWidth: '24px' }}>
+        {String(index).padStart(3, '0')}
+      </span>
+      <span style={{ color: colors[type] || 'var(--text-2)', minWidth: '36px', fontWeight: 700 }}>
+        [{codes[type] || 'LOG '}]
+      </span>
+      <span style={{ color: 'var(--text-1)', flex: 1 }}>{msg}</span>
+      <span style={{ color: 'var(--text-3)', whiteSpace: 'nowrap' }}>{time}</span>
+    </div>
+  );
+};
 
-  const getStatsForRole = () => {
-    switch (role) {
-      case 'ADMINISTRATOR':
-      case 'AUDITOR':
-        return (
-          <>
-            <StatCard title="Total Usuarios" value="1,248" icon={Users} color="primary" trend="+12% mes" />
-            <StatCard title="Citas Adelantadas" value="5,890" icon={CalendarCheck} color="success" trend="+24% mes" />
-            <StatCard title="Gestores Activos" value="132" icon={TrendingUp} color="warning" />
-            <StatCard title="Citas Pendientes" value="45" icon={Clock} color="danger" />
-          </>
-        );
-      case 'TRAVEL_AGENCY':
-      case 'VISA_MANAGER':
-        return (
-          <>
-            <StatCard title="Mis Clientes" value="48" icon={Users} color="primary" />
-            <StatCard title="Citas Aprobadas (Mes)" value="12" icon={CalendarCheck} color="success" trend="+2 esta sem" />
-            <StatCard title="Citas en Proceso" value="8" icon={Clock} color="warning" />
-          </>
-        );
-      case 'NATURAL_PERSON':
-      default:
-        return (
-          <>
-            <StatCard title="Citas Asignadas" value="1" icon={CalendarCheck} color="primary" />
-            <StatCard title="Días Ahorrados" value="145" icon={TrendingUp} color="success" />
-            <StatCard title="Estado de Trámite" value="En Proceso" icon={Clock} color="warning" />
-          </>
-        );
-    }
-  };
+/* ── TIMELINE ── */
+const Steps = ['SOLICITUD', 'VERIFICACIÓN', 'BUSCANDO', 'CONFIRMADA'];
+const Timeline = ({ current }) => (
+  <div style={{ display: 'flex', gap: 0 }}>
+    {Steps.map((s, i) => {
+      const done   = i < current;
+      const active = i === current;
+      return (
+        <div key={s} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {/* connector */}
+          <div style={{ width: '100%', height: '2px', background: done ? 'var(--lime)' : 'var(--border-2)', position: 'relative' }}>
+            <div style={{
+              position: 'absolute', top: '50%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '10px', height: '10px',
+              background: done ? 'var(--lime)' : active ? 'var(--black)' : 'var(--black-4)',
+              border: `2px solid ${done ? 'var(--lime)' : active ? 'var(--lime)' : 'var(--border-2)'}`,
+              zIndex: 1,
+            }} />
+          </div>
+          <div style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.58rem',
+            letterSpacing: '0.08em',
+            color: done ? 'var(--lime)' : active ? 'var(--text-1)' : 'var(--text-3)',
+            marginTop: '0.5rem',
+            fontWeight: active || done ? 700 : 400,
+            textAlign: 'center',
+          }}>
+            {s}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+);
+
+/* ── MAIN ── */
+const OverviewPage = () => {
+  const { role, userName } = useOutletContext();
+  const [apts, setApts] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const isAdmin = role === 'ADMINISTRATOR' || role === 'AUDITOR';
+  const isMgr   = role === 'VISA_MANAGER'  || role === 'TRAVEL_AGENCY';
+
+  const fetch = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [a, u] = await Promise.all([
+        api.getAppointments(),
+        isAdmin ? api.getUsers() : Promise.resolve([]),
+      ]);
+      setApts(a); setUsers(u);
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  }, [isAdmin]);
+
+  useEffect(() => { fetch(); }, [fetch]);
+
+  const total     = apts.length;
+  const adelant   = apts.filter(a => a.status === 'Adelantada').length;
+  const buscando  = apts.filter(a => a.status === 'Buscando').length;
+  const totalU    = users.length;
+  const activeU   = users.filter(u => u.status === 'Activo').length;
+
+  const myApt     = apts[0];
+  const step      = myApt?.status === 'Adelantada' ? 3 : 2;
+
+  const logs = [
+    { type: 'ok',   msg: 'Conexión con API establecida',               time: '17:00' },
+    { type: 'ok',   msg: `Sesión iniciada — ${userName}`,              time: '17:01' },
+    { type: 'info', msg: `${total} citas cargadas desde DB`,           time: '17:01' },
+    { type: isAdmin ? 'info' : 'ok', msg: isAdmin ? `${totalU} usuarios en sistema` : 'Bot de búsqueda activo 24/7', time: '17:01' },
+    { type: buscando > 0 ? 'warn' : 'ok', msg: `${buscando} citas en estado BUSCANDO`, time: '17:02' },
+  ];
 
   return (
-    <div className="animate-fade-in">
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
-          Resumen General
-        </h1>
-        <p style={{ color: 'var(--text-secondary)' }}>
-          Bienvenido a tu panel de control {role.replace('_', ' ')}
-        </p>
-      </div>
+    <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: '1.5rem',
-        marginBottom: '2rem'
-      }}>
-        {getStatsForRole()}
-      </div>
-
-      <div className="glass" style={{ padding: '2rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem', color: 'var(--text-primary)' }}>
-          Actividad Reciente
-        </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {[1, 2, 3].map((i) => (
-            <div key={i} style={{
-              padding: '1rem',
-              borderLeft: '4px solid var(--primary-light)',
-              background: 'var(--surface-color)',
-              borderRadius: '0 var(--radius-md) var(--radius-md) 0',
-              boxShadow: 'var(--shadow-sm)'
-            }}>
-              <p style={{ fontWeight: 600, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>Actualización de Cita B1/B2</p>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>La cita programada previamente para Oct 2026 ha sido adelantada a Ago 2026.</p>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginTop: '0.5rem' }}>Hace 2 horas</span>
-            </div>
-          ))}
+      {/* ── TOP ROW: section label + refresh ── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-3)', letterSpacing: '0.12em' }}>
+          MÓDULO: DASHBOARD &nbsp;·&nbsp; ROL: {role}
         </div>
+        <button className="btn btn-sm btn-outline" onClick={fetch} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <RefreshCw size={11} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
+          REFRESH
+        </button>
+      </div>
+
+      {/* ── STATS GRID ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1px', background: 'var(--border)' }}>
+        {isAdmin ? (
+          <>
+            <Stat label="USUARIOS_TOTAL"   value={loading ? '—' : totalU}    colorClass="normal"  delta={`+12% MES`} loading={loading} />
+            <Stat label="CITAS_SISTEMA"    value={loading ? '—' : total}     colorClass=""        loading={loading} />
+            <Stat label="CITAS_ADELANT"    value={loading ? '—' : adelant}   colorClass=""        delta={`+${adelant} SEMANA`} loading={loading} />
+            <Stat label="EN_BÚSQUEDA"      value={loading ? '—' : buscando}  colorClass="warning" loading={loading} />
+            <Stat label="USUARIOS_ACTIVOS" value={loading ? '—' : activeU}   colorClass="normal"  loading={loading} />
+          </>
+        ) : isMgr ? (
+          <>
+            <Stat label="CLIENTES"         value={loading ? '—' : total}     colorClass=""        loading={loading} />
+            <Stat label="CITAS_ADELANT"    value={loading ? '—' : adelant}   colorClass=""        loading={loading} />
+            <Stat label="EN_BÚSQUEDA"      value={loading ? '—' : buscando}  colorClass="warning" loading={loading} />
+          </>
+        ) : (
+          <>
+            <Stat label="CITAS_ASIGNADAS"  value={loading ? '—' : total}     colorClass=""        loading={loading} />
+            <Stat label="ESTADO_ACTUAL"    value={loading ? '—' : (myApt?.status || 'N/A')} colorClass={myApt?.status === 'Adelantada' ? '' : 'warning'} loading={loading} />
+            <Stat label="BOT_UPTIME"       value="∞"                          colorClass="normal"  delta="ONLINE 24/7" loading={false} />
+          </>
+        )}
+      </div>
+
+      {/* ── MAIN CONTENT ROW ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: isAdmin ? '1fr 1fr' : '1fr', gap: '1.25rem' }}>
+
+        {/* System log */}
+        <div className="panel">
+          <div className="panel-header">
+            <span className="panel-title">SYSTEM_LOG</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--text-3)' }}>
+              {new Date().toLocaleDateString('es-CO')}
+            </span>
+          </div>
+          <div className="panel-body" style={{ padding: '0 1.25rem' }}>
+            {loading
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} style={{ padding: '0.5rem 0', borderBottom: '1px solid var(--border)', display: 'flex', gap: '1rem' }}>
+                    <div className="skeleton" style={{ width: '30px', height: '12px' }} />
+                    <div className="skeleton" style={{ flex: 1, height: '12px' }} />
+                  </div>
+                ))
+              : logs.map((l, i) => <LogLine key={i} index={i + 1} {...l} />)
+            }
+          </div>
+        </div>
+
+        {/* Admin: distribution / Client: status timeline */}
+        {isAdmin ? (
+          <div className="panel">
+            <div className="panel-header">
+              <span className="panel-title">DISTRIBUCIÓN_CITAS</span>
+            </div>
+            <div className="panel-body">
+              {loading ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} style={{ marginBottom: '1rem' }}>
+                    <div className="skeleton" style={{ height: '11px', width: '60%', marginBottom: '6px' }} />
+                    <div className="skeleton" style={{ height: '4px' }} />
+                  </div>
+                ))
+              ) : [
+                { label: 'ADELANTADAS', val: adelant, max: total, color: 'var(--lime)' },
+                { label: 'BUSCANDO',    val: buscando, max: total, color: 'var(--gold)' },
+                { label: 'ACT/TOTAL',   val: activeU,  max: totalU, color: 'var(--cyan)' },
+              ].map(r => (
+                <div key={r.label} style={{ marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-2)', letterSpacing: '0.08em' }}>{r.label}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-1)', fontWeight: 700 }}>
+                      {r.val}/{r.max}
+                    </span>
+                  </div>
+                  <div className="progress">
+                    <div className="progress-fill" style={{ width: `${r.max ? Math.round((r.val / r.max) * 100) : 0}%`, background: r.color }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="panel">
+            <div className="panel-header">
+              <span className="panel-title">ESTADO_TRÁMITE</span>
+              {myApt && <span className="tag tag-lime">{myApt.status || 'BUSCANDO'}</span>}
+            </div>
+            <div className="panel-body">
+              <Timeline current={step} />
+              {myApt && (
+                <div style={{
+                  marginTop: '1.5rem',
+                  padding: '1rem',
+                  background: 'var(--lime-subtle)',
+                  border: '1px solid var(--lime-dim)',
+                }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--text-3)', letterSpacing: '0.1em', marginBottom: '4px' }}>
+                    FECHA_OBJETIVO
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--lime)' }}>
+                    {myApt.originalDate || 'POR_ASIGNAR'}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-2)', marginTop: '6px' }}>
+                    BOT ACTIVO · MONITOREO CONTINUO
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

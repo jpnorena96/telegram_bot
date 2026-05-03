@@ -1,159 +1,210 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Users, UserPlus, Search, Filter } from 'lucide-react';
+import { Search, RefreshCw, UserPlus, X, ChevronUp, ChevronDown, ShieldOff } from 'lucide-react';
 import { api } from '../../services/api';
+
+const ROLE_TAG = {
+  ADMINISTRATOR: { cls: 'tag-orange', short: 'ADM' },
+  AUDITOR:       { cls: 'tag-gold',   short: 'AUD' },
+  VISA_MANAGER:  { cls: 'tag-cyan',   short: 'MGR' },
+  TRAVEL_AGENCY: { cls: 'tag-cyan',   short: 'AGC' },
+  NATURAL_PERSON:{ cls: 'tag-lime',   short: 'CLI' },
+};
 
 const UsersPage = () => {
   const { role } = useOutletContext();
   const [users, setUsers] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [filtered, setFiltered] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [roleF, setRoleF] = useState('ALL');
+  const [statusF, setStatusF] = useState('ALL');
+  const [sortF, setSortF] = useState('id');
+  const [sortD, setSortD] = useState('desc');
 
-  useEffect(() => {
-    if (role === 'ADMINISTRATOR' || role === 'AUDITOR') {
-      const fetchUsers = async () => {
-        try {
-          const data = await api.getUsers();
-          setUsers(data);
-        } catch (err) {
-          console.error("Failed to load users:", err);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchUsers();
-    } else {
-      setIsLoading(false);
-    }
-  }, [role]);
-  
+  const isAdmin = role === 'ADMINISTRATOR';
+
   if (role !== 'ADMINISTRATOR' && role !== 'AUDITOR') {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-center animate-fade-in" style={{ padding: '4rem 2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--danger-color)', marginBottom: '1rem' }}>
-          Acceso Denegado
-        </h2>
-        <p style={{ color: 'var(--text-secondary)' }}>No tienes permisos para ver esta sección.</p>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '6rem 2rem', textAlign: 'center', gap: '1rem' }}>
+        <ShieldOff size={40} style={{ color: 'var(--orange)' }} />
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--orange)', letterSpacing: '0.1em' }}>
+          ACCESO_DENEGADO: PRIVILEGIOS_INSUFICIENTES
+        </div>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-3)' }}>
+          Esta sección requiere rol ADMINISTRATOR o AUDITOR
+        </div>
       </div>
     );
   }
 
+  const load = useCallback(async () => {
+    setLoading(true);
+    try { setUsers(await api.getUsers()); }
+    catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    let r = [...users];
+    if (search) { const q = search.toLowerCase(); r = r.filter(u => u.name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q)); }
+    if (roleF !== 'ALL') r = r.filter(u => u.role === roleF);
+    if (statusF !== 'ALL') r = r.filter(u => u.status === statusF);
+    r.sort((a, b) => sortD === 'asc' ? String(a[sortF] ?? '').localeCompare(String(b[sortF] ?? '')) : String(b[sortF] ?? '').localeCompare(String(a[sortF] ?? '')));
+    setFiltered(r);
+  }, [users, search, roleF, statusF, sortF, sortD]);
+
+  const toggleSort = f => { if (sortF === f) setSortD(d => d === 'asc' ? 'desc' : 'asc'); else { setSortF(f); setSortD('asc'); } };
+  const SortIco = ({ f }) => sortF === f ? (sortD === 'asc' ? <ChevronUp size={10} /> : <ChevronDown size={10} />) : null;
+
+  const roles = ['ALL', ...new Set(users.map(u => u.role).filter(Boolean))];
+  const total = users.length;
+  const active = users.filter(u => u.status === 'Activo').length;
+  const pending = users.filter(u => u.status === 'Pendiente').length;
+
   return (
-    <div className="animate-fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+    <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+
+      {/* ── HEADER ── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
-            Gestión de Usuarios
-          </h1>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            Administra los usuarios del sistema y sus roles.
-          </p>
-        </div>
-        
-        {role === 'ADMINISTRATOR' && (
-          <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <UserPlus size={20} />
-            Nuevo Usuario
-          </button>
-        )}
-      </div>
-
-      <div className="glass" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '300px', position: 'relative' }}>
-            <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-            <input 
-              type="text" 
-              placeholder="Buscar por nombre o correo..." 
-              className="input-field"
-              style={{ paddingLeft: '3rem' }}
-            />
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-3)', letterSpacing: '0.1em', marginBottom: '4px' }}>
+            MÓDULO: ADMIN_USUARIOS
           </div>
-          <button className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Filter size={20} /> Por Rol
+          <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-1)' }}>
+            {filtered.length} <span style={{ color: 'var(--text-3)' }}>/ {total} USUARIOS</span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className="btn btn-sm" onClick={load} style={{ gap: '0.4rem' }}>
+            <RefreshCw size={11} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />SYNC
           </button>
+          {isAdmin && <button className="btn btn-sm btn-lime"><UserPlus size={11} /> NUEVO</button>}
         </div>
       </div>
 
-      <div className="glass" style={{ overflow: 'x-auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ background: 'rgba(59, 130, 246, 0.05)', borderBottom: '1px solid var(--border-color, #e2e8f0)' }}>
-              <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Usuario</th>
-              <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Rol</th>
-              <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Estado</th>
-              {role === 'ADMINISTRATOR' && <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Acciones</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-               <tr><td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Cargando usuarios...</td></tr>
-            ) : users.length === 0 ? (
-               <tr><td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No se encontraron usuarios.</td></tr>
-            ) : users.map((u) => (
-              <tr key={u.id} style={{ borderBottom: '1px solid var(--border-color, #e2e8f0)', transition: 'background var(--transition-fast)' }}>
-                <td style={{ padding: '1rem 1.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '50%',
-                      background: 'rgba(59, 130, 246, 0.1)',
-                      color: 'var(--primary-color)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <Users size={20} />
-                    </div>
-                    <div>
-                      <p style={{ fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{u.name}</p>
-                      <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0 }}>{u.email}</p>
-                    </div>
-                  </div>
-                </td>
-                <td style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>
-                  <span style={{
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: 'var(--radius-full)',
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    border: '1px solid var(--border-color)'
-                  }}>
-                    {u.role}
-                  </span>
-                </td>
-                <td style={{ padding: '1rem 1.5rem' }}>
-                  <span style={{
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: 'var(--radius-full)',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    background: u.status === 'Activo' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                    color: u.status === 'Activo' ? 'var(--success-color)' : 'var(--danger-color)'
-                  }}>
-                    {u.status}
-                  </span>
-                </td>
-                {role === 'ADMINISTRATOR' && (
-                  <td style={{ padding: '1rem 1.5rem' }}>
-                    <button style={{
-                      padding: '0.5rem 1rem',
-                      background: 'transparent',
-                      color: 'var(--primary-color)',
-                      border: '1px solid var(--primary-color)',
-                      borderRadius: 'var(--radius-md)',
-                      cursor: 'pointer',
-                      fontSize: '0.875rem',
-                      fontWeight: 500
-                    }}>
-                      Editar
-                    </button>
-                  </td>
-                )}
+      {/* ── MINI STATS ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1px', background: 'var(--border)' }}>
+        {[
+          { label: 'TOTAL_USUARIOS', val: total,   cls: 'normal' },
+          { label: 'USUARIOS_ACTIVOS', val: active,  cls: '' },
+          { label: 'PENDIENTES_APROB', val: pending, cls: 'warning' },
+        ].map(s => (
+          <div key={s.label} className="stat-block" style={{ borderTopWidth: '2px', borderTopColor: 'var(--border-2)' }}>
+            <div className="stat-label">{s.label}</div>
+            <div className={`stat-value ${s.cls}`} style={{ fontSize: '1.5rem' }}>{loading ? '—' : s.val}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── FILTERS ── */}
+      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center', padding: '0.875rem', background: 'var(--black-3)', border: '1px solid var(--border)' }}>
+        <div style={{ flex: 1, minWidth: '200px', position: 'relative' }}>
+          <Search size={13} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
+          <input
+            type="text" placeholder="BUSCAR: nombre / email..."
+            className="input-field"
+            style={{ paddingLeft: '2.25rem', height: '36px', fontSize: '0.78rem' }}
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          {search && <button onClick={() => setSearch('')} className="btn btn-icon" style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '20px', border: 'none' }}><X size={11} /></button>}
+        </div>
+        <div style={{ display: 'flex', gap: '0', border: '1px solid var(--border)' }}>
+          {['ALL', 'Activo', 'Pendiente'].map(s => (
+            <button key={s} onClick={() => setStatusF(s)} className="btn btn-sm" style={{ border: 'none', borderRight: '1px solid var(--border)', background: statusF === s ? 'var(--lime)' : 'transparent', color: statusF === s ? 'var(--black)' : 'var(--text-3)', fontWeight: statusF === s ? 700 : 400 }}>
+              {s === 'ALL' ? 'TODO' : s.toUpperCase()}
+            </button>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: '0', border: '1px solid var(--border)' }}>
+          {roles.map(r => (
+            <button key={r} onClick={() => setRoleF(r)} className="btn btn-sm" style={{ border: 'none', borderRight: '1px solid var(--border)', background: roleF === r ? 'var(--black-5)' : 'transparent', color: roleF === r ? 'var(--lime)' : 'var(--text-3)', fontWeight: roleF === r ? 700 : 400 }}>
+              {r === 'ALL' ? 'ALL' : (ROLE_TAG[r]?.short || r)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── TABLE ── */}
+      <div style={{ background: 'var(--black-2)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th onClick={() => toggleSort('id')} style={{ cursor: 'pointer' }}>ID <SortIco f="id" /></th>
+                <th onClick={() => toggleSort('name')} style={{ cursor: 'pointer' }}>OPERADOR <SortIco f="name" /></th>
+                <th>ROL</th>
+                <th>ESTADO</th>
+                {isAdmin && <th>OPS</th>}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {loading
+                ? Array.from({ length: 7 }).map((_, i) => (
+                    <tr key={i}>
+                      {[40, 180, 70, 70, isAdmin && 80].filter(Boolean).map((w, j) => (
+                        <td key={j}><div className="skeleton" style={{ height: '13px', width: `${w}px` }} /></td>
+                      ))}
+                    </tr>
+                  ))
+                : filtered.length === 0
+                  ? (
+                    <tr>
+                      <td colSpan={isAdmin ? 5 : 4} style={{ textAlign: 'center', padding: '3rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-3)' }}>
+                        &gt; NO_RECORDS_FOUND
+                      </td>
+                    </tr>
+                  )
+                  : filtered.map(u => {
+                    const rt = ROLE_TAG[u.role] || { cls: 'tag-cyan', short: '???' };
+                    const isActive = u.status === 'Activo';
+                    return (
+                      <tr key={u.id}>
+                        <td className="mono" style={{ color: 'var(--text-3)', fontSize: '0.72rem' }}>#{String(u.id).padStart(4, '0')}</td>
+                        <td>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{u.name}</span>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-3)' }}>{u.email}</span>
+                          </div>
+                        </td>
+                        <td><span className={`tag ${rt.cls}`}>{rt.short}</span></td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div className={`status-dot${isActive ? ' pulse' : ''} ${isActive ? '' : 'warning'}`} />
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: isActive ? 'var(--green)' : 'var(--gold)', fontWeight: 700 }}>
+                              {isActive ? 'ACTIVO' : 'PENDIENTE'}
+                            </span>
+                          </div>
+                        </td>
+                        {isAdmin && (
+                          <td>
+                            <div style={{ display: 'flex', gap: '0.4rem' }}>
+                              <button className="btn btn-sm">EDITAR</button>
+                              {!isActive && <button className="btn btn-sm btn-outline">APROBAR</button>}
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })
+              }
+            </tbody>
+          </table>
+        </div>
+        {!loading && filtered.length > 0 && (
+          <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--text-3)' }}>
+              {filtered.length} RECORDS · SORTED BY {sortF.toUpperCase()}
+            </span>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <span className="tag tag-lime">{active} ACTIVOS</span>
+              <span className="tag tag-gold">{pending} PENDIENTES</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

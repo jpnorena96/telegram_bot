@@ -1,135 +1,220 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Search, Filter, CalendarDays, Plus, CalendarIcon } from 'lucide-react';
+import { Search, RefreshCw, Plus, X, ChevronUp, ChevronDown, Eye } from 'lucide-react';
 import { api } from '../../services/api';
 
+const STATUS_MAP = {
+  'Adelantada': { tag: 'tag-lime',   label: 'ADELANTADA' },
+  'Buscando':   { tag: 'tag-gold',   label: 'BUSCANDO'   },
+  'Pendiente':  { tag: 'tag-cyan',   label: 'PENDIENTE'  },
+};
+const getTag = s => STATUS_MAP[s] || { tag: 'tag-cyan', label: s?.toUpperCase() || '—' };
+
+/* ── MODAL ── */
+const Modal = ({ apt, onClose }) => {
+  if (!apt) return null;
+  const { tag, label } = getTag(apt.status);
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+      <div onClick={e => e.stopPropagation()} className="animate-in" style={{ width: '100%', maxWidth: '480px', background: 'var(--black-2)', border: '1px solid var(--border-2)' }}>
+        {/* header */}
+        <div style={{ padding: '0.875rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--black-3)' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--lime)' }}>CITA #{apt.id}</span>
+          <button className="btn btn-icon" onClick={onClose} style={{ border: 'none', width: '24px', height: '24px' }}><X size={13} /></button>
+        </div>
+        {/* body */}
+        <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0' }}>
+          {[
+            ['CLIENTE',        apt.client],
+            ['TIPO_VISA',      apt.type],
+            ['FECHA_OBJETIVO',  apt.originalDate || '—'],
+            ['FECHA_ADELANTO',  apt.newDate || '—'],
+          ].map(([k, v]) => (
+            <div key={k} style={{ display: 'flex', borderBottom: '1px solid var(--border)', padding: '0.625rem 0' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.1em', minWidth: '140px' }}>{k}</div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem', color: 'var(--text-1)' }}>{v}</div>
+            </div>
+          ))}
+          <div style={{ display: 'flex', padding: '0.625rem 0' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.1em', minWidth: '140px' }}>ESTADO</div>
+            <span className={`tag ${tag}`}>{label}</span>
+          </div>
+        </div>
+        <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--border)' }}>
+          <button className="btn btn-lime" style={{ width: '100%' }} onClick={onClose}>CERRAR</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ── MAIN ── */
 const AppointmentsPage = () => {
   const { role } = useOutletContext();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [appointments, setAppointments] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [apts, setApts] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [statusF, setStatusF] = useState('ALL');
+  const [sortF, setSortF] = useState('id');
+  const [sortD, setSortD] = useState('desc');
+  const [selected, setSelected] = useState(null);
 
-  const canManageAll = role === 'ADMINISTRATOR' || role === 'AUDITOR';
+  const isAdmin = role === 'ADMINISTRATOR' || role === 'AUDITOR';
+  const canEdit = role !== 'AUDITOR';
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try { setApts(await api.getAppointments()); }
+    catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const data = await api.getAppointments();
-        setAppointments(data);
-      } catch (err) {
-        console.error("Failed to load appointments:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchAppointments();
-  }, [role]);
+    let r = [...apts];
+    if (search) { const q = search.toLowerCase(); r = r.filter(a => a.client?.toLowerCase().includes(q) || a.type?.toLowerCase().includes(q) || String(a.id).includes(q)); }
+    if (statusF !== 'ALL') r = r.filter(a => a.status === statusF);
+    r.sort((a, b) => sortD === 'asc' ? String(a[sortF] ?? '').localeCompare(String(b[sortF] ?? '')) : String(b[sortF] ?? '').localeCompare(String(a[sortF] ?? '')));
+    setFiltered(r);
+  }, [apts, search, statusF, sortF, sortD]);
+
+  const toggleSort = f => { if (sortF === f) setSortD(d => d === 'asc' ? 'desc' : 'asc'); else { setSortF(f); setSortD('asc'); } };
+  const SortIco = ({ f }) => sortF === f ? (sortD === 'asc' ? <ChevronUp size={10} /> : <ChevronDown size={10} />) : null;
+
+  const statuses = ['ALL', ...new Set(apts.map(a => a.status).filter(Boolean))];
 
   return (
-    <div className="animate-fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+    <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+
+      {/* ── HEADER ── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
-            Gestión de Citas
-          </h1>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            Supervisa y gestiona el adelanto de citas consulares.
-          </p>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-3)', letterSpacing: '0.1em', marginBottom: '4px' }}>
+            MÓDULO: GESTIÓN_DE_CITAS
+          </div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-1)' }}>
+            {filtered.length} <span style={{ color: 'var(--text-3)' }}>/ {apts.length} REGISTROS</span>
+          </div>
         </div>
-        
-        {role !== 'AUDITOR' && (
-          <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Plus size={20} />
-            Nueva Solicitud
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className="btn btn-sm" onClick={load} style={{ gap: '0.4rem' }}>
+            <RefreshCw size={11} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />SYNC
           </button>
+          {canEdit && <button className="btn btn-sm btn-lime"><Plus size={11} /> NUEVA</button>}
+        </div>
+      </div>
+
+      {/* ── FILTERS ── */}
+      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center', padding: '0.875rem', background: 'var(--black-3)', border: '1px solid var(--border)' }}>
+        <div style={{ flex: 1, minWidth: '200px', position: 'relative' }}>
+          <Search size={13} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
+          <input
+            type="text"
+            placeholder="BUSCAR: cliente / tipo / ID..."
+            className="input-field"
+            style={{ paddingLeft: '2.25rem', height: '36px', fontSize: '0.78rem' }}
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          {search && (
+            <button onClick={() => setSearch('')} className="btn btn-icon" style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '20px', border: 'none' }}>
+              <X size={11} />
+            </button>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: '0', border: '1px solid var(--border)' }}>
+          {statuses.map(s => (
+            <button key={s} onClick={() => setStatusF(s)} className="btn btn-sm" style={{
+              border: 'none', borderRight: '1px solid var(--border)',
+              background: statusF === s ? 'var(--lime)' : 'transparent',
+              color: statusF === s ? 'var(--black)' : 'var(--text-3)',
+              fontWeight: statusF === s ? 700 : 400,
+            }}>
+              {s === 'ALL' ? 'TODO' : s.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── TABLE ── */}
+      <div style={{ background: 'var(--black-2)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                {isAdmin && <th onClick={() => toggleSort('id')} style={{ cursor: 'pointer' }}>ID <SortIco f="id" /></th>}
+                <th onClick={() => toggleSort('client')} style={{ cursor: 'pointer' }}>CLIENTE <SortIco f="client" /></th>
+                <th>TIPO_VISA</th>
+                <th onClick={() => toggleSort('originalDate')} style={{ cursor: 'pointer' }}>FECHA_OBJ <SortIco f="originalDate" /></th>
+                <th>ESTADO</th>
+                {canEdit && <th>OPS</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {loading
+                ? Array.from({ length: 6 }).map((_, i) => (
+                    <tr key={i}>
+                      {[isAdmin && 1, 1, 1, 1, 1, canEdit && 1].filter(Boolean).map((__, j) => (
+                        <td key={j}><div className="skeleton" style={{ height: '13px', width: `${50 + Math.random() * 40}%` }} /></td>
+                      ))}
+                    </tr>
+                  ))
+                : filtered.length === 0
+                  ? (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-3)' }}>
+                        &gt; NO_RECORDS_FOUND
+                      </td>
+                    </tr>
+                  )
+                  : filtered.map(apt => {
+                    const { tag, label } = getTag(apt.status);
+                    return (
+                      <tr key={apt.id}>
+                        {isAdmin && (
+                          <td className="mono" style={{ color: 'var(--text-3)', fontSize: '0.72rem' }}>#{String(apt.id).padStart(4, '0')}</td>
+                        )}
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ width: '6px', height: '6px', background: 'var(--lime)', flexShrink: 0 }} />
+                            <span style={{ fontWeight: 600 }}>{apt.client}</span>
+                          </div>
+                        </td>
+                        <td className="mono" style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>{apt.type}</td>
+                        <td className="mono" style={{ fontSize: '0.78rem', color: 'var(--text-2)' }}>{apt.originalDate || '—'}</td>
+                        <td><span className={`tag ${tag}`}>{label}</span></td>
+                        {canEdit && (
+                          <td>
+                            <button className="btn btn-sm" onClick={() => setSelected(apt)} style={{ gap: '0.3rem' }}>
+                              <Eye size={11} /> VER
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })
+              }
+            </tbody>
+          </table>
+        </div>
+
+        {/* footer */}
+        {!loading && filtered.length > 0 && (
+          <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--text-3)' }}>
+              {filtered.length} RECORDS · SORTED BY {sortF.toUpperCase()} {sortD.toUpperCase()}
+            </span>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <span className="tag tag-lime">{apts.filter(a => a.status === 'Adelantada').length} ADELANT</span>
+              <span className="tag tag-gold">{apts.filter(a => a.status === 'Buscando').length} BUSCANDO</span>
+            </div>
+          </div>
         )}
       </div>
 
-      <div className="glass" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '300px', position: 'relative' }}>
-            <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-            <input 
-              type="text" 
-              placeholder="Buscar por cliente o tipo de visa..." 
-              className="input-field"
-              style={{ paddingLeft: '3rem' }}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <button className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Filter size={20} /> Filtros
-          </button>
-        </div>
-      </div>
-
-      <div className="glass" style={{ overflow: 'x-auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ background: 'rgba(59, 130, 246, 0.05)', borderBottom: '1px solid var(--border-color, #e2e8f0)' }}>
-              {canManageAll && <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ID Sistema</th>}
-              <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Cliente</th>
-              <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Tipo Visa</th>
-              <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Cita Original</th>
-              <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Cita Adelantada</th>
-              <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Estado</th>
-              {role !== 'AUDITOR' && <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Acciones</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-               <tr><td colSpan={canManageAll && role !== 'AUDITOR' ? "7" : "6"} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Cargando citas...</td></tr>
-            ) : appointments.length === 0 ? (
-               <tr><td colSpan={canManageAll && role !== 'AUDITOR' ? "7" : "6"} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No hay citas registradas.</td></tr>
-            ) : appointments.map((apt) => (
-              <tr key={apt.id} style={{ borderBottom: '1px solid var(--border-color, #e2e8f0)', transition: 'background var(--transition-fast)' }} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                {canManageAll && <td style={{ padding: '1rem 1.5rem', color: 'var(--text-primary)' }}>#{apt.id}</td>}
-                <td style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--text-primary)' }}>{apt.client}</td>
-                <td style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>{apt.type}</td>
-                <td style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <CalendarIcon size={16} /> {apt.originalDate}
-                  </div>
-                </td>
-                <td style={{ padding: '1rem 1.5rem', fontWeight: 600, color: apt.status === 'Adelantada' ? 'var(--success-color)' : 'var(--warning-color)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <CalendarDays size={16} /> {apt.newDate}
-                  </div>
-                </td>
-                <td style={{ padding: '1rem 1.5rem' }}>
-                  <span style={{
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: 'var(--radius-full)',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    background: apt.status === 'Adelantada' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                    color: apt.status === 'Adelantada' ? 'var(--success-color)' : 'var(--warning-color)'
-                  }}>
-                    {apt.status}
-                  </span>
-                </td>
-                {role !== 'AUDITOR' && (
-                  <td style={{ padding: '1rem 1.5rem' }}>
-                    <button style={{
-                      padding: '0.5rem 1rem',
-                      background: 'var(--primary-light)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: 'var(--radius-md)',
-                      cursor: 'pointer',
-                      fontSize: '0.875rem',
-                      fontWeight: 500
-                    }}>
-                      Gestionar
-                    </button>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Modal apt={selected} onClose={() => setSelected(null)} />
     </div>
   );
 };

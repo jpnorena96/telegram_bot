@@ -1,132 +1,131 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { LogIn, Plane, Mail, Lock } from 'lucide-react';
 import { api } from '../services/api';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [isLoading, setIsLoading] = useState(false);
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    
+    setLoading(true);
+    setError('');
     try {
-      const { access_token, role, user_name } = await api.login(formData.email, formData.password);
+      const { access_token, role, user_name } = await api.login(form.email, form.password);
       localStorage.setItem('token', access_token);
       localStorage.setItem('userRole', role);
       localStorage.setItem('userName', user_name);
       navigate('/dashboard');
     } catch (err) {
-      alert(err.message || 'Error al iniciar sesión');
+      setError(err.message || 'ERROR_AUTH: Credenciales inválidas');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen" style={{ padding: '2rem' }}>
-      <div 
-        className="glass animate-fade-in" 
-        style={{ 
-          width: '100%', 
-          maxWidth: '450px', 
-          padding: '3rem 2.5rem',
-          position: 'relative',
-          overflow: 'hidden'
-        }}
-      >
-        {/* Decorative background glow */}
-        <div style={{
-          position: 'absolute',
-          top: '-50px',
-          right: '-50px',
-          width: '150px',
-          height: '150px',
-          background: 'var(--primary-light)',
-          filter: 'blur(80px)',
-          opacity: 0.2,
-          zIndex: -1
-        }} />
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex' }}>
+      {/* ── LEFT: Graphic panel ── */}
+      <div style={{ width: '45%', borderRight: '4px solid var(--black)', padding: '4rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'var(--black)', color: 'var(--bg)' }}>
+        
+        <div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--lime)', marginBottom: '4rem' }}>
+            GLOBALVISAS ///
+          </div>
 
-        <div className="text-center mb-8">
-          <Link to="/" style={{ display: 'inline-block', marginBottom: '1.5rem' }}>
-             <div style={{
-              background: 'linear-gradient(135deg, var(--primary-light), var(--primary-color))',
-              padding: '0.75rem',
-              borderRadius: 'var(--radius-md)',
-              color: 'white',
-              display: 'inline-block'
-            }}>
-              <Plane size={32} />
-            </div>
-          </Link>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
-            Bienvenido de nuevo
-          </h1>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            Ingresa a tu portal de gestión de visas
-          </p>
+          <div style={{ fontSize: '10rem', fontWeight: 900, lineHeight: 0.8, letterSpacing: '-0.05em', color: 'var(--bg)', marginBottom: '2rem' }}>
+            GV
+          </div>
+
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.02em' }}>
+            ACCESO RESTRINGIDO
+          </div>
+          <div style={{ fontSize: '1rem', color: 'var(--text-3)', lineHeight: 1.6, maxWidth: '360px', fontWeight: 500 }}>
+            Plataforma estructural de monitoreo y gestión consular. Exclusivo para operadores registrados.
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <label className="input-label" htmlFor="email">Correo Electrónico</label>
-            <div style={{ position: 'relative' }}>
-              <Mail size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-              <input 
-                id="email"
-                type="email" 
-                className="input-field" 
-                placeholder="ejemplo@correo.com"
-                style={{ paddingLeft: '3rem' }}
-                value={formData.email}
-                onChange={e => setFormData({...formData, email: e.target.value})}
-                required
-              />
-            </div>
-            <p style={{fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem'}}>
-              Tip: Usa admin@ para probar rol Administrador
-            </p>
+        <div style={{ borderTop: '2px solid var(--text-3)', paddingTop: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+            {[
+              { label: 'UPTIME',  val: '99.9%' },
+              { label: 'BOT',     val: 'ONLINE' },
+              { label: 'API',     val: 'v2.0' },
+            ].map(s => (
+              <div key={s.label}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-3)', fontWeight: 700 }}>{s.label}</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--lime)' }}>{s.val}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── RIGHT: Login form ── */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem' }}>
+        <div style={{ width: '100%', maxWidth: '460px' }}>
+
+          <div style={{ marginBottom: '3rem' }}>
+            <h2 style={{ fontSize: '3rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '0.5rem' }}>IDENTIFICACIÓN</h2>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--lime)', fontWeight: 700 }}>INGRESE CREDENCIALES</div>
           </div>
 
-          <div className="input-group" style={{ marginBottom: '2rem' }}>
-            <div className="flex justify-between items-center" style={{ marginBottom: '0.5rem' }}>
-               <label className="input-label" style={{ marginBottom: 0 }} htmlFor="password">Contraseña</label>
-               <a href="#" style={{ fontSize: '0.875rem' }}>¿Olvidaste tu contraseña?</a>
-            </div>
-            <div style={{ position: 'relative' }}>
-              <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-              <input 
-                id="password"
-                type="password" 
-                className="input-field" 
-                placeholder="••••••••"
-                style={{ paddingLeft: '3rem' }}
-                value={formData.password}
-                onChange={e => setFormData({...formData, password: e.target.value})}
+          <form onSubmit={submit}>
+            {/* Email */}
+            <div className="input-group">
+              <label className="input-label">EMAIL_ADDRESS</label>
+              <input
+                id="login-email"
+                type="email"
+                className="input-field"
+                placeholder="usuario@dominio.com"
+                value={form.email}
+                onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                 required
+                autoComplete="email"
               />
             </div>
-          </div>
 
-          <button 
-            type="submit" 
-            className="btn btn-primary w-full"
-            disabled={isLoading}
-            style={{ padding: '0.875rem', fontSize: '1rem', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}
-          >
-            {isLoading ? (
-              <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⟳</span>
-            ) : (
-              <><LogIn size={20} /> Iniciar Sesión</>
+            {/* Password */}
+            <div className="input-group" style={{ marginBottom: '2rem' }}>
+              <label className="input-label">PASSWORD_HASH</label>
+              <input
+                id="login-password"
+                type="password"
+                className="input-field"
+                placeholder="••••••••••••"
+                value={form.password}
+                onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                required
+                autoComplete="current-password"
+              />
+            </div>
+
+            {/* Error */}
+            {error && (
+              <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--orange)', color: 'var(--bg)', fontFamily: 'var(--font-mono)', fontSize: '0.875rem', fontWeight: 700, border: '2px solid var(--black)' }}>
+                {error}
+              </div>
             )}
-          </button>
-        </form>
 
-        <div style={{ textAlign: 'center', marginTop: '2rem', color: 'var(--text-secondary)' }}>
-          ¿No tienes una cuenta? <Link to="/register" style={{ fontWeight: 600 }}>Regístrate aquí</Link>
+            {/* Submit */}
+            <button id="login-submit" type="submit" disabled={loading} className="btn btn-lime" style={{ width: '100%', padding: '1rem', fontSize: '1rem' }}>
+              {loading ? (
+                <><div className="spinner" style={{ borderTopColor: 'var(--bg)', borderColor: 'rgba(255,255,255,0.2)', width: '16px', height: '16px' }} />&nbsp;AUTENTICANDO...</>
+              ) : (
+                <>INICIAR SESIÓN</>
+              )}
+            </button>
+          </form>
+
+          {/* Footer links */}
+          <div style={{ marginTop: '2rem', borderTop: '2px solid var(--black)', paddingTop: '2rem', display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '0.875rem', fontWeight: 700 }}>
+            <Link to="/register" style={{ color: 'var(--lime)' }}>CREAR CUENTA</Link>
+            <a href="#" style={{ color: 'var(--text-3)' }}>RECUPERAR ACCESO</a>
+          </div>
+
         </div>
       </div>
     </div>
