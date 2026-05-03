@@ -6,7 +6,7 @@ import { api } from '../services/api';
 const RegisterPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ 
-    fullName: '',
+    full_name: '',
     email: '', 
     password: '',
     role: 'NATURAL_PERSON'
@@ -91,8 +91,8 @@ const RegisterPage = () => {
                 className="input-field" 
                 placeholder="Juan Pérez"
                 style={{ paddingLeft: '3rem' }}
-                value={formData.fullName}
-                onChange={e => setFormData({...formData, fullName: e.target.value})}
+                value={formData.full_name}
+                onChange={e => setFormData({...formData, full_name: e.target.value})}
                 required
               />
             </div>

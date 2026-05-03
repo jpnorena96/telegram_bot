@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Search, RefreshCw, UserPlus, X, ChevronUp, ChevronDown, ShieldOff } from 'lucide-react';
+import { Search, RefreshCw, UserPlus, X, ChevronUp, ChevronDown, ShieldOff, Trash2, CheckCircle, Edit } from 'lucide-react';
 import { api } from '../../services/api';
 
 const ROLE_TAG = {
@@ -44,6 +44,22 @@ const UsersPage = () => {
     catch (e) { console.error(e); }
     finally { setLoading(false); }
   }, []);
+
+  const handleAuthorize = async (id) => {
+    if (!window.confirm('¿Aprobar el acceso para este usuario?')) return;
+    try {
+      await api.updateUser(id, { is_authorized: true });
+      load();
+    } catch (e) { alert(e.message); }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('¿ELIMINAR este usuario y todos sus datos? Esta acción no se puede deshacer.')) return;
+    try {
+      await api.deleteUser(id);
+      load();
+    } catch (e) { alert(e.message); }
+  };
 
   useEffect(() => { load(); }, [load]);
 
@@ -182,8 +198,14 @@ const UsersPage = () => {
                         {isAdmin && (
                           <td>
                             <div style={{ display: 'flex', gap: '0.4rem' }}>
-                              <button className="btn btn-sm">EDITAR</button>
-                              {!isActive && <button className="btn btn-sm btn-outline">APROBAR</button>}
+                              {!isActive && (
+                                <button className="btn btn-sm btn-lime" onClick={() => handleAuthorize(u.id)} title="Aprobar">
+                                  <CheckCircle size={11} />
+                                </button>
+                              )}
+                              <button className="btn btn-sm" onClick={() => handleDelete(u.id)} style={{ color: '#F87171' }} title="Eliminar">
+                                <Trash2 size={11} />
+                              </button>
                             </div>
                           </td>
                         )}

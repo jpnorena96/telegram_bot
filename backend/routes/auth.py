@@ -113,6 +113,20 @@ def login(request: LoginRequest, db = Depends(get_db)):
             headers={"WWW-Authenticate": "Bearer"},
         )
     
+    # Check authorization for non-admin/natural person roles
+    role = user.get('role') or 'NATURAL_PERSON'
+    
+    # Check if authorized if they are a manager or agency
+    if role in ['VISA_MANAGER', 'TRAVEL_AGENCY']:
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT is_authorized FROM users WHERE id = %s", (user['id'],))
+        auth_check = cursor.fetchone()
+        if not auth_check or not auth_check['is_authorized']:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Tu cuenta está pendiente de aprobación por el administrador."
+            )
+    
     # Defaults if migration didn't happen yet
     role = user.get('role') or 'NATURAL_PERSON'
     user_name = user.get('full_name') or user['email'].split('@')[0]
@@ -139,9 +153,11 @@ def register(request: RegisterRequest, db = Depends(get_db)):
     hashed_password = get_password_hash(request.password)
     
     try:
+        # Natural persons are authorized by default, managers and agencies need approval
+        is_authorized = 1 if request.role == 'NATURAL_PERSON' else 0
         cursor.execute(
-            "INSERT INTO users (email, password, role, full_name, country) VALUES (%s, %s, %s, %s, 'co')",
-            (request.email, hashed_password, request.role, request.full_name)
+            "INSERT INTO users (email, password, role, full_name, country, is_authorized) VALUES (%s, %s, %s, %s, 'co', %s)",
+            (request.email, hashed_password, request.role, request.full_name, is_authorized)
         )
     except mysql.connector.Error as err:
         cursor.close()

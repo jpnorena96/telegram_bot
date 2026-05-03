@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useOutletContext } from 'react-router-dom';
 import { Search, RefreshCw, Plus, X, ChevronUp, ChevronDown, Eye } from 'lucide-react';
 import { api } from '../../services/api';
@@ -10,11 +11,63 @@ const STATUS_MAP = {
 };
 const getTag = s => STATUS_MAP[s] || { tag: 'tag-cyan', label: s?.toUpperCase() || '—' };
 
+const COUNTRIES = {
+  "ar": "Argentina", "ec": "Ecuador", "bs": "The Bahamas", "gy": "Guyana", "bb": "Barbados",
+  "jm": "Jamaica", "bz": "Belize", "mx": "Mexico", "br": "Brazil", "py": "Paraguay",
+  "bo": "Bolivia", "pe": "Peru", "ca": "Canada", "sr": "Suriname", "cl": "Chile",
+  "tt": "Trinidad and Tobago", "co": "Colombia", "uy": "Uruguay", "cw": "Curacao",
+  "us": "United States (Domestic Visa Renewal)", "al": "Albania", "ie": "Ireland",
+  "am": "Armenia", "kv": "Kosovo", "az": "Azerbaijan", "mk": "North Macedonia",
+  "be": "Belgium", "nl": "The Netherlands", "ba": "Bosnia and Herzegovina", "pt": "Portugal",
+  "hr": "Croatia", "rs": "Serbia", "cy": "Cyprus", "es": "Spain and Andorra", "fr": "France",
+  "tr": "Turkiye", "gr": "Greece", "gb": "United Kingdom", "it": "Italy",
+  "il": "Israel, Jerusalem, The West Bank, and Gaza", "ae": "United Arab Emirates",
+  "ir": "Iran", "ao": "Angola", "rw": "Rwanda", "cm": "Cameroon", "sn": "Senegal",
+  "cv": "Cabo Verde", "tz": "Tanzania", "cd": "The Democratic Republic of the Congo",
+  "za": "South Africa", "et": "Ethiopia", "ug": "Uganda", "ke": "Kenya", "zm": "Zambia"
+};
+
+const COUNTRY_CONSULATES = {
+  "co": [{"name": "Bogotá", "facility_id": "25", "asc_facility_id": "26"}],
+  "mx": [
+    {"name": "Ciudad Juarez", "facility_id": "65", "asc_facility_id": "76"},
+    {"name": "Guadalajara", "facility_id": "66", "asc_facility_id": "77"},
+    {"name": "Hermosillo", "facility_id": "67", "asc_facility_id": "78"},
+    {"name": "Matamoros", "facility_id": "68", "asc_facility_id": "79"},
+    {"name": "Merida", "facility_id": "69", "asc_facility_id": "81"},
+    {"name": "Mexico City", "facility_id": "70", "asc_facility_id": "82"},
+    {"name": "Monterrey", "facility_id": "71", "asc_facility_id": "83"},
+    {"name": "Nogales", "facility_id": "72", "asc_facility_id": "84"},
+    {"name": "Nuevo Laredo", "facility_id": "73", "asc_facility_id": "85"},
+    {"name": "Tijuana", "facility_id": "74", "asc_facility_id": "88"},
+  ],
+  "ar": [{"name": "Buenos Aires", "facility_id": "Buenos Aires", "asc_facility_id": "Buenos Aires_cas"}],
+  "br": [
+    {"name": "Brasilia", "facility_id": "Brasilia", "asc_facility_id": "Brasilia_cas"},
+    {"name": "São Paulo", "facility_id": "São Paulo", "asc_facility_id": "São Paulo_cas"},
+    {"name": "Río de Janeiro", "facility_id": "Río", "asc_facility_id": "Río_cas"},
+    {"name": "Recife", "facility_id": "Recife", "asc_facility_id": "Recife_cas"},
+    {"name": "Porto Alegre", "facility_id": "Porto Alegre", "asc_facility_id": "Porto Alegre_cas"}
+  ],
+  "ec": [
+    {"name": "Quito", "facility_id": "Quito", "asc_facility_id": "Quito_cas"},
+    {"name": "Guayaquil", "facility_id": "Guayaquil", "asc_facility_id": "Guayaquil_cas"}
+  ],
+  "pe": [{"name": "Lima", "facility_id": "Lima", "asc_facility_id": "Lima_cas"}],
+  "cl": [{"name": "Santiago", "facility_id": "Santiago", "asc_facility_id": "Santiago_cas"}],
+  "uy": [{"name": "Montevideo", "facility_id": "Montevideo", "asc_facility_id": "Montevideo_cas"}],
+  "jm": [{"name": "Kingston", "facility_id": "Kingston", "asc_facility_id": "Kingston_cas"}],
+  "ca": [
+    {"name": "Toronto", "facility_id": "Toronto", "asc_facility_id": "Toronto_cas"},
+    {"name": "Vancouver", "facility_id": "Vancouver", "asc_facility_id": "Vancouver_cas"}
+  ]
+};
+
 /* ── MODAL ── */
 const Modal = ({ apt, onClose }) => {
   if (!apt) return null;
   const { tag, label } = getTag(apt.status);
-  return (
+  return createPortal(
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
       <div onClick={e => e.stopPropagation()} className="animate-in" style={{ width: '100%', maxWidth: '480px', background: 'var(--black-2)', border: '1px solid var(--border-2)' }}>
         {/* header */}
@@ -44,7 +97,8 @@ const Modal = ({ apt, onClose }) => {
           <button className="btn btn-lime" style={{ width: '100%' }} onClick={onClose}>CERRAR</button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -54,12 +108,44 @@ const CreateModal = ({ onClose, onCreated }) => {
     email: '',
     password: '',
     country: 'co',
-    consulate: 'Lima',
+    consulate: '25',
+    consulate_asc: '26',
+    needs_cas: true,
     schedule_id: '',
     ivr: 'null',
     min_consulate_date: '',
     max_consulate_date: '',
   });
+
+  const handleCountryChange = (e) => {
+    const newCountry = e.target.value;
+    const consulates = COUNTRY_CONSULATES[newCountry];
+    setFormData({
+      ...formData,
+      country: newCountry,
+      consulate: consulates ? consulates[0].facility_id : '',
+      consulate_asc: consulates ? consulates[0].asc_facility_id : '',
+      needs_cas: !!consulates,
+    });
+  };
+
+  const handleConsulateChange = (e) => {
+    const facility_id = e.target.value;
+    const consulates = COUNTRY_CONSULATES[formData.country];
+    if (consulates) {
+      const selected = consulates.find(c => c.facility_id === facility_id);
+      if (selected) {
+        setFormData({
+          ...formData,
+          consulate: selected.facility_id,
+          consulate_asc: selected.asc_facility_id,
+        });
+        return;
+      }
+    }
+    setFormData({ ...formData, consulate: facility_id });
+  };
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -71,6 +157,9 @@ const CreateModal = ({ onClose, onCreated }) => {
       const payload = { ...formData };
       if (!payload.min_consulate_date) delete payload.min_consulate_date;
       if (!payload.max_consulate_date) delete payload.max_consulate_date;
+      if (!payload.needs_cas) payload.consulate_asc = null;
+      delete payload.needs_cas;
+      
       await api.createAppointment(payload);
       onCreated();
     } catch (err) {
@@ -80,45 +169,96 @@ const CreateModal = ({ onClose, onCreated }) => {
     }
   };
 
-  return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-      <div onClick={e => e.stopPropagation()} className="animate-in" style={{ width: '100%', maxWidth: '480px', background: 'var(--black-2)', border: '1px solid var(--border-2)' }}>
-        <div style={{ padding: '0.875rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--black-3)' }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--lime)' }}>NUEVO AGENDAMIENTO</span>
-          <button type="button" className="btn btn-icon" onClick={onClose} style={{ border: 'none', width: '24px', height: '24px' }}><X size={13} /></button>
+  return createPortal(
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
+      <div onClick={e => e.stopPropagation()} className="animate-in panel" style={{ width: '100%', maxWidth: '520px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div className="panel-header" style={{ background: 'rgba(255,255,255,0.02)' }}>
+          <div>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.15em', color: 'var(--lime)' }}>NUEVO_AGENDAMIENTO</span>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-1)', marginTop: '0.25rem' }}>Agregar Cliente al Portal</h3>
+          </div>
+          <button type="button" className="btn btn-icon" onClick={onClose} style={{ border: 'none', width: '32px', height: '32px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%' }}><X size={14} /></button>
         </div>
-        <form onSubmit={handleSubmit} style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {error && <div style={{ color: 'var(--red)', fontSize: '0.8rem' }}>{error}</div>}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-            <label style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>EMAIL PORTAL</label>
-            <input className="input-field" type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-            <label style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>CONTRASEÑA PORTAL</label>
-            <input className="input-field" type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-            <label style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>SCHEDULE ID</label>
-            <input className="input-field" type="text" value={formData.schedule_id} onChange={e => setFormData({...formData, schedule_id: e.target.value})} required />
-          </div>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1 }}>
-              <label style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>FECHA MIN</label>
-              <input className="input-field" type="date" value={formData.min_consulate_date} onChange={e => setFormData({...formData, min_consulate_date: e.target.value})} />
+        <form onSubmit={handleSubmit} className="panel-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {error && <div style={{ padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 'var(--radius-sm)', color: '#F87171', fontSize: '0.85rem' }}>{error}</div>}
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>EMAIL PORTAL</label>
+              <input className="input-field" type="email" placeholder="cliente@email.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1 }}>
-              <label style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>FECHA MAX</label>
-              <input className="input-field" type="date" value={formData.max_consulate_date} onChange={e => setFormData({...formData, max_consulate_date: e.target.value})} />
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>CONTRASEÑA PORTAL</label>
+              <input className="input-field" type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required />
             </div>
           </div>
-          <div style={{ marginTop: '0.5rem' }}>
-            <button type="submit" className="btn btn-lime" style={{ width: '100%' }} disabled={loading}>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>SCHEDULE ID</label>
+              <input className="input-field" type="text" placeholder="Ej. 12345678" value={formData.schedule_id} onChange={e => setFormData({...formData, schedule_id: e.target.value})} required />
+            </div>
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>PAÍS (CONSULADO)</label>
+              <select className="input-field" style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }} value={formData.country} onChange={handleCountryChange} required>
+                {Object.entries(COUNTRIES).map(([code, name]) => (
+                  <option key={code} value={code} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>{name}</option>
+                ))}
+              </select>
+            </div>
+            
+            {COUNTRY_CONSULATES[formData.country] ? (
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>SEDE CONSULADO</label>
+                <select className="input-field" style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }} value={formData.consulate} onChange={handleConsulateChange} required>
+                  {COUNTRY_CONSULATES[formData.country].map(c => (
+                    <option key={c.facility_id} value={c.facility_id} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>CIUDAD DE EMBAJADA</label>
+                <input className="input-field" type="text" placeholder="Ej. Madrid" value={formData.consulate} onChange={handleConsulateChange} required />
+              </div>
+            )}
+          </div>
+
+          {COUNTRY_CONSULATES[formData.country] && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.02)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+              <input type="checkbox" id="needs_cas" checked={formData.needs_cas} onChange={e => setFormData({...formData, needs_cas: e.target.checked})} style={{ width: '16px', height: '16px', accentColor: 'var(--lime)' }} />
+              <div>
+                <label htmlFor="needs_cas" style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-1)', cursor: 'pointer' }}>Requiere cita en Centro Externo (CAS/ASC)</label>
+                {formData.needs_cas && (
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', marginTop: '0.1rem' }}>
+                    Sede CAS asignada: {formData.consulate_asc}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>FECHA MÍNIMA (OPCIONAL)</label>
+              <input className="input-field" type="date" value={formData.min_consulate_date} onChange={e => setFormData({...formData, min_consulate_date: e.target.value})} style={{ colorScheme: 'dark' }} />
+            </div>
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>FECHA MÁXIMA (OPCIONAL)</label>
+              <input className="input-field" type="date" value={formData.max_consulate_date} onChange={e => setFormData({...formData, max_consulate_date: e.target.value})} style={{ colorScheme: 'dark' }} />
+            </div>
+          </div>
+
+          <div style={{ marginTop: '0.75rem', display: 'flex', gap: '1rem' }}>
+            <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={onClose}>CANCELAR</button>
+            <button type="submit" className="btn btn-lime" style={{ flex: 2, background: 'linear-gradient(135deg, var(--lime), var(--accent-2))', color: '#fff', border: 'none' }} disabled={loading}>
               {loading ? 'GUARDANDO...' : 'CREAR AGENDAMIENTO'}
             </button>
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

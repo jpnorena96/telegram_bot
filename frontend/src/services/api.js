@@ -57,6 +57,23 @@ export const api = {
     return handleResponse(response);
   },
 
+  async updateUser(id, data) {
+    const response = await fetch(`${API_URL}/users/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  async deleteUser(id) {
+    const response = await fetch(`${API_URL}/users/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+
   // Appointments Methods
   async getAppointments() {
     const response = await fetch(`${API_URL}/appointments/`, {

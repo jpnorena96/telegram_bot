@@ -443,9 +443,7 @@ async def edit_or_new_appointment(update: Update, context: ContextTypes.DEFAULT_
 
 # Country → consulates with their facility IDs
 COUNTRY_CONSULATES = {
-    "co": [
-        {"name": "Bogota", "facility_id": "25", "asc_facility_id": "26"},
-    ],
+    "co": [{"name": "Bogotá", "facility_id": "25", "asc_facility_id": "26"}],
     "mx": [
         {"name": "Ciudad Juarez", "facility_id": "65", "asc_facility_id": "76"},
         {"name": "Guadalajara", "facility_id": "66", "asc_facility_id": "77"},
@@ -458,6 +456,26 @@ COUNTRY_CONSULATES = {
         {"name": "Nuevo Laredo", "facility_id": "73", "asc_facility_id": "85"},
         {"name": "Tijuana", "facility_id": "74", "asc_facility_id": "88"},
     ],
+    "ar": [{"name": "Buenos Aires", "facility_id": "Buenos Aires", "asc_facility_id": "Buenos Aires_cas"}],
+    "br": [
+        {"name": "Brasilia", "facility_id": "Brasilia", "asc_facility_id": "Brasilia_cas"},
+        {"name": "São Paulo", "facility_id": "São Paulo", "asc_facility_id": "São Paulo_cas"},
+        {"name": "Río de Janeiro", "facility_id": "Río", "asc_facility_id": "Río_cas"},
+        {"name": "Recife", "facility_id": "Recife", "asc_facility_id": "Recife_cas"},
+        {"name": "Porto Alegre", "facility_id": "Porto Alegre", "asc_facility_id": "Porto Alegre_cas"}
+    ],
+    "ec": [
+        {"name": "Quito", "facility_id": "Quito", "asc_facility_id": "Quito_cas"},
+        {"name": "Guayaquil", "facility_id": "Guayaquil", "asc_facility_id": "Guayaquil_cas"}
+    ],
+    "pe": [{"name": "Lima", "facility_id": "Lima", "asc_facility_id": "Lima_cas"}],
+    "cl": [{"name": "Santiago", "facility_id": "Santiago", "asc_facility_id": "Santiago_cas"}],
+    "uy": [{"name": "Montevideo", "facility_id": "Montevideo", "asc_facility_id": "Montevideo_cas"}],
+    "jm": [{"name": "Kingston", "facility_id": "Kingston", "asc_facility_id": "Kingston_cas"}],
+    "ca": [
+        {"name": "Toronto", "facility_id": "Toronto", "asc_facility_id": "Toronto_cas"},
+        {"name": "Vancouver", "facility_id": "Vancouver", "asc_facility_id": "Vancouver_cas"}
+    ]
 }
 
 
