@@ -51,7 +51,7 @@ export const api = {
 
   // Users Methods
   async getUsers() {
-    const response = await fetch(`${API_URL}/users`, {
+    const response = await fetch(`${API_URL}/users/`, {
       headers: getHeaders(),
     });
     return handleResponse(response);
@@ -59,14 +59,14 @@ export const api = {
 
   // Appointments Methods
   async getAppointments() {
-    const response = await fetch(`${API_URL}/appointments`, {
+    const response = await fetch(`${API_URL}/appointments/`, {
       headers: getHeaders(),
     });
     return handleResponse(response);
   },
 
   async createAppointment(data) {
-    const response = await fetch(`${API_URL}/appointments`, {
+    const response = await fetch(`${API_URL}/appointments/`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(data),
