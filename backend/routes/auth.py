@@ -114,8 +114,8 @@ def login(request: LoginRequest, db = Depends(get_db)):
         )
     
     # Defaults if migration didn't happen yet
-    role = user.get('role', 'NATURAL_PERSON')
-    user_name = user.get('full_name', user['email'].split('@')[0])
+    role = user.get('role') or 'NATURAL_PERSON'
+    user_name = user.get('full_name') or user['email'].split('@')[0]
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
