@@ -4,7 +4,8 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
+import hashlib
 import mysql.connector
 
 # Re-use config for DB connection
@@ -18,11 +19,6 @@ SECRET_KEY = "super-secret-key-change-this-in-production"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
 
-pwd_context = CryptContext(
-    schemes=["bcrypt"], 
-    deprecated="auto",
-    bcrypt__truncate_error=False 
-)
 router = APIRouter()
 
 # --- Schemas ---
@@ -39,7 +35,7 @@ class LoginRequest(BaseModel):
 class RegisterRequest(BaseModel):
     full_name: str
     email: EmailStr
-    password: str = Field(..., max_length=72)
+    password: str
     role: str
 
 # --- Security Utilities ---
@@ -47,15 +43,32 @@ def verify_password(plain_password, hashed_password):
     # Soporte para contraseñas en texto plano (Legacy)
     if plain_password == hashed_password:
         return True
+        
     try:
-        # Passlib manejará el límite de 72 bytes internamente ahora
-        return pwd_context.verify(plain_password, hashed_password)
+        # Opción 1: Probar si fue encriptada usando el pre-hash SHA256
+        sha256_pw = hashlib.sha256(plain_password.encode('utf-8')).hexdigest().encode('utf-8')
+        hash_bytes = hashed_password.encode('utf-8')
+        if bcrypt.checkpw(sha256_pw, hash_bytes):
+            return True
+    except Exception:
+        pass
+        
+    try:
+        # Opción 2: Probar si fue encriptada directamente (legacy truncado)
+        pw_bytes = plain_password.encode('utf-8')
+        hash_bytes = hashed_password.encode('utf-8')
+        return bcrypt.checkpw(pw_bytes, hash_bytes)
     except Exception:
         return False
 
 def get_password_hash(password):
-    #return pwd_context.hash(password[:72])
-    return pwd_context.hash(password)
+    # Pre-hash con SHA256 garantiza una longitud de exactamente 64 caracteres hex.
+    # Esto soluciona de forma absoluta el límite de 72 bytes de bcrypt.
+    sha256_pw = hashlib.sha256(password.encode('utf-8')).hexdigest().encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed_bytes = bcrypt.hashpw(sha256_pw, salt)
+    return hashed_bytes.decode('utf-8')
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
@@ -167,10 +180,12 @@ def register(request: RegisterRequest, db = Depends(get_db)):
     user_id = cursor.lastrowid
     cursor.close()
     
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": request.email, "roles": [request.role], "id": user_id},
-        expires_delta=access_token_expires
-    )
-    
-    return {"access_token": access_token, "token_type": "bearer", "role": request.role, "user_name": request.full_name}
+    if is_authorized:
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": request.email, "roles": [request.role], "id": user_id},
+            expires_delta=access_token_expires
+        )
+        return {"status": "authorized", "access_token": access_token, "token_type": "bearer", "role": request.role, "user_name": request.full_name}
+    else:
+        return {"status": "pending", "message": "Cuenta creada. Esperando aprobación."}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { UserPlus, Plane, Mail, Lock, User, Briefcase } from 'lucide-react';
 import { api } from '../services/api';
+import toast from 'react-hot-toast';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -24,13 +25,20 @@ const RegisterPage = () => {
     setIsLoading(true);
     
     try {
-      const { access_token, role, user_name } = await api.register(formData);
-      localStorage.setItem('token', access_token);
-      localStorage.setItem('userRole', role);
-      localStorage.setItem('userName', user_name);
-      navigate('/dashboard');
+      const response = await api.register(formData);
+      
+      if (response.status === 'pending') {
+        toast.success(`Cuenta como ${formData.role} creada. Espera la aprobación del Administrador.`, { duration: 5000 });
+        navigate('/login');
+      } else {
+        localStorage.setItem('token', response.access_token);
+        localStorage.setItem('userRole', response.role);
+        localStorage.setItem('userName', response.user_name);
+        toast.success('¡Registro exitoso! Bienvenido.');
+        navigate('/dashboard');
+      }
     } catch (err) {
-      alert(err.message || 'Error al registrarte');
+      toast.error(err.message || 'Error al registrarte');
     } finally {
       setIsLoading(false);
     }

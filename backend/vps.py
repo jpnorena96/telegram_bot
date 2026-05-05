@@ -100,6 +100,7 @@ MAX_DATE={max_date_fmt}
 NEED_ASC={need_cas}
 ASC_FACILITY_ID={asc_facility_id}
 SCHEDULE_ID=
+APPOINTMENT_ID={appointment_id or ''}
 TELEGRAM_BOT_TOKEN=8151514910:AAEHkTr3ZNooaxti2K37oCn02GPCEfVFe9E
 TELEGRAM_CHAT_ID={user_data.get("telegram_chat_id", "")}
 DB_HOST={os.getenv("DB_HOST", "")}

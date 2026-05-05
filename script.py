@@ -362,6 +362,9 @@ class Config:
             TELEGRAM_BOT_TOKEN = config_data['TELEGRAM_BOT_TOKEN']
         if config_data.get('TELEGRAM_CHAT_ID'):
             TELEGRAM_CHAT_ID = config_data['TELEGRAM_CHAT_ID']
+
+        # Appointment ID (para construir el nombre PM2 correcto)
+        self.appointment_id = config_data.get('APPOINTMENT_ID')
             
         # DB config
         self.db_host = config_data.get('DB_HOST')
@@ -1007,7 +1010,11 @@ class Bot:
                         try:
                             import subprocess
                             folder_name = self.config.email.replace('@', '_').replace('.', '_')
-                            pm2_name = f"visa_{folder_name}"
+                            appt_id = getattr(self.config, 'appointment_id', None)
+                            if appt_id:
+                                pm2_name = f"visa_{folder_name}_{appt_id}"
+                            else:
+                                pm2_name = f"visa_{folder_name}"
                             self.logger(f"[PM2] Deteniendo proceso PM2: {pm2_name}")
                             send_to_all(
                                 f"🛑 Bot detenido automáticamente.\nCita agendada para: {self.config.email}\nPM2 proceso '{pm2_name}' eliminado."

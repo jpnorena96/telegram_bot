@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Search, RefreshCw, UserPlus, X, ChevronUp, ChevronDown, ShieldOff, Trash2, CheckCircle, Edit } from 'lucide-react';
 import { api } from '../../services/api';
+import toast from 'react-hot-toast';
 
 const ROLE_TAG = {
   ADMINISTRATOR: { cls: 'tag-orange', short: 'ADM' },
@@ -41,7 +42,7 @@ const UsersPage = () => {
   const load = useCallback(async () => {
     setLoading(true);
     try { setUsers(await api.getUsers()); }
-    catch (e) { console.error(e); }
+    catch (e) { toast.error('Error al cargar usuarios'); }
     finally { setLoading(false); }
   }, []);
 
@@ -49,16 +50,18 @@ const UsersPage = () => {
     if (!window.confirm('¿Aprobar el acceso para este usuario?')) return;
     try {
       await api.updateUser(id, { is_authorized: true });
+      toast.success('Usuario autorizado correctamente');
       load();
-    } catch (e) { alert(e.message); }
+    } catch (e) { toast.error(e.message || 'Error al autorizar'); }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('¿ELIMINAR este usuario y todos sus datos? Esta acción no se puede deshacer.')) return;
     try {
       await api.deleteUser(id);
+      toast.success('Usuario eliminado permanentemente');
       load();
-    } catch (e) { alert(e.message); }
+    } catch (e) { toast.error(e.message || 'Error al eliminar'); }
   };
 
   useEffect(() => { load(); }, [load]);

@@ -10,10 +10,30 @@ import OverviewPage from './pages/dashboard/OverviewPage';
 import AppointmentsPage from './pages/dashboard/AppointmentsPage';
 import UsersPage from './pages/dashboard/UsersPage';
 import SettingsPage from './pages/dashboard/SettingsPage';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <Router>
+      <Toaster 
+        position="top-center"
+        toastOptions={{
+          style: {
+            background: 'var(--black-2)',
+            color: 'var(--text-1)',
+            border: '1px solid var(--border)',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.8rem',
+            borderRadius: '0px'
+          },
+          success: {
+            iconTheme: {
+              primary: 'var(--lime)',
+              secondary: 'var(--black)',
+            },
+          },
+        }}
+      />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={

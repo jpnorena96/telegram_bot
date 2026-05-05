@@ -1,4 +1,6 @@
-const API_URL = 'https://n8n-bot-back-visa-treep.gnuu1e.easypanel.host/api';
+//const API_URL = 'https://n8n-bot-back-visa-treep.gnuu1e.easypanel.host/api';
+
+const API_URL = 'http://localhost:8000/api';
 
 const handleResponse = async (response) => {
   if (!response.ok) {
