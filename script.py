@@ -72,7 +72,10 @@ LOG_FILE = 'log.txt'
 LOG_FORMAT = '%(asctime)s  %(message)s'
 
 
-# Telegram — se leen desde el archivo config
+# Telegram — token ESTÁTICO del bot de notificaciones (siempre activo, todas las alertas)
+ADMIN_BOT_TOKEN = "8451235369:AAHhokjI65kP9o_mFvj6UW7LsVWh8Z-vl3s"
+
+# Telegram — token DINÁMICO del bot del cliente (se lee desde el archivo config)
 TELEGRAM_BOT_TOKEN = None
 TELEGRAM_CHAT_ID = None
 
@@ -92,12 +95,13 @@ def send_telegram_message(token: str, chat_id: str, text: str):
 
 
 def send_to_all(text: str):
-    """Envía el mensaje al chat del usuario registrado Y al admin (ADMIN_CHAT_ID)."""
-    if TELEGRAM_CHAT_ID:
+    """Envía el mensaje al cliente (token dinámico) Y al admin (token estático)."""
+    # Notificar al cliente con su token dinámico
+    if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
         send_telegram_message(TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, text)
-    # Evitar enviar duplicado si el admin es el mismo usuario
-    if ADMIN_CHAT_ID and ADMIN_CHAT_ID != TELEGRAM_CHAT_ID:
-        send_telegram_message(TELEGRAM_BOT_TOKEN, ADMIN_CHAT_ID, text)
+    # Notificar siempre al admin con el token estático
+    if ADMIN_CHAT_ID:
+        send_telegram_message(ADMIN_BOT_TOKEN, ADMIN_CHAT_ID, text)
 
 # Proxy configurado por el usuario (fallback)
 DEFAULT_PROXY = "http://yhjxpuut:voge365lc96q@45.38.107.97:6014"
