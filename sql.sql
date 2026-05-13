@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS `visa_bot_db_telegram`.`user_appointments` (
   `status` VARCHAR(255) NULL DEFAULT 'pending',
   `ivr` VARCHAR(255) NULL DEFAULT 'null',
   `schedule_id` VARCHAR(64) NULL DEFAULT NULL COMMENT 'Schedule ID seleccionado en el portal de visas',
+  `date_booked` TIMESTAMP NULL DEFAULT NULL COMMENT 'Fecha y hora en la que se agendó la cita',
   PRIMARY KEY (`id`),
   INDEX `telegram_user_id` (`telegram_user_id` ASC) VISIBLE,
   INDEX `fk_user_appointments_user_id` (`user_id` ASC) VISIBLE,

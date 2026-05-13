@@ -21,7 +21,7 @@ CONSULATE_FACILITY_MAP = {
     "nuevo laredo": {"facility_id": "73", "asc_facility_id": "85"},
     "tijuana": {"facility_id": "74", "asc_facility_id": "88"},
     # Default (México)
-    "_default": {"facility_id": "65", "asc_facility_id": "77"},
+    "_default": {"facility_id": "25", "asc_facility_id": "26"},
 }
 
 # Paths relative to project root

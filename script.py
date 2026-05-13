@@ -1019,7 +1019,7 @@ class Bot:
                                 )
                                 cursor = conn.cursor()
                                 cursor.execute(
-                                    "UPDATE user_appointments SET status = 'agendado' WHERE email = %s",
+                                    "UPDATE user_appointments SET status = 'agendado', date_booked = NOW() WHERE email = %s",
                                     (self.config.email,)
                                 )
                                 conn.commit()

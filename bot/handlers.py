@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 CONSULATE_FACILITY_MAP = {
     "bogota": {"facility_id": "25", "asc_facility_id": "26"},
     # Default (México)
-    "_default": {"facility_id": "65", "asc_facility_id": "77"},
+    "_default": {"facility_id": "25", "asc_facility_id": "26"},
 }
 
 PLAN_LIMITS = {
