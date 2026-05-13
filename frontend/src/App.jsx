@@ -10,6 +10,7 @@ import OverviewPage from './pages/dashboard/OverviewPage';
 import AppointmentsPage from './pages/dashboard/AppointmentsPage';
 import UsersPage from './pages/dashboard/UsersPage';
 import SettingsPage from './pages/dashboard/SettingsPage';
+import AdminPage from './pages/dashboard/AdminPage';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
           <Route path="citas" element={<AppointmentsPage />} />
           <Route path="usuarios" element={<UsersPage />} />
           <Route path="configuracion" element={<SettingsPage />} />
+          <Route path="auditoria" element={<AdminPage />} />
         </Route>
       </Routes>
     </Router>

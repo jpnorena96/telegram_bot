@@ -91,5 +91,45 @@ export const api = {
       body: JSON.stringify(data),
     });
     return handleResponse(response);
-  }
+  },
+
+  // ── Admin Methods ──────────────────────────────────────────
+  async getAdminSummary() {
+    const r = await fetch(`${API_URL}/admin/summary`, { headers: getHeaders() });
+    return handleResponse(r);
+  },
+  async getAdminUsers() {
+    const r = await fetch(`${API_URL}/admin/users`, { headers: getHeaders() });
+    return handleResponse(r);
+  },
+  async getAdminUserAppointments(userId) {
+    const r = await fetch(`${API_URL}/admin/users/${userId}/appointments`, { headers: getHeaders() });
+    return handleResponse(r);
+  },
+  async getAdminAllAppointments() {
+    const r = await fetch(`${API_URL}/admin/appointments`, { headers: getHeaders() });
+    return handleResponse(r);
+  },
+  async adminCreateUser(data) {
+    const r = await fetch(`${API_URL}/admin/users`, {
+      method: 'POST', headers: getHeaders(), body: JSON.stringify(data),
+    });
+    return handleResponse(r);
+  },
+  async adminUpdateUser(id, data) {
+    const r = await fetch(`${API_URL}/admin/users/${id}`, {
+      method: 'PUT', headers: getHeaders(), body: JSON.stringify(data),
+    });
+    return handleResponse(r);
+  },
+  async adminDeleteUser(id) {
+    const r = await fetch(`${API_URL}/admin/users/${id}`, {
+      method: 'DELETE', headers: getHeaders(),
+    });
+    return handleResponse(r);
+  },
+  getExportCsvUrl() {
+    const token = localStorage.getItem('token');
+    return `${API_URL}/admin/export/csv?token=${token}`;
+  },
 };

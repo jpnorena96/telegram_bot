@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from .routes import auth, appointments, users
+from .routes import auth, appointments, users, admin
 
 app = FastAPI(title="GlobalVisas API")
 
@@ -31,6 +31,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(appointments.router, prefix="/api/appointments", tags=["Appointments"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
+app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 
 @app.get("/api/health")
 def health_check():

@@ -721,7 +721,11 @@ class Bot:
         response.raise_for_status()
         data = response.json()
         
-        dates = [x['date'] for x in data]
+        if not isinstance(data, list):
+            self.logger(f"Respuesta inesperada al obtener fechas: {data}")
+            return []
+            
+        dates = [x.get('date') for x in data if isinstance(x, dict) and 'date' in x]
         dates.sort()
         
         if dates:
@@ -755,7 +759,12 @@ class Bot:
         response.raise_for_status()
         data = response.json()
         self.logger(f'Response:  ddd{data}')
-        times = data['available_times'] or data['business_times']
+        
+        if not isinstance(data, dict):
+            self.logger(f"Respuesta inesperada al obtener horas: {data}")
+            return []
+            
+        times = data.get('available_times') or data.get('business_times') or []
         times.sort()
         return times
 
@@ -772,7 +781,12 @@ class Bot:
         response.raise_for_status()
         data = response.json()
         self.logger(f'Response: fff{data}')
-        dates = [x['date'] for x in data]
+        
+        if not isinstance(data, list):
+            self.logger(f"Respuesta inesperada al obtener fechas ASC: {data}")
+            return []
+            
+        dates = [x.get('date') for x in data if isinstance(x, dict) and 'date' in x]
         dates.sort()
         return dates
 
@@ -789,7 +803,12 @@ class Bot:
         response.raise_for_status()
         data = response.json()
         self.logger(f'Response: {data}')
-        times = data['available_times'] or data['business_times']
+        
+        if not isinstance(data, dict):
+            self.logger(f"Respuesta inesperada al obtener horas ASC: {data}")
+            return []
+            
+        times = data.get('available_times') or data.get('business_times') or []
         times.sort()
         return times
 
@@ -984,7 +1003,7 @@ class Bot:
                         msg += "\n✅ *Estado actualizado en el sistema a 'agendado'*."
 
                         self.logger("Cita agendada exitosamente (log interno)")
-                        telegram_messages.append(msg)
+                        send_to_all(msg)
                         booked = True
                         cita_programada = True
 
