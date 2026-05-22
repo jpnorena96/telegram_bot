@@ -788,7 +788,7 @@ async def max_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         # No IVR → run discovery to find Schedule IDs
         await update.message.reply_text(
             "📂 Archivos desplegados en el servidor.\n\n"
-            "🔍 Buscando Schedule IDs... esto puede tomar un momento."
+            "🔍 Buscando Usuarios disponibles... esto puede tomar un momento."
         )
 
         appointment_id = context.user_data.get("appointment_id")
