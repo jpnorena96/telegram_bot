@@ -339,6 +339,7 @@ async def password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         if user:
             context.user_data["user_id"] = user["id"]
             context.user_data["plan"] = user.get("plan", "platino")
+            context.user_data["db_telegram_user_id"] = user.get("telegram_user_id")
             # Split comma-separated countries (e.g., 'co,mx') into a list
             countries_str = user.get("country", "co")
             context.user_data["allowed_countries"] = [c.strip() for c in countries_str.split(",") if c.strip()]
@@ -726,9 +727,13 @@ async def max_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     telegram_user_id = update.effective_user.id
     user_id = user_data.get("user_id")
 
-    # Capture Telegram user/chat ID for VPS notifications (private chats: user_id == chat_id)
-    user_data["telegram_chat_id"] = str(telegram_user_id)
-    user_data["telegram_user_id"] = str(telegram_user_id)
+    # The actual user ID we want to notify is the one from the users table (if available)
+    db_telegram_user_id = user_data.get("db_telegram_user_id")
+    target_chat_id = str(db_telegram_user_id) if db_telegram_user_id else str(telegram_user_id)
+
+    # Capture Telegram user/chat ID for VPS notifications
+    user_data["telegram_chat_id"] = target_chat_id
+    user_data["telegram_user_id"] = target_chat_id
 
     try:
         # is_editing=True only when the user started from menu_edit (explicit edit).
