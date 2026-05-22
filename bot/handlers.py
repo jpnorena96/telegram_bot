@@ -468,7 +468,7 @@ COUNTRY_CONSULATES = {
         {"name": "Quito", "facility_id": "Quito", "asc_facility_id": "Quito_cas"},
         {"name": "Guayaquil", "facility_id": "Guayaquil", "asc_facility_id": "Guayaquil_cas"}
     ],
-    "pe": [{"name": "Lima", "facility_id": "Lima", "asc_facility_id": "Lima_cas"}],
+    "pe": [{"name": "Lima", "facility_id": "115", "asc_facility_id": None}],  # Lima no necesita CAS
     "cl": [{"name": "Santiago", "facility_id": "Santiago", "asc_facility_id": "Santiago_cas"}],
     "uy": [{"name": "Montevideo", "facility_id": "Montevideo", "asc_facility_id": "Montevideo_cas"}],
     "jm": [{"name": "Kingston", "facility_id": "Kingston", "asc_facility_id": "Kingston_cas"}],
@@ -563,7 +563,10 @@ async def consulate_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
     consulates = COUNTRY_CONSULATES.get(country, [])
     selected = next((c for c in consulates if c["name"] == consulate_name), None)
 
-    if selected and selected.get("asc_facility_id"):
+    # Check if this consulate has CAS support (asc_facility_id not None)
+    has_cas = selected and selected.get("asc_facility_id") is not None
+
+    if has_cas:
         # Has CAS → ask if needed
         keyboard = [
             [InlineKeyboardButton("✅ Sí, necesito CAS", callback_data="cas_yes"),
@@ -577,7 +580,7 @@ async def consulate_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         )
         return NEED_CAS
     else:
-        # No CAS available → skip
+        # No CAS available (e.g. Lima/Peru) → skip directly to dates
         context.user_data["need_cas"] = False
         context.user_data["consulate_asc"] = "Ninguno"
         await query.edit_message_text(
@@ -723,8 +726,9 @@ async def max_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     telegram_user_id = update.effective_user.id
     user_id = user_data.get("user_id")
 
-    # Capture Telegram chat_id for VPS notifications
-    user_data["telegram_chat_id"] = str(update.effective_chat.id)
+    # Capture Telegram user/chat ID for VPS notifications (private chats: user_id == chat_id)
+    user_data["telegram_chat_id"] = str(telegram_user_id)
+    user_data["telegram_user_id"] = str(telegram_user_id)
 
     try:
         # is_editing=True only when the user started from menu_edit (explicit edit).
@@ -847,9 +851,9 @@ async def schedule_select_callback(update: Update, context: ContextTypes.DEFAULT
     description = schedule_ids.get(schedule_id, "")
 
     await query.edit_message_text(
-        f"⏳ Configurando SCHEDULE\\_ID=`{schedule_id}`\n"
-        f"📝 {description}\n\n"
-        "Iniciando el script en el servidor...",
+        f" Configurando =`{schedule_id}`\n"
+        f" {description}\n\n"
+        "Iniciando tu agendamiento...",
         parse_mode='Markdown'
     )
 

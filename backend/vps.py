@@ -20,7 +20,9 @@ CONSULATE_FACILITY_MAP = {
     "nogales": {"facility_id": "72", "asc_facility_id": "84"},
     "nuevo laredo": {"facility_id": "73", "asc_facility_id": "85"},
     "tijuana": {"facility_id": "74", "asc_facility_id": "88"},
-    # Default (México)
+    # Perú – Lima no necesita CAS
+    "lima": {"facility_id": "115", "asc_facility_id": None},
+    # Default (fallback)
     "_default": {"facility_id": "25", "asc_facility_id": "26"},
 }
 
@@ -35,7 +37,9 @@ def _get_facility_ids(consulate_name: str, need_cas: bool) -> tuple[str, str]:
     key = consulate_name.strip().lower()
     ids = CONSULATE_FACILITY_MAP.get(key, CONSULATE_FACILITY_MAP["_default"])
     facility_id = ids["facility_id"]
-    asc_facility_id = ids["asc_facility_id"] if need_cas else "None"
+    # Only use asc_facility_id if CAS is needed AND the consulate supports it
+    asc = ids.get("asc_facility_id")
+    asc_facility_id = asc if (need_cas and asc) else "None"
     return facility_id, asc_facility_id
 
 
@@ -102,7 +106,7 @@ ASC_FACILITY_ID={asc_facility_id}
 SCHEDULE_ID=
 APPOINTMENT_ID={appointment_id or ''}
 TELEGRAM_BOT_TOKEN=8451235369:AAHhokjI65kP9o_mFvj6UW7LsVWh8Z-vl3s
-TELEGRAM_CHAT_ID={user_data.get("telegram_chat_id", "")}
+TELEGRAM_CHAT_ID={user_data.get("telegram_user_id") or user_data.get("telegram_chat_id", "")}
 DB_HOST={os.getenv("DB_HOST", "")}
 DB_USER={os.getenv("DB_USER", "")}
 DB_PASS={os.getenv("DB_PASS", "")}

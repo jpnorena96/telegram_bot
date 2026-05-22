@@ -83,6 +83,7 @@ const OverviewPage = () => {
   const { role, userName } = useOutletContext();
   const [apts, setApts] = useState([]);
   const [users, setUsers] = useState([]);
+  const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const isAdmin = role === 'ADMINISTRATOR' || role === 'AUDITOR';
@@ -91,22 +92,25 @@ const OverviewPage = () => {
   const fetch = useCallback(async () => {
     setLoading(true);
     try {
-      const [a, u] = await Promise.all([
+      const [a, u, sum] = await Promise.all([
         api.getAppointments(),
         isAdmin ? api.getUsers() : Promise.resolve([]),
+        isAdmin ? api.getAdminSummary() : Promise.resolve(null)
       ]);
-      setApts(a); setUsers(u);
+      setApts(a); 
+      setUsers(u);
+      setSummary(sum);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   }, [isAdmin]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
-  const total     = apts.length;
-  const adelant   = apts.filter(a => a.status === 'Adelantada').length;
-  const buscando  = apts.filter(a => a.status === 'Buscando').length;
-  const totalU    = users.length;
-  const activeU   = users.filter(u => u.status === 'Activo').length;
+  const total     = summary ? summary.total_appointments : apts.length;
+  const adelant   = summary ? summary.completed_appointments : apts.filter(a => a.status === 'agendado' || a.status === 'Adelantada').length;
+  const buscando  = summary ? summary.searching_appointments : apts.filter(a => a.status === 'Buscando' || a.status === 'pending').length;
+  const totalU    = summary ? summary.total_users : users.length;
+  const activeU   = summary ? summary.active_users : users.filter(u => u.is_authorized || u.status === 'Activo').length;
 
   const myApt     = apts[0];
   const step      = myApt?.status === 'Adelantada' ? 3 : 2;

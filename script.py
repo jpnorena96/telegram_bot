@@ -195,12 +195,7 @@ COUNTRIES = {
 }
 
 
-def send_telegram_message(token, chat_id, message):
-    url = f'https://api.telegram.org/bot{token}/sendMessage'
-    payload = {'chat_id': chat_id, 'text': message}
-    headers = {'Content-Type': 'application/json'}
-    response = requests.post(url, json=payload, headers=headers)
-    return response
+
 
 
 def parse_date(date_str: str) -> date:
@@ -444,7 +439,19 @@ class Config:
             f.write(f'MAX_DATE={(self.max_date.strftime(DATE_FORMAT) if self.max_date else NONE)}\n')
             f.write(f'NEED_ASC={self.need_asc}\n')
             f.write(f'ASC_FACILITY_ID={self.asc_facility_id}\n')
-            f.write(f'SCHEDULE_ID={self.schedule_id}')
+            f.write(f'SCHEDULE_ID={self.schedule_id}\n')
+            
+            if getattr(self, 'appointment_id', None):
+                f.write(f'APPOINTMENT_ID={self.appointment_id}\n')
+            if TELEGRAM_BOT_TOKEN:
+                f.write(f'TELEGRAM_BOT_TOKEN={TELEGRAM_BOT_TOKEN}\n')
+            if TELEGRAM_CHAT_ID:
+                f.write(f'TELEGRAM_CHAT_ID={TELEGRAM_CHAT_ID}\n')
+            if getattr(self, 'db_host', None):
+                f.write(f'DB_HOST={self.db_host}\n')
+                f.write(f'DB_USER={self.db_user}\n')
+                f.write(f'DB_PASS={self.db_pass}\n')
+                f.write(f'DB_NAME={self.db_name}\n')
 
 
 class Bot:
