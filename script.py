@@ -192,6 +192,14 @@ class WebshareManager:
 COUNTRIES = {
     'co': 'Colombia',
     'mx': 'Mexico',
+    'ar': 'Argentina',
+    'br': 'Brazil',
+    'ec': 'Ecuador',
+    'pe': 'Peru',
+    'cl': 'Chile',
+    'uy': 'Uruguay',
+    'jm': 'Jamaica',
+    'ca': 'Canada'
 }
 
 
@@ -286,7 +294,7 @@ class Config:
             password = gui_input('Enter password: ')
         self.password = password
         
-        self.country = config_data.get('COUNTRY', 'co')
+        self.country = (config_data.get('COUNTRY') or 'co').strip().lower()
         if self.country not in COUNTRIES:
             self.country = 'co'
         
