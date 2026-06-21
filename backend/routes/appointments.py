@@ -90,7 +90,9 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
                 'B1/B2 Turista' as type, 
                 a.min_consulate_date as originalDate,
                 a.status as newDate,
-                a.status as status
+                a.status as status,
+                a.date_created,
+                a.date_booked
             FROM user_appointments a
             LEFT JOIN users u ON a.user_id = u.id
             ORDER BY a.id DESC LIMIT 50
@@ -104,7 +106,9 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
                 'B1/B2 Turista' as type, 
                 min_consulate_date as originalDate,
                 status as newDate,
-                status as status
+                status as status,
+                date_created,
+                date_booked
             FROM user_appointments 
             WHERE user_id = %s
             ORDER BY id DESC
@@ -117,6 +121,10 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
     for apt in appointments:
         if apt["originalDate"]:
             apt["originalDate"] = apt["originalDate"].strftime('%Y-%m-%d')
+        if apt.get("date_created"):
+            apt["date_created"] = apt["date_created"].strftime('%Y-%m-%d %H:%M:%S')
+        if apt.get("date_booked"):
+            apt["date_booked"] = apt["date_booked"].strftime('%Y-%m-%d %H:%M:%S')
         # Map statuses for frontend
         if apt["status"] == "pending":
             apt["newDate"] = "Pendiente"

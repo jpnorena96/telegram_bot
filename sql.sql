@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS `visa_bot_db_telegram`.`users` (
   `full_name` VARCHAR(255) NULL DEFAULT NULL,
   `role` VARCHAR(50) NULL DEFAULT 'NATURAL_PERSON',
   `plan` VARCHAR(20) NULL DEFAULT 'platino',
+  `telegram_user_id` BIGINT NULL DEFAULT NULL,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha de última modificación',
   PRIMARY KEY (`id`),
   UNIQUE INDEX `email` (`email` ASC) VISIBLE)

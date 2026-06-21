@@ -67,6 +67,21 @@ const COUNTRY_CONSULATES = {
 const Modal = ({ apt, onClose }) => {
   if (!apt) return null;
   const { tag, label } = getTag(apt.status);
+  
+  const modalRows = [
+    ['CLIENTE',        apt.client],
+    ['TIPO_VISA',      apt.type],
+    ['FECHA_OBJETIVO',  apt.originalDate || '—'],
+    ['FECHA_ADELANTO',  apt.newDate || '—'],
+  ];
+
+  if (apt.date_created) {
+    modalRows.push(['FECHA_REGISTRO', apt.date_created]);
+  }
+  if (apt.date_booked) {
+    modalRows.push(['FECHA_AGENDADO', apt.date_booked]);
+  }
+
   return createPortal(
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
       <div onClick={e => e.stopPropagation()} className="animate-in" style={{ width: '100%', maxWidth: '480px', background: 'var(--black-2)', border: '1px solid var(--border-2)' }}>
@@ -77,12 +92,7 @@ const Modal = ({ apt, onClose }) => {
         </div>
         {/* body */}
         <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0' }}>
-          {[
-            ['CLIENTE',        apt.client],
-            ['TIPO_VISA',      apt.type],
-            ['FECHA_OBJETIVO',  apt.originalDate || '—'],
-            ['FECHA_ADELANTO',  apt.newDate || '—'],
-          ].map(([k, v]) => (
+          {modalRows.map(([k, v]) => (
             <div key={k} style={{ display: 'flex', borderBottom: '1px solid var(--border)', padding: '0.625rem 0' }}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.1em', minWidth: '140px' }}>{k}</div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem', color: 'var(--text-1)' }}>{v}</div>
@@ -275,6 +285,11 @@ const AppointmentsPage = () => {
   const [selected, setSelected] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
 
+  // Filtros de fecha para administrador
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [dateFilterType, setDateFilterType] = useState('originalDate'); // originalDate, date_booked, date_created
+
   const isAdmin = role === 'ADMINISTRATOR' || role === 'AUDITOR';
   const canEdit = role !== 'AUDITOR';
 
@@ -291,9 +306,26 @@ const AppointmentsPage = () => {
     let r = [...apts];
     if (search) { const q = search.toLowerCase(); r = r.filter(a => a.client?.toLowerCase().includes(q) || a.type?.toLowerCase().includes(q) || String(a.id).includes(q)); }
     if (statusF !== 'ALL') r = r.filter(a => a.status === statusF);
+    
+    // Filtrado por fecha para administrador
+    if (isAdmin) {
+      if (startDate) {
+        r = r.filter(a => {
+          const val = a[dateFilterType];
+          return val ? val.substring(0, 10) >= startDate : false;
+        });
+      }
+      if (endDate) {
+        r = r.filter(a => {
+          const val = a[dateFilterType];
+          return val ? val.substring(0, 10) <= endDate : false;
+        });
+      }
+    }
+
     r.sort((a, b) => sortD === 'asc' ? String(a[sortF] ?? '').localeCompare(String(b[sortF] ?? '')) : String(b[sortF] ?? '').localeCompare(String(a[sortF] ?? '')));
     setFiltered(r);
-  }, [apts, search, statusF, sortF, sortD]);
+  }, [apts, search, statusF, sortF, sortD, startDate, endDate, dateFilterType, isAdmin]);
 
   const toggleSort = f => { if (sortF === f) setSortD(d => d === 'asc' ? 'desc' : 'asc'); else { setSortF(f); setSortD('asc'); } };
   const SortIco = ({ f }) => sortF === f ? (sortD === 'asc' ? <ChevronUp size={10} /> : <ChevronDown size={10} />) : null;
@@ -352,6 +384,57 @@ const AppointmentsPage = () => {
           ))}
         </div>
       </div>
+
+      {/* ── DATE FILTERS (ADMIN ONLY) ── */}
+      {isAdmin && (
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', padding: '0.875rem', background: 'var(--black-3)', border: '1px solid var(--border)', borderTop: 'none', marginTop: '-1.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-3)', letterSpacing: '0.05em' }}>FILTRAR POR:</span>
+            <select 
+              value={dateFilterType} 
+              onChange={e => setDateFilterType(e.target.value)}
+              className="input-field"
+              style={{ height: '32px', fontSize: '0.75rem', padding: '0 0.5rem', width: 'auto', background: 'var(--black-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}
+            >
+              <option value="originalDate" style={{ background: 'var(--black-2)' }}>Fecha Objetivo</option>
+              <option value="date_booked" style={{ background: 'var(--black-2)' }}>Fecha de Agendado</option>
+              <option value="date_created" style={{ background: 'var(--black-2)' }}>Fecha de Registro</option>
+            </select>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-3)' }}>DESDE:</span>
+            <input 
+              type="date" 
+              value={startDate} 
+              onChange={e => setStartDate(e.target.value)}
+              className="input-field"
+              style={{ height: '32px', fontSize: '0.75rem', width: '135px', colorScheme: 'dark', background: 'var(--black-2)', border: '1px solid var(--border)', padding: '0 0.5rem', borderRadius: 'var(--radius-sm)' }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-3)' }}>HASTA:</span>
+            <input 
+              type="date" 
+              value={endDate} 
+              onChange={e => setEndDate(e.target.value)}
+              className="input-field"
+              style={{ height: '32px', fontSize: '0.75rem', width: '135px', colorScheme: 'dark', background: 'var(--black-2)', border: '1px solid var(--border)', padding: '0 0.5rem', borderRadius: 'var(--radius-sm)' }}
+            />
+          </div>
+
+          {(startDate || endDate) && (
+            <button 
+              onClick={() => { setStartDate(''); setEndDate(''); }}
+              className="btn btn-sm btn-outline"
+              style={{ height: '32px', padding: '0 0.75rem', fontSize: '0.7rem' }}
+            >
+              LIMPIAR FECHAS
+            </button>
+          )}
+        </div>
+      )}
 
       {/* ── TABLE ── */}
       <div style={{ background: 'var(--black-2)', border: '1px solid var(--border)', overflow: 'hidden' }}>

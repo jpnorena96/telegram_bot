@@ -22,6 +22,18 @@ def migrate():
         else:
             logger.info("Column 'plan' already exists.")
             
+        # Check if 'telegram_user_id' column exists
+        cursor.execute("SHOW COLUMNS FROM users LIKE 'telegram_user_id'")
+        result_tg = cursor.fetchone()
+        
+        if not result_tg:
+            logger.info("Adding 'telegram_user_id' column to 'users' table...")
+            cursor.execute("ALTER TABLE users ADD COLUMN telegram_user_id BIGINT NULL DEFAULT NULL")
+            conn.commit()
+            logger.info("Column 'telegram_user_id' added successfully.")
+        else:
+            logger.info("Column 'telegram_user_id' already exists.")
+            
         cursor.close()
         conn.close()
     except Exception as e:
