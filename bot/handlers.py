@@ -18,9 +18,9 @@ CONSULATE_FACILITY_MAP = {
 }
 
 PLAN_LIMITS = {
-    "platino": 3,
-    "oro": 5,
-    "diamante": 20
+    "platino": 50,
+    "oro": 80,
+    "diamante": 200
 }
 
 # Teclado persistente con navegacion rapida
