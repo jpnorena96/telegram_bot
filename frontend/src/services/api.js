@@ -155,6 +155,22 @@ export const api = {
     });
     return handleResponse(response);
   },
+  async discoverDirect(data) {
+    const response = await fetch(`${API_URL}/appointments/discover-direct`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+  async selectSchedule(appointmentId, scheduleId) {
+    const response = await fetch(`${API_URL}/appointments/${appointmentId}/select-schedule`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ schedule_id: scheduleId }),
+    });
+    return handleResponse(response);
+  },
   getExportCsvUrl() {
     const token = localStorage.getItem('token');
     return `${API_URL}/admin/export/csv?token=${token}`;

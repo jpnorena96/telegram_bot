@@ -274,3 +274,124 @@ def stop_appointment(appointment_id: int, current_user: dict = Depends(get_curre
     else:
         cursor.close()
         raise HTTPException(status_code=500, detail="Error al pausar el proceso en el VPS")
+
+
+class DiscoverDirectRequest(BaseModel):
+    email: str
+    password: str
+    country: str = 'co'
+    consulate: str = '25'
+    consulate_asc: Optional[str] = '26'
+    min_consulate_date: Optional[date] = None
+    max_consulate_date: Optional[date] = None
+    ivr: Optional[str] = 'null'
+
+
+@router.post("/discover-direct")
+def discover_direct(req: DiscoverDirectRequest, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    try:
+        # 1. Obtener telegram_user_id (vació para no notificar por Telegram al ser por la web)
+        telegram_user_id = ""
+
+        # 2. Insertar agendamiento temporal en la base de datos (con status 'guardada')
+        cursor_insert = db.cursor()
+        cursor_insert.execute("""
+            INSERT INTO user_appointments (
+                user_id, email, password, country, consulate, consulate_asc,
+                min_consulate_date, max_consulate_date, status, ivr
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s,
+                %s, %s, 'guardada', %s
+            )
+        """, (
+            current_user["id"], req.email, req.password, req.country, req.consulate, req.consulate_asc,
+            req.min_consulate_date, req.max_consulate_date, req.ivr
+        ))
+        db.commit()
+        new_id = cursor_insert.lastrowid
+        cursor_insert.close()
+
+        # 3. Preparar datos para el VPS
+        need_cas = bool(req.consulate_asc and req.consulate_asc.strip().lower() not in ["ninguno", "none", "null", ""])
+        user_data = {
+            "appt_email": req.email,
+            "appt_password": req.password,
+            "country": req.country,
+            "consulate": req.consulate,
+            "need_cas": need_cas,
+            "consulate_asc": req.consulate_asc if need_cas else "Ninguno",
+            "min_consulate_date": req.min_consulate_date.strftime('%Y-%m-%d') if req.min_consulate_date else None,
+            "max_consulate_date": req.max_consulate_date.strftime('%Y-%m-%d') if req.max_consulate_date else None,
+            "ivr": req.ivr or "Ninguno",
+            "telegram_user_id": telegram_user_id,
+            "appointment_id": new_id
+        }
+
+        # 4. Crear archivos en el VPS
+        vps_success = vps.create_vps_config(user_data)
+        if not vps_success:
+            raise Exception("No se pudo desplegar la configuración en el servidor VPS")
+
+        # 5. Ejecutar descubrimiento de Schedule IDs en el VPS
+        schedule_ids, error_detail = vps.discover_schedule_ids(req.email, new_id)
+        
+        if not schedule_ids:
+            return {"status": "error", "appointment_id": new_id, "detail": error_detail or "No se encontraron Schedule IDs en el portal de visas. Por favor verifica tu correo y contraseña."}
+
+        return {"status": "ok", "appointment_id": new_id, "schedules": schedule_ids}
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+
+
+class SelectScheduleRequest(BaseModel):
+    schedule_id: str
+
+
+@router.post("/{appointment_id}/select-schedule")
+def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT email, user_id FROM user_appointments WHERE id = %s", (appointment_id,))
+        apt = cursor.fetchone()
+        
+        if not apt:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+            
+        role = current_user["roles"][0]
+        if role not in ["ADMINISTRATOR", "AUDITOR"] and apt["user_id"] != current_user["id"]:
+            raise HTTPException(status_code=403, detail="Not authorized")
+            
+        # 1. Validar que no esté duplicado
+        cursor.execute("SELECT id FROM user_appointments WHERE schedule_id = %s", (req.schedule_id,))
+        existing = cursor.fetchone()
+        if existing:
+            raise HTTPException(status_code=400, detail="Este Schedule ID ya se encuentra registrado.")
+            
+        # 2. Guardar e iniciar PM2
+        success = vps.set_schedule_id_and_start(apt["email"], req.schedule_id, appointment_id)
+        if success:
+            cursor.execute(
+                "UPDATE user_appointments SET schedule_id = %s, status = 'pending' WHERE id = %s",
+                (req.schedule_id, appointment_id)
+            )
+            # Insertar notificación
+            cursor.execute(
+                "INSERT INTO notifications (user_id, message, status) VALUES (%s, %s, 'success')",
+                (apt["user_id"], f"Búsqueda automática iniciada en el servidor (PM2) para {apt['email']} con Schedule ID {req.schedule_id}.",)
+            )
+            db.commit()
+            return {"status": "ok", "message": "Schedule ID configurado y búsqueda iniciada en PM2."}
+        else:
+            raise HTTPException(status_code=500, detail="Error al configurar el Schedule ID en el servidor VPS.")
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()

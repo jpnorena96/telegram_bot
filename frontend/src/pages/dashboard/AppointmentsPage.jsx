@@ -127,6 +127,12 @@ const CreateModal = ({ onClose, onCreated }) => {
     max_consulate_date: '',
   });
 
+  const [mode, setMode] = useState('discover'); // 'discover' | 'manual'
+  const [discovering, setDiscovering] = useState(false);
+  const [discoveredSchedules, setDiscoveredSchedules] = useState(null);
+  const [tempAppointmentId, setTempAppointmentId] = useState(null);
+  const [selectedScheduleId, setSelectedScheduleId] = useState('');
+
   const handleCountryChange = (e) => {
     const newCountry = e.target.value;
     const consulates = COUNTRY_CONSULATES[newCountry];
@@ -159,21 +165,62 @@ const CreateModal = ({ onClose, onCreated }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleDiscoverSchedules = async () => {
+    if (!formData.email || !formData.password) {
+      setError('Por favor ingresa el email y la contraseña para conectar con el portal.');
+      return;
+    }
+    setDiscovering(true);
     setError('');
+    setDiscoveredSchedules(null);
     try {
       const payload = { ...formData };
       if (!payload.min_consulate_date) delete payload.min_consulate_date;
       if (!payload.max_consulate_date) delete payload.max_consulate_date;
       if (!payload.needs_cas) payload.consulate_asc = null;
       delete payload.needs_cas;
-      
-      await api.createAppointment(payload);
+      delete payload.schedule_id;
+
+      const res = await api.discoverDirect(payload);
+      if (res.status === 'ok') {
+        setDiscoveredSchedules(res.schedules);
+        setTempAppointmentId(res.appointment_id);
+        const keys = Object.keys(res.schedules);
+        if (keys.length > 0) {
+          setSelectedScheduleId(keys[0]);
+        }
+      } else {
+        setError(res.detail || 'No se encontraron Schedule IDs en el portal.');
+      }
+    } catch (err) {
+      setError(err.message || 'Error al conectar con el portal de visas.');
+    } finally {
+      setDiscovering(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      if (mode === 'manual') {
+        const payload = { ...formData };
+        if (!payload.min_consulate_date) delete payload.min_consulate_date;
+        if (!payload.max_consulate_date) delete payload.max_consulate_date;
+        if (!payload.needs_cas) payload.consulate_asc = null;
+        delete payload.needs_cas;
+        
+        await api.createAppointment(payload);
+      } else {
+        if (!selectedScheduleId) {
+          throw new Error('Debes seleccionar un Schedule ID descubierto del portal.');
+        }
+        await api.selectSchedule(tempAppointmentId, selectedScheduleId);
+      }
       onCreated();
     } catch (err) {
-      setError(err.message || 'Error al crear cita');
+      setError(err.message || 'Error al guardar el agendamiento');
     } finally {
       setLoading(false);
     }
@@ -190,7 +237,7 @@ const CreateModal = ({ onClose, onCreated }) => {
           <button type="button" className="btn btn-icon" onClick={onClose} style={{ border: 'none', width: '32px', height: '32px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%' }}><X size={14} /></button>
         </div>
         <form onSubmit={handleSubmit} className="panel-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {error && <div style={{ padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 'var(--radius-sm)', color: '#F87171', fontSize: '0.85rem' }}>{error}</div>}
+          {error && <div style={{ padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 'var(--radius-sm)', color: '#F87171', fontSize: '0.85rem', whiteSpace: 'pre-line' }}>{error}</div>}
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
             <div className="input-group" style={{ marginBottom: 0 }}>
@@ -204,10 +251,6 @@ const CreateModal = ({ onClose, onCreated }) => {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-            <div className="input-group" style={{ marginBottom: 0 }}>
-              <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>SCHEDULE ID</label>
-              <input className="input-field" type="text" placeholder="Ej. 12345678" value={formData.schedule_id} onChange={e => setFormData({...formData, schedule_id: e.target.value})} required />
-            </div>
             <div className="input-group" style={{ marginBottom: 0 }}>
               <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>PAÍS (CONSULADO)</label>
               <select className="input-field" style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }} value={formData.country} onChange={handleCountryChange} required>
@@ -259,10 +302,127 @@ const CreateModal = ({ onClose, onCreated }) => {
             </div>
           </div>
 
+          {/* Selector de modo */}
+          <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', marginTop: '0.5rem', gap: '1rem' }}>
+            <button
+              type="button"
+              onClick={() => { setMode('discover'); setError(''); }}
+              style={{
+                flex: 1,
+                padding: '0.5rem',
+                fontSize: '0.72rem',
+                fontFamily: 'var(--font-mono)',
+                fontWeight: mode === 'discover' ? 700 : 400,
+                color: mode === 'discover' ? 'var(--lime)' : 'var(--text-3)',
+                background: mode === 'discover' ? 'rgba(163, 230, 53, 0.03)' : 'transparent',
+                border: '1px solid ' + (mode === 'discover' ? 'var(--lime)' : 'var(--border)'),
+                cursor: 'pointer',
+                borderRadius: 'var(--radius-sm)',
+                transition: 'all 0.2s'
+              }}
+            >
+              [ AUTO-DESCUBRIR SCHEDULE ]
+            </button>
+            <button
+              type="button"
+              onClick={() => { setMode('manual'); setError(''); }}
+              style={{
+                flex: 1,
+                padding: '0.5rem',
+                fontSize: '0.72rem',
+                fontFamily: 'var(--font-mono)',
+                fontWeight: mode === 'manual' ? 700 : 400,
+                color: mode === 'manual' ? 'var(--lime)' : 'var(--text-3)',
+                background: mode === 'manual' ? 'rgba(163, 230, 53, 0.03)' : 'transparent',
+                border: '1px solid ' + (mode === 'manual' ? 'var(--lime)' : 'var(--border)'),
+                cursor: 'pointer',
+                borderRadius: 'var(--radius-sm)',
+                transition: 'all 0.2s'
+              }}
+            >
+              [ INGRESO MANUAL ]
+            </button>
+          </div>
+
+          {/* Contenido según el modo */}
+          {mode === 'manual' ? (
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>SCHEDULE ID</label>
+              <input className="input-field" type="text" placeholder="Ej. 12345678" value={formData.schedule_id} onChange={e => setFormData({...formData, schedule_id: e.target.value})} required={mode === 'manual'} />
+            </div>
+          ) : (
+            <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {discovering ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', gap: '0.75rem', textAlign: 'center' }}>
+                  <RefreshCw size={24} style={{ animation: 'spin 1.5s linear infinite', color: 'var(--lime)' }} />
+                  <div>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-1)', display: 'block' }}>Buscando Schedule ID...</span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', display: 'block', marginTop: '0.25rem' }}>Iniciando sesión en el portal del consulado. Esto puede tardar hasta 2 minutos.</span>
+                  </div>
+                </div>
+              ) : discoveredSchedules && Object.keys(discoveredSchedules).length > 0 ? (
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', color: 'var(--lime)' }}>SELECCIONAR SOLICITANTE / SCHEDULE ID</label>
+                  <select
+                    className="input-field"
+                    style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }}
+                    value={selectedScheduleId}
+                    onChange={e => setSelectedScheduleId(e.target.value)}
+                    required={mode === 'discover'}
+                  >
+                    {Object.entries(discoveredSchedules).map(([id, name]) => (
+                      <option key={id} value={id} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>
+                        {name} (ID: {id})
+                      </option>
+                    ))}
+                  </select>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>Se encontraron {Object.keys(discoveredSchedules).length} id(s).</span>
+                    <button type="button" onClick={handleDiscoverSchedules} style={{ background: 'none', border: 'none', color: 'var(--lime)', fontSize: '0.7rem', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}>BUSCAR DE NUEVO</button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-2)', textAlign: 'center' }}>
+                    Para obtener el Schedule ID automáticamente, haz clic en el botón de abajo. Conectaremos con el portal usando el email y contraseña ingresados.
+                  </span>
+                  <button
+                    type="button"
+                    className="btn btn-sm"
+                    onClick={handleDiscoverSchedules}
+                    style={{
+                      marginTop: '0.5rem',
+                      width: '100%',
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid var(--border)',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '0.75rem',
+                      color: 'var(--text-1)',
+                      gap: '0.5rem'
+                    }}
+                    disabled={!formData.email || !formData.password}
+                  >
+                    <Search size={12} /> CONECTAR Y BUSCAR EN PORTAL
+                  </button>
+                  {(!formData.email || !formData.password) && (
+                    <span style={{ fontSize: '0.65rem', color: '#F87171', fontFamily: 'var(--font-mono)' }}>
+                      * Requiere ingresar Email y Contraseña arriba.
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           <div style={{ marginTop: '0.75rem', display: 'flex', gap: '1rem' }}>
             <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={onClose}>CANCELAR</button>
-            <button type="submit" className="btn btn-lime" style={{ flex: 2, background: 'linear-gradient(135deg, var(--lime), var(--accent-2))', color: '#fff', border: 'none' }} disabled={loading}>
-              {loading ? 'GUARDANDO...' : 'CREAR AGENDAMIENTO'}
+            <button 
+              type="submit" 
+              className="btn btn-lime" 
+              style={{ flex: 2, background: 'linear-gradient(135deg, var(--lime), var(--accent-2))', color: '#fff', border: 'none' }} 
+              disabled={loading || discovering || (mode === 'discover' && !selectedScheduleId)}
+            >
+              {loading ? 'GUARDANDO...' : (mode === 'discover' ? 'ASIGNAR E INICIAR BÚSQUEDA' : 'CREAR AGENDAMIENTO')}
             </button>
           </div>
         </form>
