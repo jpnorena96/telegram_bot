@@ -112,8 +112,9 @@ const Modal = ({ apt, onClose }) => {
   );
 };
 
-/* ── CREATE MODAL ── */
-const CreateModal = ({ onClose, onCreated }) => {
+/* ── CREATE WIZARD ── */
+const CreateWizard = ({ onClose, onCreated }) => {
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -132,6 +133,10 @@ const CreateModal = ({ onClose, onCreated }) => {
   const [discoveredSchedules, setDiscoveredSchedules] = useState(null);
   const [tempAppointmentId, setTempAppointmentId] = useState(null);
   const [selectedScheduleId, setSelectedScheduleId] = useState('');
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   const handleCountryChange = (e) => {
     const newCountry = e.target.value;
@@ -162,12 +167,9 @@ const CreateModal = ({ onClose, onCreated }) => {
     setFormData({ ...formData, consulate: facility_id });
   };
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
   const handleDiscoverSchedules = async () => {
     if (!formData.email || !formData.password) {
-      setError('Por favor ingresa el email y la contraseña para conectar con el portal.');
+      setError('Por favor regresa al Paso 1 e ingresa el email y la contraseña.');
       return;
     }
     setDiscovering(true);
@@ -199,8 +201,42 @@ const CreateModal = ({ onClose, onCreated }) => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleNextStep = () => {
+    setError('');
+    if (currentStep === 1) {
+      if (!formData.email || !formData.password) {
+        setError('Debes ingresar el correo y la contraseña del portal.');
+        return;
+      }
+      setCurrentStep(2);
+    } else if (currentStep === 2) {
+      if (mode === 'manual' && !formData.schedule_id) {
+        setError('Debes ingresar el Schedule ID manualmente.');
+        return;
+      }
+      if (mode === 'discover' && !selectedScheduleId) {
+        setError('Debes descubrir y seleccionar un Schedule ID del portal.');
+        return;
+      }
+      setCurrentStep(3);
+    } else if (currentStep === 3) {
+      if (!formData.country || !formData.consulate) {
+        setError('Debes configurar el país y la sede del consulado.');
+        return;
+      }
+      setCurrentStep(4);
+    } else if (currentStep === 4) {
+      setCurrentStep(5);
+    }
+  };
+
+  const handlePrevStep = () => {
+    setError('');
+    setCurrentStep(prev => prev - 1);
+  };
+
+  const handleFinish = async (e) => {
+    if (e) e.preventDefault();
     setLoading(true);
     setError('');
     try {
@@ -213,222 +249,399 @@ const CreateModal = ({ onClose, onCreated }) => {
         
         await api.createAppointment(payload);
       } else {
-        if (!selectedScheduleId) {
-          throw new Error('Debes seleccionar un Schedule ID descubierto del portal.');
-        }
         await api.selectSchedule(tempAppointmentId, selectedScheduleId);
       }
-      onCreated();
+      setSuccess(true);
     } catch (err) {
-      setError(err.message || 'Error al guardar el agendamiento');
+      setError(err.message || 'Error al guardar o iniciar la búsqueda');
     } finally {
       setLoading(false);
     }
   };
 
-  return createPortal(
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
-      <div onClick={e => e.stopPropagation()} className="animate-in panel" style={{ width: '100%', maxWidth: '520px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <div className="panel-header" style={{ background: 'rgba(255,255,255,0.02)' }}>
-          <div>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.15em', color: 'var(--lime)' }}>NUEVO_AGENDAMIENTO</span>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-1)', marginTop: '0.25rem' }}>Agregar Cliente al Portal</h3>
-          </div>
-          <button type="button" className="btn btn-icon" onClick={onClose} style={{ border: 'none', width: '32px', height: '32px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%' }}><X size={14} /></button>
+  const steps = [
+    { num: 1, label: 'ACCESO', desc: 'Credenciales' },
+    { num: 2, label: 'VÍNCULO', desc: 'Schedule ID' },
+    { num: 3, label: 'CONSULAR', desc: 'País y Sede' },
+    { num: 4, label: 'FECHAS', desc: 'Límites' },
+    { num: 5, label: 'DESPLIEGUE', desc: 'Resumen' }
+  ];
+
+  return (
+    <div className="panel animate-in" style={{ width: '100%', maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', border: '1px solid var(--border-2)', background: 'var(--black-2)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+      
+      {/* Cabecera del Asistente */}
+      <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.01)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.15em', color: 'var(--lime)' }}>MÓDULO: CREACIÓN_DE_AGENDAMIENTOS</span>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-1)', marginTop: '0.25rem' }}>Asistente de Configuración Experto</h3>
         </div>
-        <form onSubmit={handleSubmit} className="panel-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {error && <div style={{ padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 'var(--radius-sm)', color: '#F87171', fontSize: '0.85rem', whiteSpace: 'pre-line' }}>{error}</div>}
+        <button type="button" className="btn btn-icon" onClick={onClose} style={{ border: 'none', width: '32px', height: '32px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%' }}><X size={14} /></button>
+      </div>
+
+      <div style={{ padding: '1.5rem' }}>
+        {/* Indicador de pasos (Stepper) */}
+        {!success && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', background: 'rgba(255,255,255,0.01)', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
+            {steps.map((s, idx) => {
+              const isActive = currentStep === s.num;
+              const isCompleted = currentStep > s.num;
+              return (
+                <React.Fragment key={s.num}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: idx === 4 ? 'initial' : 1 }}>
+                    <div style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.75rem',
+                      fontFamily: 'var(--font-mono)',
+                      fontWeight: 700,
+                      background: isActive ? 'var(--lime)' : isCompleted ? 'rgba(163, 230, 53, 0.1)' : 'rgba(255,255,255,0.03)',
+                      color: isActive ? 'var(--black)' : isCompleted ? 'var(--lime)' : 'var(--text-3)',
+                      border: '1px solid ' + (isActive || isCompleted ? 'var(--lime)' : 'var(--border)'),
+                      boxShadow: isActive ? '0 0 10px rgba(163, 230, 53, 0.3)' : 'none',
+                      transition: 'all 0.3s ease'
+                    }}>
+                      {isCompleted ? '✓' : s.num}
+                    </div>
+                    <div style={{ display: 'block' }}>
+                      <span style={{ display: 'block', fontSize: '0.65rem', fontFamily: 'var(--font-mono)', fontWeight: 700, letterSpacing: '0.05em', color: isActive ? 'var(--lime)' : isCompleted ? 'var(--text-2)' : 'var(--text-3)' }}>{s.label}</span>
+                      <span style={{ display: 'block', fontSize: '0.55rem', color: 'var(--text-3)' }}>{s.desc}</span>
+                    </div>
+                  </div>
+                  {idx < 4 && (
+                    <div style={{
+                      flex: 1,
+                      height: '1px',
+                      background: isCompleted ? 'var(--lime)' : 'var(--border)',
+                      margin: '0 0.5rem',
+                      transition: 'all 0.3s ease'
+                    }} />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Mensaje de Error global del Wizard */}
+        {error && (
+          <div style={{ marginBottom: '1.25rem', padding: '0.75rem 1rem', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 'var(--radius-md)', color: '#F87171', fontSize: '0.85rem', whiteSpace: 'pre-line', display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+            <AlertTriangle size={15} style={{ flexShrink: 0, marginTop: '0.1rem' }} />
+            <div>{error}</div>
+          </div>
+        )}
+
+        {/* Cuerpo del paso actual */}
+        <div style={{ minHeight: '260px' }}>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-            <div className="input-group" style={{ marginBottom: 0 }}>
-              <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>EMAIL PORTAL</label>
-              <input className="input-field" type="email" placeholder="cliente@email.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
-            </div>
-            <div className="input-group" style={{ marginBottom: 0 }}>
-              <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>CONTRASEÑA PORTAL</label>
-              <input className="input-field" type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required />
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-            <div className="input-group" style={{ marginBottom: 0 }}>
-              <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>PAÍS (CONSULADO)</label>
-              <select className="input-field" style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }} value={formData.country} onChange={handleCountryChange} required>
-                {Object.entries(COUNTRIES).map(([code, name]) => (
-                  <option key={code} value={code} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>{name}</option>
-                ))}
-              </select>
-            </div>
-            
-            {COUNTRY_CONSULATES[formData.country] ? (
-              <div className="input-group" style={{ marginBottom: 0 }}>
-                <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>SEDE CONSULADO</label>
-                <select className="input-field" style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }} value={formData.consulate} onChange={handleConsulateChange} required>
-                  {COUNTRY_CONSULATES[formData.country].map(c => (
-                    <option key={c.facility_id} value={c.facility_id} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>{c.name}</option>
-                  ))}
-                </select>
+          {/* PASO 1: ACCESO */}
+          {currentStep === 1 && (
+            <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Credenciales del Portal</h4>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Proporciona el correo y la contraseña con la que inicias sesión en el portal oficial de agendamiento de visas.</p>
               </div>
-            ) : (
-              <div className="input-group" style={{ marginBottom: 0 }}>
-                <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>CIUDAD DE EMBAJADA</label>
-                <input className="input-field" type="text" placeholder="Ej. Madrid" value={formData.consulate} onChange={handleConsulateChange} required />
-              </div>
-            )}
-          </div>
 
-          {COUNTRY_CONSULATES[formData.country] && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.02)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-              <input type="checkbox" id="needs_cas" checked={formData.needs_cas} onChange={e => setFormData({...formData, needs_cas: e.target.checked})} style={{ width: '16px', height: '16px', accentColor: 'var(--lime)' }} />
-              <div>
-                <label htmlFor="needs_cas" style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-1)', cursor: 'pointer' }}>Requiere cita en Centro Externo (CAS/ASC)</label>
-                {formData.needs_cas && (
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', marginTop: '0.1rem' }}>
-                    Sede CAS asignada: {formData.consulate_asc}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem', marginTop: '0.5rem' }}>
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><User size={11} /> EMAIL PORTAL</label>
+                  <input className="input-field" type="email" placeholder="cliente@email.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
+                </div>
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Lock size={11} /> CONTRASEÑA PORTAL</label>
+                  <input className="input-field" type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PASO 2: VÍNCULO (SCHEDULE ID) */}
+          {currentStep === 2 && (
+            <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Vinculación del Schedule ID</h4>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Vincula el Schedule ID de la cita. Puedes buscarlo automáticamente conectando con el portal o escribirlo manualmente.</p>
+              </div>
+
+              {/* Selector de modo interactivo */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.5rem' }}>
+                <div 
+                  onClick={() => { setMode('discover'); setError(''); }}
+                  style={{
+                    padding: '1.25rem',
+                    background: mode === 'discover' ? 'rgba(163, 230, 53, 0.03)' : 'rgba(255,255,255,0.01)',
+                    border: '1px solid ' + (mode === 'discover' ? 'var(--lime)' : 'var(--border)'),
+                    borderRadius: 'var(--radius-md)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: mode === 'discover' ? '0 0 15px rgba(163, 230, 53, 0.05)' : 'none'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, color: mode === 'discover' ? 'var(--lime)' : 'var(--text-1)' }}>
+                    <Search size={14} /> AUTO-DESCUBRIR (RECOMENDADO)
+                  </div>
+                  <p style={{ fontSize: '0.7rem', color: 'var(--text-3)', marginTop: '0.5rem', lineHeight: '1.3' }}>El bot se conectará de manera segura al portal y extraerá las citas y nombres asociados a la cuenta.</p>
+                </div>
+
+                <div 
+                  onClick={() => { setMode('manual'); setError(''); }}
+                  style={{
+                    padding: '1.25rem',
+                    background: mode === 'manual' ? 'rgba(163, 230, 53, 0.03)' : 'rgba(255,255,255,0.01)',
+                    border: '1px solid ' + (mode === 'manual' ? 'var(--lime)' : 'var(--border)'),
+                    borderRadius: 'var(--radius-md)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: mode === 'manual' ? '0 0 15px rgba(163, 230, 53, 0.05)' : 'none'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, color: mode === 'manual' ? 'var(--lime)' : 'var(--text-1)' }}>
+                    <User size={14} /> INGRESO MANUAL DIRECTO
+                  </div>
+                  <p style={{ fontSize: '0.7rem', color: 'var(--text-3)', marginTop: '0.5rem', lineHeight: '1.3' }}>Escribe directamente el número de 8 dígitos de tu Schedule ID si ya lo conoces de antemano.</p>
+                </div>
+              </div>
+
+              {/* Panel de contenido según el modo */}
+              <div style={{ marginTop: '0.5rem' }}>
+                {mode === 'manual' ? (
+                  <div className="input-group" style={{ marginBottom: 0 }}>
+                    <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>SCHEDULE ID (8 DÍGITOS)</label>
+                    <input className="input-field" type="text" placeholder="Ej. 12345678" value={formData.schedule_id} onChange={e => setFormData({...formData, schedule_id: e.target.value})} required={mode === 'manual'} />
+                  </div>
+                ) : (
+                  <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)', padding: '1.25rem' }}>
+                    {discovering ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', gap: '0.75rem', textAlign: 'center' }}>
+                        <RefreshCw size={28} style={{ animation: 'spin 1.5s linear infinite', color: 'var(--lime)' }} />
+                        <div>
+                          <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-1)', display: 'block' }}>Buscando Schedule ID en el servidor...</span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', display: 'block', marginTop: '0.25rem' }}>Iniciando sesión remota de forma segura. Este proceso en la VPS suele tardar entre 1 y 2 minutos.</span>
+                        </div>
+                      </div>
+                    ) : discoveredSchedules && Object.keys(discoveredSchedules).length > 0 ? (
+                      <div className="input-group" style={{ marginBottom: 0 }}>
+                        <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', color: 'var(--lime)' }}>SELECCIONAR SOLICITANTE / SCHEDULE ID DETECTADO</label>
+                        <select
+                          className="input-field"
+                          style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }}
+                          value={selectedScheduleId}
+                          onChange={e => setSelectedScheduleId(e.target.value)}
+                        >
+                          {Object.entries(discoveredSchedules).map(([id, name]) => (
+                            <option key={id} value={id} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>
+                              {name} (ID: {id})
+                            </option>
+                          ))}
+                        </select>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.625rem' }}>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>VÍNCULOS ENCONTRADOS: {Object.keys(discoveredSchedules).length} CITA(S)</span>
+                          <button type="button" onClick={handleDiscoverSchedules} style={{ background: 'none', border: 'none', color: 'var(--lime)', fontSize: '0.7rem', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}>REALIZAR NUEVA BÚSQUEDA</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', textAlign: 'center', padding: '0.5rem 0' }}>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-2)', maxWidth: '480px' }}>
+                          Conectaremos de forma remota a la VPS para iniciar sesión en la plataforma y extraer tus Schedule IDs automáticamente.
+                        </span>
+                        <button
+                          type="button"
+                          className="btn btn-lime btn-sm"
+                          onClick={handleDiscoverSchedules}
+                          style={{ minWidth: '240px', gap: '0.5rem' }}
+                        >
+                          <Search size={13} /> CONECTAR Y BUSCAR EN PORTAL
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-            <div className="input-group" style={{ marginBottom: 0 }}>
-              <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>FECHA MÍNIMA (OPCIONAL)</label>
-              <input className="input-field" type="date" value={formData.min_consulate_date} onChange={e => setFormData({...formData, min_consulate_date: e.target.value})} style={{ colorScheme: 'dark' }} />
-            </div>
-            <div className="input-group" style={{ marginBottom: 0 }}>
-              <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>FECHA MÁXIMA (OPCIONAL)</label>
-              <input className="input-field" type="date" value={formData.max_consulate_date} onChange={e => setFormData({...formData, max_consulate_date: e.target.value})} style={{ colorScheme: 'dark' }} />
-            </div>
-          </div>
+          {/* PASO 3: CONFIGURACIÓN CONSULAR */}
+          {currentStep === 3 && (
+            <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Configuración Consular y Sede</h4>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Selecciona el país y el consulado correspondiente a la cita que deseas adelantar.</p>
+              </div>
 
-          {/* Selector de modo */}
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', marginTop: '0.5rem', gap: '1rem' }}>
-            <button
-              type="button"
-              onClick={() => { setMode('discover'); setError(''); }}
-              style={{
-                flex: 1,
-                padding: '0.5rem',
-                fontSize: '0.72rem',
-                fontFamily: 'var(--font-mono)',
-                fontWeight: mode === 'discover' ? 700 : 400,
-                color: mode === 'discover' ? 'var(--lime)' : 'var(--text-3)',
-                background: mode === 'discover' ? 'rgba(163, 230, 53, 0.03)' : 'transparent',
-                border: '1px solid ' + (mode === 'discover' ? 'var(--lime)' : 'var(--border)'),
-                cursor: 'pointer',
-                borderRadius: 'var(--radius-sm)',
-                transition: 'all 0.2s'
-              }}
-            >
-              [ AUTO-DESCUBRIR SCHEDULE ]
-            </button>
-            <button
-              type="button"
-              onClick={() => { setMode('manual'); setError(''); }}
-              style={{
-                flex: 1,
-                padding: '0.5rem',
-                fontSize: '0.72rem',
-                fontFamily: 'var(--font-mono)',
-                fontWeight: mode === 'manual' ? 700 : 400,
-                color: mode === 'manual' ? 'var(--lime)' : 'var(--text-3)',
-                background: mode === 'manual' ? 'rgba(163, 230, 53, 0.03)' : 'transparent',
-                border: '1px solid ' + (mode === 'manual' ? 'var(--lime)' : 'var(--border)'),
-                cursor: 'pointer',
-                borderRadius: 'var(--radius-sm)',
-                transition: 'all 0.2s'
-              }}
-            >
-              [ INGRESO MANUAL ]
-            </button>
-          </div>
-
-          {/* Contenido según el modo */}
-          {mode === 'manual' ? (
-            <div className="input-group" style={{ marginBottom: 0 }}>
-              <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>SCHEDULE ID</label>
-              <input className="input-field" type="text" placeholder="Ej. 12345678" value={formData.schedule_id} onChange={e => setFormData({...formData, schedule_id: e.target.value})} required={mode === 'manual'} />
-            </div>
-          ) : (
-            <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {discovering ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', gap: '0.75rem', textAlign: 'center' }}>
-                  <RefreshCw size={24} style={{ animation: 'spin 1.5s linear infinite', color: 'var(--lime)' }} />
-                  <div>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-1)', display: 'block' }}>Buscando Schedule ID...</span>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', display: 'block', marginTop: '0.25rem' }}>Iniciando sesión en el portal del consulado. Esto puede tardar hasta 2 minutos.</span>
-                  </div>
-                </div>
-              ) : discoveredSchedules && Object.keys(discoveredSchedules).length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginTop: '0.5rem' }}>
                 <div className="input-group" style={{ marginBottom: 0 }}>
-                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', color: 'var(--lime)' }}>SELECCIONAR SOLICITANTE / SCHEDULE ID</label>
-                  <select
-                    className="input-field"
-                    style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }}
-                    value={selectedScheduleId}
-                    onChange={e => setSelectedScheduleId(e.target.value)}
-                    required={mode === 'discover'}
-                  >
-                    {Object.entries(discoveredSchedules).map(([id, name]) => (
-                      <option key={id} value={id} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>
-                        {name} (ID: {id})
-                      </option>
+                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Globe size={11} /> PAÍS (CONSULADO)</label>
+                  <select className="input-field" style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }} value={formData.country} onChange={handleCountryChange} required>
+                    {Object.entries(COUNTRIES).map(([code, name]) => (
+                      <option key={code} value={code} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>{name}</option>
                     ))}
                   </select>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>Se encontraron {Object.keys(discoveredSchedules).length} id(s).</span>
-                    <button type="button" onClick={handleDiscoverSchedules} style={{ background: 'none', border: 'none', color: 'var(--lime)', fontSize: '0.7rem', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}>BUSCAR DE NUEVO</button>
-                  </div>
                 </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-2)', textAlign: 'center' }}>
-                    Para obtener el Schedule ID automáticamente, haz clic en el botón de abajo. Conectaremos con el portal usando el email y contraseña ingresados.
-                  </span>
-                  <button
-                    type="button"
-                    className="btn btn-sm"
-                    onClick={handleDiscoverSchedules}
-                    style={{
-                      marginTop: '0.5rem',
-                      width: '100%',
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid var(--border)',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '0.75rem',
-                      color: 'var(--text-1)',
-                      gap: '0.5rem'
-                    }}
-                    disabled={!formData.email || !formData.password}
-                  >
-                    <Search size={12} /> CONECTAR Y BUSCAR EN PORTAL
-                  </button>
-                  {(!formData.email || !formData.password) && (
-                    <span style={{ fontSize: '0.65rem', color: '#F87171', fontFamily: 'var(--font-mono)' }}>
-                      * Requiere ingresar Email y Contraseña arriba.
-                    </span>
-                  )}
+                
+                {COUNTRY_CONSULATES[formData.country] ? (
+                  <div className="input-group" style={{ marginBottom: 0 }}>
+                    <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Globe size={11} /> SEDE CONSULADO</label>
+                    <select className="input-field" style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }} value={formData.consulate} onChange={handleConsulateChange} required>
+                      {COUNTRY_CONSULATES[formData.country].map(c => (
+                        <option key={c.facility_id} value={c.facility_id} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <div className="input-group" style={{ marginBottom: 0 }}>
+                    <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Globe size={11} /> CIUDAD DE EMBAJADA</label>
+                    <input className="input-field" type="text" placeholder="Ej. Madrid" value={formData.consulate} onChange={handleConsulateChange} required />
+                  </div>
+                )}
+              </div>
+
+              {COUNTRY_CONSULATES[formData.country] && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.02)', padding: '0.875rem 1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', marginTop: '0.5rem' }}>
+                  <input type="checkbox" id="needs_cas" checked={formData.needs_cas} onChange={e => setFormData({...formData, needs_cas: e.target.checked})} style={{ width: '16px', height: '16px', accentColor: 'var(--lime)', cursor: 'pointer' }} />
+                  <div>
+                    <label htmlFor="needs_cas" style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-1)', cursor: 'pointer' }}>Requiere cita en Centro Externo (CAS/ASC)</label>
+                    {formData.needs_cas && (
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', marginTop: '0.1rem' }}>
+                        Sede CAS asignada: {formData.consulate_asc}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
           )}
 
-          <div style={{ marginTop: '0.75rem', display: 'flex', gap: '1rem' }}>
-            <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={onClose}>CANCELAR</button>
-            <button 
-              type="submit" 
-              className="btn btn-lime" 
-              style={{ flex: 2, background: 'linear-gradient(135deg, var(--lime), var(--accent-2))', color: '#fff', border: 'none' }} 
-              disabled={loading || discovering || (mode === 'discover' && !selectedScheduleId)}
+          {/* PASO 4: PARÁMETROS Y FECHAS */}
+          {currentStep === 4 && (
+            <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Rango de Fechas Objetivo</h4>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Opcional. Especifica el rango de fechas en el cual el bot buscará reprogramar la cita. Si no se indica, reprogramará la más cercana disponible.</p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginTop: '0.5rem' }}>
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Calendar size={11} /> FECHA MÍNIMA</label>
+                  <input className="input-field" type="date" value={formData.min_consulate_date} onChange={e => setFormData({...formData, min_consulate_date: e.target.value})} style={{ colorScheme: 'dark' }} />
+                </div>
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Calendar size={11} /> FECHA MÁXIMA</label>
+                  <input className="input-field" type="date" value={formData.max_consulate_date} onChange={e => setFormData({...formData, max_consulate_date: e.target.value})} style={{ colorScheme: 'dark' }} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PASO 5: RESUMEN Y DESPLIEGUE */}
+          {currentStep === 5 && (
+            <div className="animate-in">
+              {success ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '2rem 1rem', gap: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '56px', height: '56px', background: 'rgba(163,230,53,0.1)', border: '1px solid var(--lime)', borderRadius: '50%', color: 'var(--lime)', boxShadow: '0 0 20px rgba(163,230,53,0.2)' }}>
+                    <CheckCircle2 size={32} />
+                  </div>
+                  <div>
+                    <h4 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-1)' }}>¡Agente Desplegado con Éxito!</h4>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-3)', marginTop: '0.35rem', maxWidth: '460px', margin: '0.35rem auto 0' }}>El script del agendamiento ha sido creado e inicializado correctamente en el servidor mediante el gestor de procesos PM2.</p>
+                  </div>
+                  
+                  <div style={{ width: '100%', maxWidth: '420px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '0.875rem', marginTop: '0.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>PROCESO PM2:</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--lime)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>ACTIVO (ONLINE)</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>CLIENTE ASIGNADO:</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-1)', fontFamily: 'var(--font-mono)' }}>{formData.email}</span>
+                    </div>
+                  </div>
+
+                  <button type="button" className="btn btn-lime" style={{ marginTop: '1rem', width: '100%', maxWidth: '200px' }} onClick={onCreated}>FINALIZAR</button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Confirmación y Lanzamiento</h4>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Revisa la configuración completa del agendamiento antes de lanzar el agente automático en el servidor VPS.</p>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border)', padding: '1.25rem', borderRadius: 'var(--radius-md)' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <span style={{ fontSize: '0.62rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>EMAIL DEL PORTAL</span>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-1)', fontWeight: 600 }}>{formData.email}</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <span style={{ fontSize: '0.62rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>SCHEDULE ID VINCULADO</span>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--lime)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+                        {mode === 'discover' ? selectedScheduleId : formData.schedule_id}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <span style={{ fontSize: '0.62rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>PAÍS Y SEDE CONSULAR</span>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-1)' }}>
+                        {COUNTRIES[formData.country]} ({formData.consulate})
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <span style={{ fontSize: '0.62rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>RANGO DE FECHAS LIMITADO</span>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-1)' }}>
+                        {formData.min_consulate_date || 'Sin límite'} → {formData.max_consulate_date || 'Sin límite'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+        </div>
+
+        {/* Botones de Navegación del Wizard */}
+        {!success && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: '1.25rem', marginTop: '1.5rem', gap: '1rem' }}>
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={currentStep === 1 ? onClose : handlePrevStep}
+              disabled={loading}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
             >
-              {loading ? 'GUARDANDO...' : (mode === 'discover' ? 'ASIGNAR E INICIAR BÚSQUEDA' : 'CREAR AGENDAMIENTO')}
+              <ArrowLeft size={12} /> {currentStep === 1 ? 'CANCELAR' : 'ATRÁS'}
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-lime"
+              onClick={currentStep === 5 ? handleFinish : handleNextStep}
+              disabled={loading || discovering || (currentStep === 2 && mode === 'discover' && !selectedScheduleId)}
+              style={{
+                minWidth: '160px',
+                background: currentStep === 5 ? 'linear-gradient(135deg, var(--lime), var(--accent-2))' : 'var(--surface-3)',
+                color: currentStep === 5 ? '#fff' : 'var(--text-1)',
+                border: currentStep === 5 ? 'none' : '1px solid var(--border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.4rem'
+              }}
+            >
+              {loading ? (
+                'DESPLEGANDO...'
+              ) : currentStep === 5 ? (
+                <>INICIAR AGENTE PM2 <CheckCircle2 size={12} /></>
+              ) : (
+                <>CONTINUAR <ArrowRight size={12} /></>
+              )}
             </button>
           </div>
-        </form>
+        )}
+
       </div>
-    </div>,
-    document.body
+    </div>
   );
 };
 
@@ -491,6 +704,15 @@ const AppointmentsPage = () => {
   const SortIco = ({ f }) => sortF === f ? (sortD === 'asc' ? <ChevronUp size={10} /> : <ChevronDown size={10} />) : null;
 
   const statuses = ['ALL', ...new Set(apts.map(a => a.status).filter(Boolean))];
+
+  if (isCreating) {
+    return (
+      <CreateWizard 
+        onClose={() => setIsCreating(false)} 
+        onCreated={() => { setIsCreating(false); load(); }} 
+      />
+    );
+  }
 
   return (
     <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -673,12 +895,6 @@ const AppointmentsPage = () => {
       </div>
 
       <Modal apt={selected} onClose={() => setSelected(null)} />
-      {isCreating && (
-        <CreateModal 
-          onClose={() => setIsCreating(false)} 
-          onCreated={() => { setIsCreating(false); load(); }} 
-        />
-      )}
     </div>
   );
 };
