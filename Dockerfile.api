@@ -22,6 +22,8 @@ RUN pip install --no-cache-dir -r requirements-api.txt
 # ── Copiar el código fuente ───────────────────────────────────────────────────
 # Necesitamos config.py de la raíz porque backend/db.py lo importa
 COPY config.py .
+COPY script.py .
+COPY script_requirements.txt .
 COPY ./backend /app/backend
 
 # ── Permisos correctos ────────────────────────────────────────────────────────
