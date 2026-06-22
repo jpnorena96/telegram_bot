@@ -264,6 +264,10 @@ async def main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         plan = query.data.replace("adm_usr_setplan_", "")
         return await admin_create_user_plan_received(update, context, plan)
 
+    elif query.data.startswith("adm_usr_appts_"):
+        uid = int(query.data.split("_")[3])
+        return await show_admin_user_appointments(update, context, uid)
+
     return MAIN_MENU
 
 
@@ -271,6 +275,7 @@ async def view_appointments(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     """Shows all appointments for the current user as selectable buttons."""
     query = update.callback_query
     user_id = context.user_data.get("user_id")
+    context.user_data["back_to_appt_list"] = "menu_view"
 
     try:
         appointments = db.get_appointments(user_id)
@@ -305,13 +310,14 @@ async def view_appointments(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 async def show_appointment_details(update: Update, context: ContextTypes.DEFAULT_TYPE, appt_id: int) -> int:
     """Displays detailed info about a specific appointment with start/stop action buttons."""
     query = update.callback_query
+    back_callback = context.user_data.get("back_to_appt_list", "menu_view")
     
     try:
         appt = db.get_appointment(appt_id)
         if not appt:
             await query.edit_message_text(
                 "❌ No se encontró el usuario.",
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Volver", callback_data="menu_view")]]),
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Volver", callback_data=back_callback)]]),
                 parse_mode='Markdown'
             )
             return MAIN_MENU
@@ -339,7 +345,7 @@ async def show_appointment_details(update: Update, context: ContextTypes.DEFAULT
         else:
             keyboard.append([InlineKeyboardButton("▶️ Iniciar Búsqueda", callback_data=f"action_start_{appt_id}")])
             
-        keyboard.append([InlineKeyboardButton("◀️ Volver a la lista", callback_data="menu_view")])
+        keyboard.append([InlineKeyboardButton("◀️ Volver a la lista", callback_data=back_callback)])
         
         await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
         
@@ -347,7 +353,7 @@ async def show_appointment_details(update: Update, context: ContextTypes.DEFAULT
         logger.error(f"Error in show_appointment_details: {e}")
         await query.edit_message_text(
             "❌ Ocurrió un error al cargar los detalles.",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Volver", callback_data="menu_view")]]),
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Volver", callback_data=back_callback)]]),
             parse_mode='Markdown'
         )
         
@@ -1170,7 +1176,9 @@ async def show_admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     query = update.callback_query
     
     stats = db.get_admin_summary()
-    if not stats:
+    time_stats = db.get_appointments_stats()
+    
+    if not stats or not time_stats:
         await query.edit_message_text(
             "❌ Error al cargar las estadísticas.",
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Volver", callback_data="back_to_menu")]]),
@@ -1186,7 +1194,17 @@ async def show_admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         f"⏳ *Usuarios Pendientes:* `{stats['pending_users']}`\n"
         f"🏛️ *Total Agendamientos:* `{stats['total_appointments']}`\n"
         f"🔎 *Búsquedas Activas:* `{stats['searching_appointments']}`\n"
-        f"✅ *Citas Logradas:* `{stats['completed_appointments']}`\n"
+        f"✅ *Citas Logradas:* `{stats['completed_appointments']}`\n\n"
+        
+        "🏆 *Citas Logradas con Éxito (Reservas)*\n"
+        f"  • *Hoy:* `{time_stats['booked_today']}`\n"
+        f"  • *Esta Semana:* `{time_stats['booked_week']}`\n"
+        f"  • *Este Mes:* `{time_stats['booked_month']}`\n\n"
+        
+        "📝 *Nuevos Agendamientos Registrados*\n"
+        f"  • *Hoy:* `{time_stats['created_today']}`\n"
+        f"  • *Esta Semana:* `{time_stats['created_week']}`\n"
+        f"  • *Este Mes:* `{time_stats['created_month']}`\n"
     )
     
     keyboard = [[InlineKeyboardButton("◀️ Volver al Menú", callback_data="back_to_menu")]]
@@ -1259,6 +1277,7 @@ async def show_admin_user_details(update: Update, context: ContextTypes.DEFAULT_
     )
     
     keyboard = [
+        [InlineKeyboardButton("👁️ Ver Agendamientos de este Usuario", callback_data=f"adm_usr_appts_{user_id}")],
         [InlineKeyboardButton(auth_action_label, callback_data=f"adm_usr_auth_{user_id}")],
         [InlineKeyboardButton("💎 Cambiar Plan", callback_data=f"adm_usr_plan_{user_id}"),
          InlineKeyboardButton("👤 Cambiar Rol", callback_data=f"adm_usr_role_{user_id}")],
@@ -1395,6 +1414,7 @@ async def admin_create_user_plan_received(update: Update, context: ContextTypes.
 async def show_admin_appointments(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Displays all recent appointments in the system for administrative start/stop control."""
     query = update.callback_query
+    context.user_data["back_to_appt_list"] = "admin_appointments"
     
     appointments = db.get_all_appointments_admin()
     if not appointments:
@@ -1416,6 +1436,49 @@ async def show_admin_appointments(update: Update, context: ContextTypes.DEFAULT_
         keyboard.append([InlineKeyboardButton("◀️ Volver al Menú", callback_data="back_to_menu")])
         
     await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+    return MAIN_MENU
+
+
+async def show_admin_user_appointments(update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int) -> int:
+    """Lists all appointments for a specific user to allow admin management."""
+    query = update.callback_query
+    
+    try:
+        # Get user details for context
+        conn = mysql.connector.connect(**db.DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT email, full_name FROM users WHERE id = %s", (user_id,))
+        u = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        if not u:
+            await query.answer("Usuario no encontrado", show_alert=True)
+            return await show_admin_users(update, context)
+            
+        name = u.get("full_name") or u["email"].split("@")[0]
+        appointments = db.get_appointments(user_id)
+        
+        context.user_data["back_to_appt_list"] = f"adm_usr_appts_{user_id}"
+        
+        if not appointments:
+            text = f"📭 *El usuario {name} ({u['email']}) no tiene agendamientos registrados.*"
+            keyboard = [[InlineKeyboardButton("◀️ Volver al Usuario", callback_data=f"adm_usr_view_{user_id}")]]
+        else:
+            text = f"🏛️ *Agendamientos de {name}:*\n\nSelecciona uno para gestionar:"
+            keyboard = []
+            for appt in appointments:
+                status_emoji = "✅" if appt.get("status") == "pending" else "⏸️"
+                label = f"{status_emoji} {appt.get('email')} ({appt.get('consulate', 'N/A')})"
+                keyboard.append([InlineKeyboardButton(label, callback_data=f"view_appt_{appt['id']}")])
+            keyboard.append([InlineKeyboardButton("◀️ Volver al Usuario", callback_data=f"adm_usr_view_{user_id}")])
+            
+        await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+        
+    except Exception as e:
+        logger.error(f"Error in show_admin_user_appointments: {e}")
+        await query.answer("Error al consultar la base de datos.", show_alert=True)
+        
     return MAIN_MENU
 
 

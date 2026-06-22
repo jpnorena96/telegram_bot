@@ -403,3 +403,51 @@ def get_all_appointments_admin() -> List[dict]:
     except mysql.connector.Error as err:
         logger.error(f"Database Error in get_all_appointments_admin: {err}")
         return []
+
+
+def get_appointments_stats() -> dict:
+    """Returns counts of created and booked appointments for today, this week, and this month."""
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        # 1. Booked appointments (Citas logradas con éxito)
+        # Hoy
+        cursor.execute("SELECT COUNT(*) as total FROM user_appointments WHERE date_booked >= CURDATE()")
+        booked_today = cursor.fetchone()["total"]
+        
+        # Esta semana (lunes a domingo)
+        cursor.execute("SELECT COUNT(*) as total FROM user_appointments WHERE YEARWEEK(date_booked, 1) = YEARWEEK(CURDATE(), 1)")
+        booked_week = cursor.fetchone()["total"]
+        
+        # Este mes
+        cursor.execute("SELECT COUNT(*) as total FROM user_appointments WHERE MONTH(date_booked) = MONTH(CURDATE()) AND YEAR(date_booked) = YEAR(CURDATE())")
+        booked_month = cursor.fetchone()["total"]
+        
+        # 2. Created appointments (Nuevos registros creados)
+        # Hoy
+        cursor.execute("SELECT COUNT(*) as total FROM user_appointments WHERE date_created >= CURDATE()")
+        created_today = cursor.fetchone()["total"]
+        
+        # Esta semana
+        cursor.execute("SELECT COUNT(*) as total FROM user_appointments WHERE YEARWEEK(date_created, 1) = YEARWEEK(CURDATE(), 1)")
+        created_week = cursor.fetchone()["total"]
+        
+        # Este mes
+        cursor.execute("SELECT COUNT(*) as total FROM user_appointments WHERE MONTH(date_created) = MONTH(CURDATE()) AND YEAR(date_created) = YEAR(CURDATE())")
+        created_month = cursor.fetchone()["total"]
+        
+        cursor.close()
+        conn.close()
+        
+        return {
+            "booked_today": booked_today,
+            "booked_week": booked_week,
+            "booked_month": booked_month,
+            "created_today": created_today,
+            "created_week": created_week,
+            "created_month": created_month,
+        }
+    except mysql.connector.Error as err:
+        logger.error(f"Database Error in get_appointments_stats: {err}")
+        return {}
