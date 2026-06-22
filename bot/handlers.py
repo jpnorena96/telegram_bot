@@ -170,6 +170,15 @@ async def main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
     elif query.data == "admin_appointments":
         return await show_admin_appointments(update, context)
 
+    elif query.data == "admin_create_appt":
+        context.user_data["is_editing"] = False
+        await query.edit_message_text(
+            "➕ *Crear Nuevo Agendamiento (Administrador)*\n\n"
+            "Por favor ingresa el *Correo Electrónico de la cuenta de Visas*:",
+            parse_mode='Markdown'
+        )
+        return APPOINTMENT_EMAIL
+
     elif query.data == "adm_usr_create":
         return await admin_create_user_start(update, context)
 
@@ -1390,7 +1399,10 @@ async def show_admin_appointments(update: Update, context: ContextTypes.DEFAULT_
     appointments = db.get_all_appointments_admin()
     if not appointments:
         text = "📭 *No hay ningún agendamiento registrado en el sistema.*"
-        keyboard = [[InlineKeyboardButton("◀️ Volver al Menú", callback_data="back_to_menu")]]
+        keyboard = [
+            [InlineKeyboardButton("➕ Crear Nuevo Agendamiento", callback_data="admin_create_appt")],
+            [InlineKeyboardButton("◀️ Volver al Menú", callback_data="back_to_menu")]
+        ]
     else:
         text = "🏛️ *Gestión de Agendamientos:* \n\nSelecciona una búsqueda para iniciarla o pausarla:"
         keyboard = []
@@ -1400,6 +1412,7 @@ async def show_admin_appointments(update: Update, context: ContextTypes.DEFAULT_
             label = f"{status_emoji} {client} - {appt.get('email')} ({appt.get('consulate', 'N/A')})"
             keyboard.append([InlineKeyboardButton(label, callback_data=f"view_appt_{appt['id']}")])
             
+        keyboard.append([InlineKeyboardButton("➕ Crear Nuevo Agendamiento", callback_data="admin_create_appt")])
         keyboard.append([InlineKeyboardButton("◀️ Volver al Menú", callback_data="back_to_menu")])
         
     await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
