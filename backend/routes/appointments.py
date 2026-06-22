@@ -52,12 +52,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 def create_appointment(apt: AppointmentCreate, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     cursor = db.cursor(dictionary=True)
     try:
-        # 1. Obtener telegram_user_id de la tabla users
-        cursor.execute("SELECT telegram_user_id FROM users WHERE id = %s", (current_user["id"],))
-        user_row = cursor.fetchone()
-        telegram_user_id = user_row["telegram_user_id"] if user_row else None
-
-        # 2. Insertar agendamiento en la base de datos
+        # 1. Insertar agendamiento en la base de datos
         cursor_insert = db.cursor()
         cursor_insert.execute("""
             INSERT INTO user_appointments (
@@ -78,7 +73,7 @@ def create_appointment(apt: AppointmentCreate, current_user: dict = Depends(get_
         new_id = cursor_insert.lastrowid
         cursor_insert.close()
 
-        # 3. Preparar datos para configuración en VPS
+        # 2. Preparar datos para configuración en VPS (fijamos telegram_user_id a vacío para no notificar por Telegram al ser creado desde la web)
         need_cas = bool(apt.consulate_asc and apt.consulate_asc.strip().lower() not in ["ninguno", "none", "null", ""])
         
         user_data = {
@@ -91,23 +86,25 @@ def create_appointment(apt: AppointmentCreate, current_user: dict = Depends(get_
             "min_consulate_date": apt.min_consulate_date.strftime('%Y-%m-%d') if apt.min_consulate_date else None,
             "max_consulate_date": apt.max_consulate_date.strftime('%Y-%m-%d') if apt.max_consulate_date else None,
             "ivr": apt.ivr or "Ninguno",
-            "telegram_user_id": telegram_user_id,
+            "telegram_user_id": "",  # Vacío para evitar notificaciones de Telegram desde la web
             "appointment_id": new_id
         }
 
-        # 4. Crear archivos de configuración en el VPS
+        # 3. Crear archivos de configuración en el VPS
         vps_success = vps.create_vps_config(user_data)
 
-        # 5. Si viene con schedule_id o ivr numérico, iniciar PM2 en el VPS
+        # 4. Si viene con schedule_id o ivr numérico, iniciar PM2 en el VPS
         schedule_id_to_use = None
         if apt.schedule_id and apt.schedule_id.strip():
             schedule_id_to_use = apt.schedule_id.strip()
         elif apt.ivr and apt.ivr.strip().isdigit():
             schedule_id_to_use = apt.ivr.strip()
 
+        is_running = False
         if vps_success and schedule_id_to_use:
             start_success = vps.set_schedule_id_and_start(apt.email, schedule_id_to_use, new_id)
             if start_success:
+                is_running = True
                 cursor_update = db.cursor()
                 cursor_update.execute(
                     "UPDATE user_appointments SET schedule_id = %s, status = 'pending' WHERE id = %s",
@@ -115,6 +112,21 @@ def create_appointment(apt: AppointmentCreate, current_user: dict = Depends(get_
                 )
                 db.commit()
                 cursor_update.close()
+
+        # 5. Insertar notificación del sistema para la web
+        msg = f"Se ha registrado el agendamiento para {apt.email}."
+        if is_running:
+            msg += " Búsqueda automática iniciada en el servidor (PM2)."
+        else:
+            msg += " Servidor configurado a la espera del Schedule ID."
+            
+        cursor_notif = db.cursor()
+        cursor_notif.execute(
+            "INSERT INTO notifications (user_id, message, status) VALUES (%s, %s, %s)",
+            (current_user["id"], msg, "success" if is_running else "info")
+        )
+        db.commit()
+        cursor_notif.close()
 
     except Exception as e:
         db.rollback()
@@ -219,6 +231,11 @@ def start_appointment(appointment_id: int, current_user: dict = Depends(get_curr
     success = vps.start_pm2_process(apt["email"], appointment_id)
     if success:
         cursor.execute("UPDATE user_appointments SET status = 'pending' WHERE id = %s", (appointment_id,))
+        # Insertar notificación
+        cursor.execute(
+            "INSERT INTO notifications (user_id, message, status) VALUES (%s, %s, 'info')",
+            (apt["user_id"], f"Búsqueda automática iniciada en el servidor para {apt['email']}.",)
+        )
         db.commit()
         cursor.close()
         return {"status": "ok", "message": "Búsqueda iniciada en el servidor (PM2)"}
@@ -246,6 +263,11 @@ def stop_appointment(appointment_id: int, current_user: dict = Depends(get_curre
     success = vps.stop_pm2_process(apt["email"], appointment_id)
     if success:
         cursor.execute("UPDATE user_appointments SET status = 'paused' WHERE id = %s", (appointment_id,))
+        # Insertar notificación
+        cursor.execute(
+            "INSERT INTO notifications (user_id, message, status) VALUES (%s, %s, 'warning')",
+            (apt["user_id"], f"Búsqueda automática detenida en el servidor para {apt['email']}.",)
+        )
         db.commit()
         cursor.close()
         return {"status": "ok", "message": "Búsqueda pausada en el servidor (PM2)"}

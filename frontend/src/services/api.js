@@ -128,6 +128,33 @@ export const api = {
     });
     return handleResponse(r);
   },
+  async getNotifications() {
+    const response = await fetch(`${API_URL}/notifications/`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  async markNotificationsRead() {
+    const response = await fetch(`${API_URL}/notifications/read`, {
+      method: 'POST',
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  async startAppointment(id) {
+    const response = await fetch(`${API_URL}/appointments/${id}/start`, {
+      method: 'POST',
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  async stopAppointment(id) {
+    const response = await fetch(`${API_URL}/appointments/${id}/stop`, {
+      method: 'POST',
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
   getExportCsvUrl() {
     const token = localStorage.getItem('token');
     return `${API_URL}/admin/export/csv?token=${token}`;
