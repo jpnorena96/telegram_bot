@@ -73,6 +73,57 @@ def create_appointment(apt: AppointmentCreate, current_user: dict = Depends(get_
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()
+
+    # Deploy configuration to VPS and start PM2 automatically
+    try:
+        # Get telegram_user_id of current user from DB
+        cursor_u = db.cursor(dictionary=True)
+        cursor_u.execute("SELECT telegram_user_id FROM users WHERE id = %s", (current_user["id"],))
+        user_row = cursor_u.fetchone()
+        telegram_user_id = user_row["telegram_user_id"] if user_row else None
+        cursor_u.close()
+
+        # Build user_data dictionary for VPS functions
+        user_data = {
+            "appt_email": apt.email,
+            "appt_password": apt.password,
+            "country": apt.country,
+            "consulate": apt.consulate,
+            "need_cas": bool(apt.consulate_asc and apt.consulate_asc != 'Ninguno'),
+            "consulate_asc": apt.consulate_asc or 'Ninguno',
+            "min_consulate_date": str(apt.min_consulate_date) if apt.min_consulate_date else None,
+            "max_consulate_date": str(apt.max_consulate_date) if apt.max_consulate_date else None,
+            "schedule_id": apt.schedule_id or "",
+            "ivr": apt.ivr or "Ninguno",
+            "appointment_id": new_id,
+            "telegram_user_id": telegram_user_id,
+            "telegram_chat_id": telegram_user_id,
+        }
+
+        # Import VPS helper and deploy
+        import vps
+        vps_success = vps.create_vps_config(user_data)
+        
+        if vps_success:
+            sched_id = None
+            if apt.schedule_id and apt.schedule_id.strip() and apt.schedule_id.strip().lower() != 'null':
+                sched_id = apt.schedule_id.strip()
+            elif apt.ivr and apt.ivr.strip() and apt.ivr.strip().lower() != 'null' and apt.ivr.strip().isdigit():
+                sched_id = apt.ivr.strip()
+
+            if sched_id:
+                # Update DB with the active schedule_id
+                cursor_s = db.cursor()
+                cursor_s.execute("UPDATE user_appointments SET schedule_id = %s WHERE id = %s", (sched_id, new_id))
+                db.commit()
+                cursor_s.close()
+                
+                # Start script on VPS using PM2
+                vps.set_schedule_id_and_start(apt.email, sched_id, new_id)
+    except Exception as vps_err:
+        # Log VPS error, but proceed with HTTP 200 response since DB insert succeeded
+        import logging
+        logging.getLogger(__name__).error(f"Error deploying to VPS for appointment {new_id}: {vps_err}")
     
     return {"message": "Appointment created successfully", "id": new_id}
 
