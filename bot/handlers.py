@@ -217,9 +217,9 @@ async def show_appointment_details(update: Update, context: ContextTypes.DEFAULT
         
         keyboard = []
         if status == "pending":
-            keyboard.append([InlineKeyboardButton("🛑 Pausar Búsqueda (Stop PM2)", callback_data=f"action_stop_{appt_id}")])
+            keyboard.append([InlineKeyboardButton("🛑 Pausar Búsqueda", callback_data=f"action_stop_{appt_id}")])
         else:
-            keyboard.append([InlineKeyboardButton("▶️ Iniciar Búsqueda (Start PM2)", callback_data=f"action_start_{appt_id}")])
+            keyboard.append([InlineKeyboardButton("▶️ Iniciar Búsqueda", callback_data=f"action_start_{appt_id}")])
             
         keyboard.append([InlineKeyboardButton("◀️ Volver a la lista", callback_data="menu_view")])
         
