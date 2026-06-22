@@ -253,3 +253,37 @@ def set_schedule_id_and_start(email: str, schedule_id: str, appointment_id: int 
     except Exception as e:
         logger.error(f"Failed to set schedule ID and start: {e}")
         return False
+
+
+def stop_pm2_process(email: str, appointment_id: int = None) -> bool:
+    """Stops the PM2 process for the given appointment on the VPS."""
+    try:
+        base_path, folder_name = _get_base_path(email, appointment_id)
+        pm2_name = f"visa_{folder_name}"
+        logger.info(f"Connecting to VPS to stop PM2 process: {pm2_name}")
+        
+        ssh = _connect_ssh()
+        _run_ssh_command(ssh, f"pm2 stop {pm2_name}")
+        _run_ssh_command(ssh, "pm2 save")
+        ssh.close()
+        return True
+    except Exception as e:
+        logger.error(f"Failed to stop PM2 process {pm2_name or email}: {e}")
+        return False
+
+
+def start_pm2_process(email: str, appointment_id: int = None) -> bool:
+    """Starts/resumes the PM2 process for the given appointment on the VPS."""
+    try:
+        base_path, folder_name = _get_base_path(email, appointment_id)
+        pm2_name = f"visa_{folder_name}"
+        logger.info(f"Connecting to VPS to start PM2 process: {pm2_name}")
+        
+        ssh = _connect_ssh()
+        _run_ssh_command(ssh, f"pm2 start {pm2_name}")
+        _run_ssh_command(ssh, "pm2 save")
+        ssh.close()
+        return True
+    except Exception as e:
+        logger.error(f"Failed to start PM2 process {pm2_name or email}: {e}")
+        return False

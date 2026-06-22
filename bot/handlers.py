@@ -134,11 +134,23 @@ async def main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         )
         return ConversationHandler.END
 
+    elif query.data.startswith("view_appt_"):
+        appt_id = int(query.data.split("_")[2])
+        return await show_appointment_details(update, context, appt_id)
+
+    elif query.data.startswith("action_stop_"):
+        appt_id = int(query.data.split("_")[2])
+        return await toggle_appointment_search(update, context, appt_id, start_search=False)
+
+    elif query.data.startswith("action_start_"):
+        appt_id = int(query.data.split("_")[2])
+        return await toggle_appointment_search(update, context, appt_id, start_search=True)
+
     return MAIN_MENU
 
 
 async def view_appointments(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Shows all appointments for the current user."""
+    """Shows all appointments for the current user as selectable buttons."""
     query = update.callback_query
     user_id = context.user_data.get("user_id")
 
@@ -150,27 +162,122 @@ async def view_appointments(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                 "📭 *No tienes usuarios registrados*\n\n"
                 "Usa la opción *➕ Crear nuevo usuario* para agregar uno."
             )
+            keyboard = [[InlineKeyboardButton("◀️ Volver al Menú", callback_data="back_to_menu")]]
         else:
-            text = "👁️ *Tus Usuarios Registrados:*\n\n"
-            for i, appt in enumerate(appointments, 1):
+            text = (
+                "👁️ *Tus Usuarios Registrados:*\n\n"
+                "Selecciona un usuario para gestionar su búsqueda (Pausar o Reanudar):"
+            )
+            keyboard = []
+            for appt in appointments:
                 status_emoji = "✅" if appt.get("status") == "pending" else "⏸️"
-                text += (
-                    f"━━━━━━━━━━━━━━━━━━\n"
-                    f"{status_emoji} *Usuario {i}*\n"
-                    f"📧 Email: `{appt.get('email', 'N/A')}`\n"
-                    f"🌎 País: `{appt.get('country', 'co').upper()}`\n"
-                    f"🏛️ Consulado: {appt.get('consulate', 'N/A')}\n"
-                    f"🏢 ASC: {appt.get('consulate_asc', 'N/A')}\n"
-                    f"📅 Fechas: {appt.get('min_consulate_date', 'N/A')} → {appt.get('max_consulate_date', 'N/A')}\n"
-                    f"📊 Estado: {appt.get('status', 'N/A')}\n\n"
-                )
+                label = f"{status_emoji} {appt.get('email', 'N/A')} ({appt.get('consulate', 'N/A')})"
+                keyboard.append([InlineKeyboardButton(label, callback_data=f"view_appt_{appt['id']}")])
+            keyboard.append([InlineKeyboardButton("◀️ Volver al Menú", callback_data="back_to_menu")])
+            
     except mysql.connector.Error as err:
         logger.error(f"Database Error: {err}")
         text = "❌ Error al consultar la base de datos."
+        keyboard = [[InlineKeyboardButton("◀️ Volver al Menú", callback_data="back_to_menu")]]
 
-    keyboard = [[InlineKeyboardButton("◀️ Volver al Menú", callback_data="back_to_menu")]]
     await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
     return MAIN_MENU
+
+
+async def show_appointment_details(update: Update, context: ContextTypes.DEFAULT_TYPE, appt_id: int) -> int:
+    """Displays detailed info about a specific appointment with start/stop action buttons."""
+    query = update.callback_query
+    
+    try:
+        appt = db.get_appointment(appt_id)
+        if not appt:
+            await query.edit_message_text(
+                "❌ No se encontró el usuario.",
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Volver", callback_data="menu_view")]]),
+                parse_mode='Markdown'
+            )
+            return MAIN_MENU
+            
+        status = appt.get("status", "pending")
+        status_text = "✅ Buscando cita activa..." if status == "pending" else "⏸️ Búsqueda pausada/detenida"
+        status_emoji = "🟢 Activo" if status == "pending" else "🔴 Pausado"
+        
+        text = (
+            f"👤 *Detalles del Usuario de Citas*\n"
+            f"━━━━━━━━━━━━━━━━━━\n"
+            f"📧 Email: `{appt.get('email', 'N/A')}`\n"
+            f"🌎 País: `{appt.get('country', 'co').upper()}`\n"
+            f"🏛️ Consulado: {appt.get('consulate', 'N/A')}\n"
+            f"🏢 ASC: {appt.get('consulate_asc', 'N/A')}\n"
+            f"📅 Fechas: {appt.get('min_consulate_date', 'N/A')} → {appt.get('max_consulate_date', 'N/A')}\n"
+            f"🆔 Schedule ID: `{appt.get('schedule_id', 'N/A')}`\n"
+            f"📊 Estado actual: *{status_emoji}*\n"
+            f"ℹ️ Info de estado: {status_text}\n"
+        )
+        
+        keyboard = []
+        if status == "pending":
+            keyboard.append([InlineKeyboardButton("🛑 Pausar Búsqueda (Stop PM2)", callback_data=f"action_stop_{appt_id}")])
+        else:
+            keyboard.append([InlineKeyboardButton("▶️ Iniciar Búsqueda (Start PM2)", callback_data=f"action_start_{appt_id}")])
+            
+        keyboard.append([InlineKeyboardButton("◀️ Volver a la lista", callback_data="menu_view")])
+        
+        await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+        
+    except Exception as e:
+        logger.error(f"Error in show_appointment_details: {e}")
+        await query.edit_message_text(
+            "❌ Ocurrió un error al cargar los detalles.",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Volver", callback_data="menu_view")]]),
+            parse_mode='Markdown'
+        )
+        
+    return MAIN_MENU
+
+
+async def toggle_appointment_search(update: Update, context: ContextTypes.DEFAULT_TYPE, appt_id: int, start_search: bool) -> int:
+    """Stops or starts the PM2 process on VPS and updates database status accordingly."""
+    query = update.callback_query
+    
+    action_verb = "iniciar" if start_search else "pausar"
+    await query.edit_message_text(
+        f"⏳ Conectando al servidor VPS para {action_verb} la búsqueda...\n"
+        "Esto puede demorar unos segundos."
+    )
+    
+    try:
+        appt = db.get_appointment(appt_id)
+        if not appt:
+            await query.edit_message_text(
+                "❌ No se encontró el usuario.",
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Volver", callback_data="menu_view")]]),
+                parse_mode='Markdown'
+            )
+            return MAIN_MENU
+            
+        email = appt["email"]
+        
+        if start_search:
+            success = vps.start_pm2_process(email, appt_id)
+            new_status = "pending"
+        else:
+            success = vps.stop_pm2_process(email, appt_id)
+            new_status = "paused"
+            
+        if success:
+            db.update_appointment_status(appt_id, new_status)
+            status_msg = "iniciada (PM2 Start)" if start_search else "detenida (PM2 Stop)"
+            await query.answer(f"✅ Búsqueda {status_msg} con éxito", show_alert=True)
+        else:
+            await query.answer("❌ Error al cambiar el estado en el servidor VPS", show_alert=True)
+            
+    except Exception as e:
+        logger.error(f"Error in toggle_appointment_search: {e}")
+        await query.answer("❌ Ocurrió un error inesperado al procesar la solicitud", show_alert=True)
+        
+    # Return to details page to show the updated state
+    return await show_appointment_details(update, context, appt_id)
 
 
 async def show_appointment_list(update: Update, context: ContextTypes.DEFAULT_TYPE, action: str) -> int:

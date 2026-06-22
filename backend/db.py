@@ -236,3 +236,19 @@ def check_existing_schedule_id(schedule_id: str) -> bool:
     except mysql.connector.Error as err:
         logger.error(f"Database Error in check_existing_schedule_id: {err}")
         return False
+
+
+def update_appointment_status(appointment_id: int, status: str) -> bool:
+    """Updates the status of an appointment in the database."""
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+        sql = "UPDATE user_appointments SET status = %s WHERE id = %s"
+        cursor.execute(sql, (status, appointment_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return True
+    except mysql.connector.Error as err:
+        logger.error(f"Database Error in update_appointment_status: {err}")
+        return False
