@@ -876,7 +876,7 @@ async def schedule_select_callback(update: Update, context: ContextTypes.DEFAULT
             update, context,
             text=(
                 f"✅ *Script iniciado correctamente!*\n\n"
-                f"🆔 SCHEDULE\\_ID: `{schedule_id}`\n"
+                f"🆔 IDENTIFICADOR: `{schedule_id}`\n"
                 f"📧 Email: `{appt_email}`\n\n"
                 "🎯 *Menú Principal*\n\nSelecciona una opción:"
             )
@@ -904,7 +904,7 @@ async def manual_schedule_id(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return MANUAL_SCHEDULE_ID
 
     await update.message.reply_text(
-        f"⏳ Configurando SCHEDULE\\_ID=`{schedule_id}`\n"
+        f"⏳ Configurando IDENTIFICADOR=`{schedule_id}`\n"
         "🚀 Iniciando script en el servidor...",
         parse_mode='Markdown'
     )
@@ -923,7 +923,7 @@ async def manual_schedule_id(update: Update, context: ContextTypes.DEFAULT_TYPE)
             update, context,
             text=(
                 f"✅ *Script iniciado correctamente!*\n\n"
-                f"🆔 SCHEDULE\\_ID: `{schedule_id}`\n"
+                f"🆔 IDENTIFICADOR: `{schedule_id}`\n"
                 f"📧 Email: `{appt_email}`\n\n"
                 "🎯 *Menú Principal*\n\nSelecciona una opción:"
             )
