@@ -1001,6 +1001,7 @@ async def max_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             if success:
                 # Persistir schedule_id en la BD
                 db.save_schedule_id(appt_email, ivr_value)
+                await notify_user_new_appointment(context, appt_id)
                 return await show_main_menu(
                     update, context,
                     text=(
@@ -1098,6 +1099,8 @@ async def schedule_select_callback(update: Update, context: ContextTypes.DEFAULT
     if success:
         # Persistir schedule_id en la BD
         db.save_schedule_id(appt_email, schedule_id)
+        if appointment_id:
+            await notify_user_new_appointment(context, appointment_id)
         return await show_main_menu(
             update, context,
             text=(
@@ -1145,6 +1148,8 @@ async def manual_schedule_id(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if success:
         # Persistir schedule_id en la BD
         db.save_schedule_id(appt_email, schedule_id)
+        if appointment_id:
+            await notify_user_new_appointment(context, appointment_id)
         return await show_main_menu(
             update, context,
             text=(
@@ -1159,6 +1164,42 @@ async def manual_schedule_id(update: Update, context: ContextTypes.DEFAULT_TYPE)
             update, context,
             text="⚠️ Hubo un problema iniciando el script.\n\n🎯 *Menú Principal*\n\nSelecciona una opción:"
         )
+
+
+async def notify_user_new_appointment(context: ContextTypes.DEFAULT_TYPE, appointment_id: int) -> None:
+    """Sends a Telegram notification to the user owning the appointment when it starts."""
+    try:
+        appt = db.get_appointment(appointment_id)
+        if not appt:
+            return
+            
+        target_chat_id = db.get_telegram_user_id_by_appointment(appointment_id)
+        if not target_chat_id:
+            logger.warning(f"No telegram_user_id found for appointment_id {appointment_id}")
+            return
+            
+        email = appt.get("email")
+        consulate = appt.get("consulate")
+        schedule_id = appt.get("schedule_id") or appt.get("ivr")
+        
+        text = (
+            "🚀 *Nuevo Agendamiento Iniciado*\n"
+            "━━━━━━━━━━━━━━━━━━\n"
+            "Se ha iniciado la búsqueda automática de citas para tu cuenta:\n\n"
+            f"📧 *Email:* `{email}`\n"
+            f"🏛️ *Consulado:* {consulate}\n"
+            f"🆔 *Schedule ID:* `{schedule_id}`\n\n"
+            "Te notificaremos por este medio en cuanto encontremos una cita disponible. 🔍"
+        )
+        
+        await context.bot.send_message(
+            chat_id=int(target_chat_id),
+            text=text,
+            parse_mode='Markdown'
+        )
+        logger.info(f"Notification sent to telegram_user_id {target_chat_id} for appointment {appointment_id}")
+    except Exception as e:
+        logger.error(f"Failed to send new appointment notification to user: {e}")
 
 
 # ─────────────────────────────────────────────

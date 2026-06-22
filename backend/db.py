@@ -451,3 +451,26 @@ def get_appointments_stats() -> dict:
     except mysql.connector.Error as err:
         logger.error(f"Database Error in get_appointments_stats: {err}")
         return {}
+
+
+def get_telegram_user_id_by_appointment(appointment_id: int) -> Optional[int]:
+    """Returns the telegram_user_id of the user owning the given appointment."""
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        sql = """
+            SELECT u.telegram_user_id 
+            FROM user_appointments a
+            JOIN users u ON a.user_id = u.id
+            WHERE a.id = %s
+        """
+        cursor.execute(sql, (appointment_id,))
+        res = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        if res:
+            return res.get("telegram_user_id")
+        return None
+    except mysql.connector.Error as err:
+        logger.error(f"Database Error in get_telegram_user_id_by_appointment: {err}")
+        return None
