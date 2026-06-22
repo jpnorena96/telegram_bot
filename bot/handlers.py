@@ -55,14 +55,8 @@ async def show_main_menu(update_or_query, context: ContextTypes.DEFAULT_TYPE, te
         ]
     else:
         if text is None:
-            user_id = context.user_data.get("user_id")
-            plan = context.user_data.get("plan", "platino")
-            count = db.get_appointment_count(user_id)
-            limit = PLAN_LIMITS.get(plan, 3)
-            
             text = (
                 "🎯 *Menú Principal*\n\n"
-                f"👤 *Plan:* {plan.capitalize()} ({count}/{limit} usuarios)\n\n"
                 "Selecciona una opción:"
             )
 
