@@ -39,24 +39,39 @@ NAV_TRIGGERS = {"◀️ Menú", "🔄 Reiniciar", "/menu", "/cancel"}
 
 async def show_main_menu(update_or_query, context: ContextTypes.DEFAULT_TYPE, text: str = None) -> int:
     """Displays the main menu with inline buttons."""
-    if text is None:
-        user_id = context.user_data.get("user_id")
-        plan = context.user_data.get("plan", "platino")
-        count = db.get_appointment_count(user_id)
-        limit = PLAN_LIMITS.get(plan, 3)
-        
-        text = (
-            "🎯 *Menú Principal*\n\n"
-            f"👤 *Plan:* {plan.capitalize()} ({count}/{limit} usuarios)\n\n"
-            "Selecciona una opción:"
-        )
+    role = context.user_data.get("role", "NATURAL_PERSON")
+    
+    if role == "ADMINISTRATOR":
+        if text is None:
+            text = (
+                "👑 *Panel de Control - Administrador*\n\n"
+                "Selecciona una opción de administración del sistema:"
+            )
+        keyboard = [
+            [InlineKeyboardButton("📊 Estadísticas del Sistema", callback_data="admin_stats")],
+            [InlineKeyboardButton("👥 Gestionar Usuarios del Sistema", callback_data="admin_users")],
+            [InlineKeyboardButton("🏛️ Gestionar Agendamientos", callback_data="admin_appointments")],
+            [InlineKeyboardButton("🚪 Cerrar sesión", callback_data="menu_logout")],
+        ]
+    else:
+        if text is None:
+            user_id = context.user_data.get("user_id")
+            plan = context.user_data.get("plan", "platino")
+            count = db.get_appointment_count(user_id)
+            limit = PLAN_LIMITS.get(plan, 3)
+            
+            text = (
+                "🎯 *Menú Principal*\n\n"
+                f"👤 *Plan:* {plan.capitalize()} ({count}/{limit} usuarios)\n\n"
+                "Selecciona una opción:"
+            )
 
-    keyboard = [
-        [InlineKeyboardButton("➕ Crear nuevo usuario", callback_data="menu_create")],
-        [InlineKeyboardButton("✏️ Editar usuario", callback_data="menu_edit")],
-        [InlineKeyboardButton("👁️ Ver mis usuarios", callback_data="menu_view")],
-        [InlineKeyboardButton("🚪 Cerrar sesión", callback_data="menu_logout")],
-    ]
+        keyboard = [
+            [InlineKeyboardButton("➕ Crear nuevo usuario", callback_data="menu_create")],
+            [InlineKeyboardButton("✏️ Editar usuario", callback_data="menu_edit")],
+            [InlineKeyboardButton("👁️ Ver mis usuarios", callback_data="menu_view")],
+            [InlineKeyboardButton("🚪 Cerrar sesión", callback_data="menu_logout")],
+        ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     if hasattr(update_or_query, 'callback_query') and update_or_query.callback_query:
@@ -145,6 +160,100 @@ async def main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
     elif query.data.startswith("action_start_"):
         appt_id = int(query.data.split("_")[2])
         return await toggle_appointment_search(update, context, appt_id, start_search=True)
+
+    elif query.data == "admin_stats":
+        return await show_admin_stats(update, context)
+
+    elif query.data == "admin_users":
+        return await show_admin_users(update, context)
+
+    elif query.data == "admin_appointments":
+        return await show_admin_appointments(update, context)
+
+    elif query.data == "adm_usr_create":
+        return await admin_create_user_start(update, context)
+
+    elif query.data.startswith("adm_usr_view_"):
+        uid = int(query.data.split("_")[3])
+        return await show_admin_user_details(update, context, uid)
+
+    elif query.data.startswith("adm_usr_auth_"):
+        uid = int(query.data.split("_")[3])
+        try:
+            conn = mysql.connector.connect(**db.DB_CONFIG)
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT is_authorized FROM users WHERE id = %s", (uid,))
+            u = cursor.fetchone()
+            cursor.close()
+            conn.close()
+            if u:
+                new_auth = 0 if u["is_authorized"] else 1
+                db.admin_update_user(uid, {"is_authorized": new_auth})
+        except Exception:
+            pass
+        return await show_admin_user_details(update, context, uid)
+
+    elif query.data.startswith("adm_usr_plan_"):
+        uid = int(query.data.split("_")[3])
+        keyboard = [
+            [InlineKeyboardButton("Platino (platino)", callback_data=f"adm_usr_setnewplan_platino_{uid}")],
+            [InlineKeyboardButton("Oro (oro)", callback_data=f"adm_usr_setnewplan_oro_{uid}")],
+            [InlineKeyboardButton("Diamante (diamante)", callback_data=f"adm_usr_setnewplan_diamante_{uid}")],
+            [InlineKeyboardButton("◀️ Volver", callback_data=f"adm_usr_view_{uid}")]
+        ]
+        await query.edit_message_text("💎 *Selecciona el nuevo Plan para el usuario:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+        return MAIN_MENU
+
+    elif query.data.startswith("adm_usr_setnewplan_"):
+        parts = query.data.split("_")
+        new_plan = parts[4]
+        uid = int(parts[5])
+        db.admin_update_user(uid, {"plan": new_plan})
+        await query.answer("Plan actualizado", show_alert=True)
+        return await show_admin_user_details(update, context, uid)
+
+    elif query.data.startswith("adm_usr_role_"):
+        uid = int(query.data.split("_")[3])
+        keyboard = [
+            [InlineKeyboardButton("Persona Natural (NATURAL_PERSON)", callback_data=f"adm_usr_setnewrole_NATURAL_PERSON_{uid}")],
+            [InlineKeyboardButton("Agencia de Viajes (TRAVEL_AGENCY)", callback_data=f"adm_usr_setnewrole_TRAVEL_AGENCY_{uid}")],
+            [InlineKeyboardButton("Visa Manager (VISA_MANAGER)", callback_data=f"adm_usr_setnewrole_VISA_MANAGER_{uid}")],
+            [InlineKeyboardButton("Administrador (ADMINISTRATOR)", callback_data=f"adm_usr_setnewrole_ADMINISTRATOR_{uid}")],
+            [InlineKeyboardButton("◀️ Volver", callback_data=f"adm_usr_view_{uid}")]
+        ]
+        await query.edit_message_text("👤 *Selecciona el nuevo Rol para el usuario:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+        return MAIN_MENU
+
+    elif query.data.startswith("adm_usr_setnewrole_"):
+        parts = query.data.split("_")
+        new_role = parts[4]
+        uid = int(parts[5])
+        db.admin_update_user(uid, {"role": new_role})
+        await query.answer("Rol actualizado", show_alert=True)
+        return await show_admin_user_details(update, context, uid)
+
+    elif query.data.startswith("adm_usr_del_"):
+        uid = int(query.data.split("_")[3])
+        keyboard = [
+            [InlineKeyboardButton("✅ Sí, eliminar", callback_data=f"adm_usr_delconf_yes_{uid}"),
+             InlineKeyboardButton("❌ No, cancelar", callback_data=f"adm_usr_view_{uid}")]
+        ]
+        await query.edit_message_text("⚠️ *¿Estás seguro de eliminar permanentemente este usuario y todos sus agendamientos?*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+        return MAIN_MENU
+
+    elif query.data.startswith("adm_usr_delconf_yes_"):
+        uid = int(query.data.split("_")[4])
+        db.admin_delete_user(uid)
+        await query.answer("Usuario eliminado", show_alert=True)
+        return await show_admin_users(update, context)
+
+    elif query.data.startswith("adm_usr_setrole_"):
+        role = query.data.replace("adm_usr_setrole_", "")
+        return await admin_create_user_role_received(update, context, role)
+
+    elif query.data.startswith("adm_usr_setplan_"):
+        plan = query.data.replace("adm_usr_setplan_", "")
+        return await admin_create_user_plan_received(update, context, plan)
 
     return MAIN_MENU
 
@@ -447,6 +556,7 @@ async def password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             context.user_data["user_id"] = user["id"]
             context.user_data["plan"] = user.get("plan", "platino")
             context.user_data["db_telegram_user_id"] = user.get("telegram_user_id")
+            context.user_data["role"] = user.get("role", "NATURAL_PERSON")
             # Split comma-separated countries (e.g., 'co,mx') into a list
             countries_str = user.get("country", "co")
             context.user_data["allowed_countries"] = [c.strip() for c in countries_str.split(",") if c.strip()]
@@ -1040,6 +1150,260 @@ async def manual_schedule_id(update: Update, context: ContextTypes.DEFAULT_TYPE)
             update, context,
             text="⚠️ Hubo un problema iniciando el script.\n\n🎯 *Menú Principal*\n\nSelecciona una opción:"
         )
+
+
+# ─────────────────────────────────────────────
+# ADMINISTRATOR MODULES
+# ─────────────────────────────────────────────
+
+async def show_admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Displays global statistics of the system."""
+    query = update.callback_query
+    
+    stats = db.get_admin_summary()
+    if not stats:
+        await query.edit_message_text(
+            "❌ Error al cargar las estadísticas.",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Volver", callback_data="back_to_menu")]]),
+            parse_mode='Markdown'
+        )
+        return MAIN_MENU
+        
+    text = (
+        "📊 *Estadísticas Globales del Sistema*\n"
+        "━━━━━━━━━━━━━━━━━━\n"
+        f"👥 *Total Usuarios:* `{stats['total_users']}`\n"
+        f"🟢 *Usuarios Activos:* `{stats['active_users']}`\n"
+        f"⏳ *Usuarios Pendientes:* `{stats['pending_users']}`\n"
+        f"🏛️ *Total Agendamientos:* `{stats['total_appointments']}`\n"
+        f"🔎 *Búsquedas Activas:* `{stats['searching_appointments']}`\n"
+        f"✅ *Citas Logradas:* `{stats['completed_appointments']}`\n"
+    )
+    
+    keyboard = [[InlineKeyboardButton("◀️ Volver al Menú", callback_data="back_to_menu")]]
+    await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+    return MAIN_MENU
+
+
+async def show_admin_users(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Lists all system users with option to edit or add new ones."""
+    query = update.callback_query
+    
+    users = db.get_admin_users()
+    if not users:
+        text = "📭 *No hay usuarios en el sistema.*"
+        keyboard = [
+            [InlineKeyboardButton("➕ Crear Nuevo Usuario", callback_data="adm_usr_create")],
+            [InlineKeyboardButton("◀️ Volver al Menú", callback_data="back_to_menu")]
+        ]
+    else:
+        text = "👥 *Usuarios Registrados en el Sistema:*\n\nSelecciona uno para gestionar su cuenta:"
+        keyboard = []
+        for u in users:
+            auth_emoji = "🔓" if u.get("is_authorized") else "🔒"
+            role_label = "👑" if u.get("role") == "ADMINISTRATOR" else "👤"
+            label = f"{auth_emoji} {role_label} {u.get('full_name') or u['email'].split('@')[0]} ({u['email']})"
+            keyboard.append([InlineKeyboardButton(label, callback_data=f"adm_usr_view_{u['id']}")])
+            
+        # Button to create new user
+        keyboard.append([InlineKeyboardButton("➕ Crear Nuevo Usuario", callback_data="adm_usr_create")])
+        keyboard.append([InlineKeyboardButton("◀️ Volver al Menú", callback_data="back_to_menu")])
+        
+    await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+    return MAIN_MENU
+
+
+async def show_admin_user_details(update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int) -> int:
+    """Shows specific details of a system user and authorization/edit options."""
+    query = update.callback_query
+    
+    try:
+        conn = mysql.connector.connect(**db.DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT id, email, full_name, role, plan, is_authorized FROM users WHERE id = %s", (user_id,))
+        u = cursor.fetchone()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        logger.error(f"Error querying user {user_id}: {e}")
+        u = None
+        
+    if not u:
+        await query.edit_message_text(
+            "❌ No se encontró el usuario.",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Volver", callback_data="admin_users")]]),
+            parse_mode='Markdown'
+        )
+        return MAIN_MENU
+        
+    auth_text = "Autorizado (Activo)" if u.get("is_authorized") else "No Autorizado (Pendiente)"
+    auth_action_label = "🔒 Desautorizar Cuenta" if u.get("is_authorized") else "🔓 Autorizar Cuenta"
+    
+    text = (
+        f"👤 *Detalles de Cuenta de Usuario*\n"
+        f"━━━━━━━━━━━━━━━━━━\n"
+        f"📛 Nombre: `{u.get('full_name') or 'N/A'}`\n"
+        f"📧 Email: `{u.get('email', 'N/A')}`\n"
+        f"🔑 Rol: `{u.get('role', 'NATURAL_PERSON')}`\n"
+        f"💎 Plan: `{u.get('plan', 'platino').capitalize()}`\n"
+        f"📊 Estado: *{auth_text}*\n"
+    )
+    
+    keyboard = [
+        [InlineKeyboardButton(auth_action_label, callback_data=f"adm_usr_auth_{user_id}")],
+        [InlineKeyboardButton("💎 Cambiar Plan", callback_data=f"adm_usr_plan_{user_id}"),
+         InlineKeyboardButton("👤 Cambiar Rol", callback_data=f"adm_usr_role_{user_id}")],
+        [InlineKeyboardButton("🗑️ Eliminar Usuario", callback_data=f"adm_usr_del_{user_id}")],
+        [InlineKeyboardButton("◀️ Volver a la lista", callback_data="admin_users")]
+    ]
+    
+    await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+    return MAIN_MENU
+
+
+async def admin_create_user_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Starts the user creation flow for the administrator."""
+    query = update.callback_query
+    
+    await query.edit_message_text(
+        "➕ *Crear Nuevo Usuario del Sistema*\n\n"
+        "Ingresa el *Nombre Completo* del nuevo usuario:",
+        parse_mode='Markdown'
+    )
+    return ADMIN_CREATE_USER_NAME
+
+
+async def admin_create_user_name_received(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Saves the name and asks for the email."""
+    context.user_data["new_user_name"] = update.message.text.strip()
+    
+    await update.message.reply_text(
+        "📧 Ingresa el *Correo Electrónico* del nuevo usuario:",
+        reply_markup=NAV_KEYBOARD,
+        parse_mode='Markdown'
+    )
+    return ADMIN_CREATE_USER_EMAIL
+
+
+async def admin_create_user_email_received(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Saves the email and asks for the password."""
+    email_text = update.message.text.strip()
+    if "@" not in email_text or "." not in email_text:
+        await update.message.reply_text("❌ Formato de correo inválido. Inténtalo de nuevo:")
+        return ADMIN_CREATE_USER_EMAIL
+        
+    context.user_data["new_user_email"] = email_text
+    
+    await update.message.reply_text(
+        "🔒 Ingresa la *Contraseña* para este nuevo usuario:",
+        reply_markup=NAV_KEYBOARD,
+        parse_mode='Markdown'
+    )
+    return ADMIN_CREATE_USER_PASS
+
+
+async def admin_create_user_pass_received(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Saves the password and shows role selection buttons."""
+    password_msg = update.message
+    password_text = password_msg.text.strip()
+    
+    try:
+        await password_msg.delete()
+    except Exception:
+        pass
+        
+    context.user_data["new_user_pass"] = password_text
+    
+    keyboard = [
+        [InlineKeyboardButton("Persona Natural (NATURAL_PERSON)", callback_data="adm_usr_setrole_NATURAL_PERSON")],
+        [InlineKeyboardButton("Agencia de Viajes (TRAVEL_AGENCY)", callback_data="adm_usr_setrole_TRAVEL_AGENCY")],
+        [InlineKeyboardButton("Visa Manager (VISA_MANAGER)", callback_data="adm_usr_setrole_VISA_MANAGER")],
+        [InlineKeyboardButton("Administrador (ADMINISTRATOR)", callback_data="adm_usr_setrole_ADMINISTRATOR")],
+        [InlineKeyboardButton("◀️ Cancelar", callback_data="admin_users")]
+    ]
+    
+    await update.message.reply_text(
+        "👤 *Selecciona el Rol para el nuevo usuario:*",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode='Markdown'
+    )
+    return MAIN_MENU
+
+
+async def admin_create_user_role_received(update: Update, context: ContextTypes.DEFAULT_TYPE, role: str) -> int:
+    """Saves the role and shows plan selection buttons."""
+    context.user_data["new_user_role"] = role
+    
+    keyboard = [
+        [InlineKeyboardButton("Plan Platino (platino)", callback_data="adm_usr_setplan_platino")],
+        [InlineKeyboardButton("Plan Oro (oro)", callback_data="adm_usr_setplan_oro")],
+        [InlineKeyboardButton("Plan Diamante (diamante)", callback_data="adm_usr_setplan_diamante")],
+        [InlineKeyboardButton("◀️ Cancelar", callback_data="admin_users")]
+    ]
+    
+    await update.callback_query.edit_message_text(
+        "💎 *Selecciona el Plan para el nuevo usuario:*",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode='Markdown'
+    )
+    return MAIN_MENU
+
+
+async def admin_create_user_plan_received(update: Update, context: ContextTypes.DEFAULT_TYPE, plan: str) -> int:
+    """Completes the user creation by inserting into DB."""
+    query = update.callback_query
+    
+    name = context.user_data.get("new_user_name")
+    email = context.user_data.get("new_user_email")
+    password = context.user_data.get("new_user_pass")
+    role = context.user_data.get("new_user_role")
+    
+    await query.edit_message_text("⏳ Creando usuario en el sistema...")
+    
+    new_id = db.admin_create_user(name, email, password, role, plan)
+    
+    if new_id > 0:
+        text = (
+            f"✅ *Usuario creado exitosamente!*\n\n"
+            f"📛 Nombre: `{name}`\n"
+            f"📧 Email: `{email}`\n"
+            f"🔑 Rol: `{role}`\n"
+            f"💎 Plan: `{plan.capitalize()}`\n"
+        )
+    else:
+        text = "❌ Error al crear el usuario. Es posible que el correo electrónico ya esté registrado."
+        
+    # Clean up user data
+    for k in ["new_user_name", "new_user_email", "new_user_pass", "new_user_role"]:
+        if k in context.user_data:
+            del context.user_data[k]
+            
+    keyboard = [[InlineKeyboardButton("◀️ Volver a Usuarios", callback_data="admin_users")]]
+    await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+    return MAIN_MENU
+
+
+async def show_admin_appointments(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Displays all recent appointments in the system for administrative start/stop control."""
+    query = update.callback_query
+    
+    appointments = db.get_all_appointments_admin()
+    if not appointments:
+        text = "📭 *No hay ningún agendamiento registrado en el sistema.*"
+        keyboard = [[InlineKeyboardButton("◀️ Volver al Menú", callback_data="back_to_menu")]]
+    else:
+        text = "🏛️ *Gestión de Agendamientos:* \n\nSelecciona una búsqueda para iniciarla o pausarla:"
+        keyboard = []
+        for appt in appointments:
+            status_emoji = "✅" if appt.get("status") == "pending" else "⏸️"
+            client = appt.get("client_name") or appt.get("email", "N/A").split("@")[0]
+            label = f"{status_emoji} {client} - {appt.get('email')} ({appt.get('consulate', 'N/A')})"
+            keyboard.append([InlineKeyboardButton(label, callback_data=f"view_appt_{appt['id']}")])
+            
+        keyboard.append([InlineKeyboardButton("◀️ Volver al Menú", callback_data="back_to_menu")])
+        
+    await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+    return MAIN_MENU
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:

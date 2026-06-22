@@ -11,7 +11,7 @@ def verify_user(email: str, password: str) -> Optional[dict]:
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor(dictionary=True)
-        sql = "SELECT id, country, plan, telegram_user_id FROM users WHERE email = %s AND password = %s"
+        sql = "SELECT id, country, plan, telegram_user_id, role FROM users WHERE email = %s AND password = %s"
         cursor.execute(sql, (email, password))
         user = cursor.fetchone()
         cursor.close()
@@ -252,3 +252,154 @@ def update_appointment_status(appointment_id: int, status: str) -> bool:
     except mysql.connector.Error as err:
         logger.error(f"Database Error in update_appointment_status: {err}")
         return False
+
+
+def get_admin_summary() -> dict:
+    """Returns general statistics for the admin dashboard."""
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("SELECT COUNT(*) as total FROM users WHERE role != 'ADMINISTRATOR'")
+        total_users = cursor.fetchone()["total"]
+        
+        cursor.execute("SELECT COUNT(*) as total FROM users WHERE is_authorized=1 AND role != 'ADMINISTRATOR'")
+        active_users = cursor.fetchone()["total"]
+        
+        cursor.execute("SELECT COUNT(*) as total FROM users WHERE is_authorized=0")
+        pending_users = cursor.fetchone()["total"]
+        
+        cursor.execute("SELECT COUNT(*) as total FROM user_appointments")
+        total_apts = cursor.fetchone()["total"]
+        
+        cursor.execute("SELECT COUNT(*) as total FROM user_appointments WHERE status='pending'")
+        searching = cursor.fetchone()["total"]
+        
+        cursor.execute("SELECT COUNT(*) as total FROM user_appointments WHERE status NOT IN ('pending', 'guardada')")
+        completed = cursor.fetchone()["total"]
+        
+        cursor.close()
+        conn.close()
+        return {
+            "total_users": total_users,
+            "active_users": active_users,
+            "pending_users": pending_users,
+            "total_appointments": total_apts,
+            "searching_appointments": searching,
+            "completed_appointments": completed
+        }
+    except mysql.connector.Error as err:
+        logger.error(f"Database Error in get_admin_summary: {err}")
+        return {}
+
+
+def get_admin_users() -> List[dict]:
+    """Returns a list of all users for administration."""
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT u.id, u.full_name, u.email, u.role, u.is_authorized, u.plan,
+                   COUNT(a.id) AS appointment_count
+            FROM users u
+            LEFT JOIN user_appointments a ON a.user_id = u.id
+            GROUP BY u.id
+            ORDER BY u.id DESC
+        """)
+        users = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return users
+    except mysql.connector.Error as err:
+        logger.error(f"Database Error in get_admin_users: {err}")
+        return []
+
+
+def admin_create_user(name: str, email: str, password_text: str, role: str, plan: str) -> int:
+    """Creates a new user with proper password hashing and returns the new ID, or 0 on error."""
+    import hashlib
+    import bcrypt
+    try:
+        # Hashing using SHA256 + Bcrypt
+        sha256_pw = hashlib.sha256(password_text.encode('utf-8')).hexdigest().encode('utf-8')
+        salt = bcrypt.gensalt()
+        hashed_password = bcrypt.hashpw(sha256_pw, salt).decode('utf-8')
+        
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+        sql = "INSERT INTO users (full_name, email, password, role, plan, is_authorized, country) VALUES (%s, %s, %s, %s, %s, 1, 'co')"
+        cursor.execute(sql, (name, email, hashed_password, role, plan))
+        conn.commit()
+        new_id = cursor.lastrowid
+        cursor.close()
+        conn.close()
+        return new_id
+    except mysql.connector.Error as err:
+        logger.error(f"Database Error in admin_create_user: {err}")
+        return 0
+
+
+def admin_update_user(user_id: int, fields: dict) -> bool:
+    """Updates user information in the database."""
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+        
+        sql_parts = []
+        vals = []
+        for col, val in fields.items():
+            sql_parts.append(f"{col} = %s")
+            vals.append(val)
+            
+        if not sql_parts:
+            return False
+            
+        vals.append(user_id)
+        sql = f"UPDATE users SET {', '.join(sql_parts)} WHERE id = %s"
+        cursor.execute(sql, vals)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return True
+    except mysql.connector.Error as err:
+        logger.error(f"Database Error in admin_update_user: {err}")
+        return False
+
+
+def admin_delete_user(user_id: int) -> bool:
+    """Deletes a user and all their appointments."""
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+        # Delete appointments first due to foreign key
+        cursor.execute("DELETE FROM user_appointments WHERE user_id = %s", (user_id,))
+        cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return True
+    except mysql.connector.Error as err:
+        logger.error(f"Database Error in admin_delete_user: {err}")
+        return False
+
+
+def get_all_appointments_admin() -> List[dict]:
+    """Returns the most recent 15 appointments in the system for admin view."""
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT a.id, a.email, a.consulate, a.country, a.status, a.schedule_id, 
+                   u.full_name as client_name
+            FROM user_appointments a
+            LEFT JOIN users u ON a.user_id = u.id
+            ORDER BY a.id DESC
+            LIMIT 15
+        """)
+        appointments = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return appointments
+    except mysql.connector.Error as err:
+        logger.error(f"Database Error in get_all_appointments_admin: {err}")
+        return []
