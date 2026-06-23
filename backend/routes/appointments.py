@@ -146,13 +146,15 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
         cursor.execute("""
             SELECT 
                 a.id, 
-                IFNULL(u.full_name, a.email) as client, 
+                a.email as client, 
                 'B1/B2 Turista' as type, 
                 a.min_consulate_date as originalDate,
                 a.status as newDate,
                 a.status as status,
                 a.date_created,
-                a.date_booked
+                a.date_booked,
+                u.full_name as system_user_name,
+                u.email as system_user_email
             FROM user_appointments a
             LEFT JOIN users u ON a.user_id = u.id
             ORDER BY a.id DESC LIMIT 50
@@ -168,7 +170,9 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
                 status as newDate,
                 status as status,
                 date_created,
-                date_booked
+                date_booked,
+                NULL as system_user_name,
+                NULL as system_user_email
             FROM user_appointments 
             WHERE user_id = %s
             ORDER BY id DESC

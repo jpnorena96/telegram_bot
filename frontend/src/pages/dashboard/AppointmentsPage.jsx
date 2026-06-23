@@ -5,9 +5,9 @@ import { Search, RefreshCw, Plus, X, ChevronUp, ChevronDown, Eye, ArrowLeft, Arr
 import { api } from '../../services/api';
 
 const STATUS_MAP = {
-  'Adelantada': { tag: 'tag-lime',   label: 'ADELANTADA' },
-  'Buscando':   { tag: 'tag-gold',   label: 'BUSCANDO'   },
-  'Pendiente':  { tag: 'tag-cyan',   label: 'PENDIENTE'  },
+  'Adelantada': { tag: 'tag-lime', label: 'ADELANTADA' },
+  'Buscando': { tag: 'tag-gold', label: 'BUSCANDO' },
+  'Pendiente': { tag: 'tag-cyan', label: 'PENDIENTE' },
 };
 const getTag = s => STATUS_MAP[s] || { tag: 'tag-cyan', label: s?.toUpperCase() || '—' };
 
@@ -28,38 +28,38 @@ const COUNTRIES = {
 };
 
 const COUNTRY_CONSULATES = {
-  "co": [{"name": "Bogotá", "facility_id": "25", "asc_facility_id": "26"}],
+  "co": [{ "name": "Bogotá", "facility_id": "25", "asc_facility_id": "26" }],
   "mx": [
-    {"name": "Ciudad Juarez", "facility_id": "65", "asc_facility_id": "76"},
-    {"name": "Guadalajara", "facility_id": "66", "asc_facility_id": "77"},
-    {"name": "Hermosillo", "facility_id": "67", "asc_facility_id": "78"},
-    {"name": "Matamoros", "facility_id": "68", "asc_facility_id": "79"},
-    {"name": "Merida", "facility_id": "69", "asc_facility_id": "81"},
-    {"name": "Mexico City", "facility_id": "70", "asc_facility_id": "82"},
-    {"name": "Monterrey", "facility_id": "71", "asc_facility_id": "83"},
-    {"name": "Nogales", "facility_id": "72", "asc_facility_id": "84"},
-    {"name": "Nuevo Laredo", "facility_id": "73", "asc_facility_id": "85"},
-    {"name": "Tijuana", "facility_id": "74", "asc_facility_id": "88"},
+    { "name": "Ciudad Juarez", "facility_id": "65", "asc_facility_id": "76" },
+    { "name": "Guadalajara", "facility_id": "66", "asc_facility_id": "77" },
+    { "name": "Hermosillo", "facility_id": "67", "asc_facility_id": "78" },
+    { "name": "Matamoros", "facility_id": "68", "asc_facility_id": "79" },
+    { "name": "Merida", "facility_id": "69", "asc_facility_id": "81" },
+    { "name": "Mexico City", "facility_id": "70", "asc_facility_id": "82" },
+    { "name": "Monterrey", "facility_id": "71", "asc_facility_id": "83" },
+    { "name": "Nogales", "facility_id": "72", "asc_facility_id": "84" },
+    { "name": "Nuevo Laredo", "facility_id": "73", "asc_facility_id": "85" },
+    { "name": "Tijuana", "facility_id": "74", "asc_facility_id": "88" },
   ],
-  "ar": [{"name": "Buenos Aires", "facility_id": "Buenos Aires", "asc_facility_id": "Buenos Aires_cas"}],
+  "ar": [{ "name": "Buenos Aires", "facility_id": "Buenos Aires", "asc_facility_id": "Buenos Aires_cas" }],
   "br": [
-    {"name": "Brasilia", "facility_id": "Brasilia", "asc_facility_id": "Brasilia_cas"},
-    {"name": "São Paulo", "facility_id": "São Paulo", "asc_facility_id": "São Paulo_cas"},
-    {"name": "Río de Janeiro", "facility_id": "Río", "asc_facility_id": "Río_cas"},
-    {"name": "Recife", "facility_id": "Recife", "asc_facility_id": "Recife_cas"},
-    {"name": "Porto Alegre", "facility_id": "Porto Alegre", "asc_facility_id": "Porto Alegre_cas"}
+    { "name": "Brasilia", "facility_id": "Brasilia", "asc_facility_id": "Brasilia_cas" },
+    { "name": "São Paulo", "facility_id": "São Paulo", "asc_facility_id": "São Paulo_cas" },
+    { "name": "Río de Janeiro", "facility_id": "Río", "asc_facility_id": "Río_cas" },
+    { "name": "Recife", "facility_id": "Recife", "asc_facility_id": "Recife_cas" },
+    { "name": "Porto Alegre", "facility_id": "Porto Alegre", "asc_facility_id": "Porto Alegre_cas" }
   ],
   "ec": [
-    {"name": "Quito", "facility_id": "Quito", "asc_facility_id": "Quito_cas"},
-    {"name": "Guayaquil", "facility_id": "Guayaquil", "asc_facility_id": "Guayaquil_cas"}
+    { "name": "Quito", "facility_id": "Quito", "asc_facility_id": "Quito_cas" },
+    { "name": "Guayaquil", "facility_id": "Guayaquil", "asc_facility_id": "Guayaquil_cas" }
   ],
-  "pe": [{"name": "Lima", "facility_id": "Lima", "asc_facility_id": "Lima_cas"}],
-  "cl": [{"name": "Santiago", "facility_id": "Santiago", "asc_facility_id": "Santiago_cas"}],
-  "uy": [{"name": "Montevideo", "facility_id": "Montevideo", "asc_facility_id": "Montevideo_cas"}],
-  "jm": [{"name": "Kingston", "facility_id": "Kingston", "asc_facility_id": "Kingston_cas"}],
+  "pe": [{ "name": "Lima", "facility_id": "Lima", "asc_facility_id": "Lima_cas" }],
+  "cl": [{ "name": "Santiago", "facility_id": "Santiago", "asc_facility_id": "Santiago_cas" }],
+  "uy": [{ "name": "Montevideo", "facility_id": "Montevideo", "asc_facility_id": "Montevideo_cas" }],
+  "jm": [{ "name": "Kingston", "facility_id": "Kingston", "asc_facility_id": "Kingston_cas" }],
   "ca": [
-    {"name": "Toronto", "facility_id": "Toronto", "asc_facility_id": "Toronto_cas"},
-    {"name": "Vancouver", "facility_id": "Vancouver", "asc_facility_id": "Vancouver_cas"}
+    { "name": "Toronto", "facility_id": "Toronto", "asc_facility_id": "Toronto_cas" },
+    { "name": "Vancouver", "facility_id": "Vancouver", "asc_facility_id": "Vancouver_cas" }
   ]
 };
 
@@ -67,13 +67,17 @@ const COUNTRY_CONSULATES = {
 const Modal = ({ apt, onClose }) => {
   if (!apt) return null;
   const { tag, label } = getTag(apt.status);
-  
+
   const modalRows = [
-    ['CLIENTE',        apt.client],
-    ['TIPO_VISA',      apt.type],
-    ['FECHA_OBJETIVO',  apt.originalDate || '—'],
-    ['FECHA_ADELANTO',  apt.newDate || '—'],
+    ['CLIENTE', apt.client],
+    ['TIPO_VISA', apt.type],
+    ['FECHA_OBJETIVO', apt.originalDate || '—'],
+    ['FECHA_ADELANTO', apt.newDate || '—'],
   ];
+
+  if (apt.system_user_name) {
+    modalRows.push(['USUARIO_SISTEMA', `${apt.system_user_name} (${apt.system_user_email})`]);
+  }
 
   if (apt.date_created) {
     modalRows.push(['FECHA_REGISTRO', apt.date_created]);
@@ -250,7 +254,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
         if (!payload.max_consulate_date) delete payload.max_consulate_date;
         if (!payload.needs_cas) payload.consulate_asc = null;
         delete payload.needs_cas;
-        
+
         await api.createAppointment(payload);
       } else {
         await api.selectSchedule(tempAppointmentId, selectedScheduleId);
@@ -273,7 +277,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
 
   return (
     <div className="panel animate-in" style={{ width: '100%', maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', border: '1px solid var(--border-2)', background: 'var(--black-2)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-      
+
       {/* Cabecera del Asistente */}
       <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.01)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
@@ -341,7 +345,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
 
         {/* Cuerpo del paso actual */}
         <div style={{ minHeight: '260px' }}>
-          
+
           {/* PASO 1: ACCESO */}
           {currentStep === 1 && (
             <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -353,11 +357,11 @@ const CreateWizard = ({ onClose, onCreated }) => {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem', marginTop: '0.5rem' }}>
                 <div className="input-group" style={{ marginBottom: 0 }}>
                   <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><User size={11} /> EMAIL PORTAL</label>
-                  <input className="input-field" type="email" placeholder="cliente@email.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
+                  <input className="input-field" type="email" placeholder="cliente@email.com" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
                 </div>
                 <div className="input-group" style={{ marginBottom: 0 }}>
                   <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Lock size={11} /> CONTRASEÑA PORTAL</label>
-                  <input className="input-field" type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required />
+                  <input className="input-field" type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} required />
                 </div>
               </div>
             </div>
@@ -380,7 +384,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
                     ))}
                   </select>
                 </div>
-                
+
                 {COUNTRY_CONSULATES[formData.country] ? (
                   <div className="input-group" style={{ marginBottom: 0 }}>
                     <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Globe size={11} /> SEDE CONSULADO</label>
@@ -400,7 +404,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
 
               {COUNTRY_CONSULATES[formData.country] && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.02)', padding: '0.875rem 1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', marginTop: '0.5rem' }}>
-                  <input type="checkbox" id="needs_cas" checked={formData.needs_cas} onChange={e => setFormData({...formData, needs_cas: e.target.checked})} style={{ width: '16px', height: '16px', accentColor: 'var(--lime)', cursor: 'pointer' }} />
+                  <input type="checkbox" id="needs_cas" checked={formData.needs_cas} onChange={e => setFormData({ ...formData, needs_cas: e.target.checked })} style={{ width: '16px', height: '16px', accentColor: 'var(--lime)', cursor: 'pointer' }} />
                   <div>
                     <label htmlFor="needs_cas" style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-1)', cursor: 'pointer' }}>Requiere cita en Centro Externo (CAS/ASC)</label>
                     {formData.needs_cas && (
@@ -425,11 +429,11 @@ const CreateWizard = ({ onClose, onCreated }) => {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginTop: '0.5rem' }}>
                 <div className="input-group" style={{ marginBottom: 0 }}>
                   <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Calendar size={11} /> FECHA MÍNIMA</label>
-                  <input className="input-field" type="date" value={formData.min_consulate_date} onChange={e => setFormData({...formData, min_consulate_date: e.target.value})} style={{ colorScheme: 'dark' }} />
+                  <input className="input-field" type="date" value={formData.min_consulate_date} onChange={e => setFormData({ ...formData, min_consulate_date: e.target.value })} style={{ colorScheme: 'dark' }} />
                 </div>
                 <div className="input-group" style={{ marginBottom: 0 }}>
                   <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Calendar size={11} /> FECHA MÁXIMA</label>
-                  <input className="input-field" type="date" value={formData.max_consulate_date} onChange={e => setFormData({...formData, max_consulate_date: e.target.value})} style={{ colorScheme: 'dark' }} />
+                  <input className="input-field" type="date" value={formData.max_consulate_date} onChange={e => setFormData({ ...formData, max_consulate_date: e.target.value })} style={{ colorScheme: 'dark' }} />
                 </div>
               </div>
             </div>
@@ -439,13 +443,13 @@ const CreateWizard = ({ onClose, onCreated }) => {
           {currentStep === 4 && (
             <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Vinculación del Schedule ID</h4>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Vinculación del Identificador</h4>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Vincula el Schedule ID de la cita. Puedes buscarlo automáticamente conectando con el portal o escribirlo manualmente.</p>
               </div>
 
               {/* Selector de modo interactivo */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.5rem' }}>
-                <div 
+                <div
                   onClick={() => { setMode('discover'); setError(''); }}
                   style={{
                     padding: '1.25rem',
@@ -463,7 +467,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
                   <p style={{ fontSize: '0.7rem', color: 'var(--text-3)', marginTop: '0.5rem', lineHeight: '1.3' }}>El bot se conectará de manera segura al portal y extraerá las citas y nombres asociados a la cuenta.</p>
                 </div>
 
-                <div 
+                <div
                   onClick={() => { setMode('manual'); setError(''); }}
                   style={{
                     padding: '1.25rem',
@@ -487,7 +491,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
                 {mode === 'manual' ? (
                   <div className="input-group" style={{ marginBottom: 0 }}>
                     <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>SCHEDULE ID (8 DÍGITOS)</label>
-                    <input className="input-field" type="text" placeholder="Ej. 12345678" value={formData.schedule_id} onChange={e => setFormData({...formData, schedule_id: e.target.value})} required={mode === 'manual'} />
+                    <input className="input-field" type="text" placeholder="Ej. 12345678" value={formData.schedule_id} onChange={e => setFormData({ ...formData, schedule_id: e.target.value })} required={mode === 'manual'} />
                   </div>
                 ) : (
                   <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)', padding: '1.25rem' }}>
@@ -501,7 +505,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
                       </div>
                     ) : discoveredSchedules && Object.keys(discoveredSchedules).length > 0 ? (
                       <div className="input-group" style={{ marginBottom: 0 }}>
-                        <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', color: 'var(--lime)' }}>SELECCIONAR SOLICITANTE / SCHEDULE ID DETECTADO</label>
+                        <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', color: 'var(--lime)' }}>SELECCIONAR SOLICITANTE / IDENTIFICADOR DETECTADO</label>
                         <select
                           className="input-field"
                           style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }}
@@ -552,7 +556,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
                     <h4 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-1)' }}>¡Agente Desplegado con Éxito!</h4>
                     <p style={{ fontSize: '0.82rem', color: 'var(--text-3)', marginTop: '0.35rem', maxWidth: '460px', margin: '0.35rem auto 0' }}>El script del agendamiento ha sido creado e inicializado correctamente en el servidor mediante el gestor de procesos PM2.</p>
                   </div>
-                  
+
                   <div style={{ width: '100%', maxWidth: '420px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '0.875rem', marginTop: '0.5rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>
                       <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>PROCESO PM2:</span>
@@ -683,7 +687,7 @@ const AppointmentsPage = () => {
     let r = [...apts];
     if (search) { const q = search.toLowerCase(); r = r.filter(a => a.client?.toLowerCase().includes(q) || a.type?.toLowerCase().includes(q) || String(a.id).includes(q)); }
     if (statusF !== 'ALL') r = r.filter(a => a.status === statusF);
-    
+
     // Filtrado por fecha para administrador
     if (isAdmin) {
       if (startDate) {
@@ -711,9 +715,9 @@ const AppointmentsPage = () => {
 
   if (isCreating) {
     return (
-      <CreateWizard 
-        onClose={() => setIsCreating(false)} 
-        onCreated={() => { setIsCreating(false); load(); }} 
+      <CreateWizard
+        onClose={() => setIsCreating(false)}
+        onCreated={() => { setIsCreating(false); load(); }}
       />
     );
   }
@@ -776,8 +780,8 @@ const AppointmentsPage = () => {
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', padding: '0.875rem', background: 'var(--black-3)', border: '1px solid var(--border)', borderTop: 'none', marginTop: '-1.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-3)', letterSpacing: '0.05em' }}>FILTRAR POR:</span>
-            <select 
-              value={dateFilterType} 
+            <select
+              value={dateFilterType}
               onChange={e => setDateFilterType(e.target.value)}
               className="input-field"
               style={{ height: '32px', fontSize: '0.75rem', padding: '0 0.5rem', width: 'auto', background: 'var(--black-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}
@@ -787,12 +791,12 @@ const AppointmentsPage = () => {
               <option value="date_created" style={{ background: 'var(--black-2)' }}>Fecha de Registro</option>
             </select>
           </div>
-          
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-3)' }}>DESDE:</span>
-            <input 
-              type="date" 
-              value={startDate} 
+            <input
+              type="date"
+              value={startDate}
               onChange={e => setStartDate(e.target.value)}
               className="input-field"
               style={{ height: '32px', fontSize: '0.75rem', width: '135px', colorScheme: 'dark', background: 'var(--black-2)', border: '1px solid var(--border)', padding: '0 0.5rem', borderRadius: 'var(--radius-sm)' }}
@@ -801,9 +805,9 @@ const AppointmentsPage = () => {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-3)' }}>HASTA:</span>
-            <input 
-              type="date" 
-              value={endDate} 
+            <input
+              type="date"
+              value={endDate}
               onChange={e => setEndDate(e.target.value)}
               className="input-field"
               style={{ height: '32px', fontSize: '0.75rem', width: '135px', colorScheme: 'dark', background: 'var(--black-2)', border: '1px solid var(--border)', padding: '0 0.5rem', borderRadius: 'var(--radius-sm)' }}
@@ -811,7 +815,7 @@ const AppointmentsPage = () => {
           </div>
 
           {(startDate || endDate) && (
-            <button 
+            <button
               onClick={() => { setStartDate(''); setEndDate(''); }}
               className="btn btn-sm btn-outline"
               style={{ height: '32px', padding: '0 0.75rem', fontSize: '0.7rem' }}
@@ -829,6 +833,7 @@ const AppointmentsPage = () => {
             <thead>
               <tr>
                 {isAdmin && <th onClick={() => toggleSort('id')} style={{ cursor: 'pointer' }}>ID <SortIco f="id" /></th>}
+                {isAdmin && <th onClick={() => toggleSort('system_user_name')} style={{ cursor: 'pointer' }}>USUARIO_SISTEMA <SortIco f="system_user_name" /></th>}
                 <th onClick={() => toggleSort('client')} style={{ cursor: 'pointer' }}>CLIENTE <SortIco f="client" /></th>
                 <th>TIPO_VISA</th>
                 <th onClick={() => toggleSort('originalDate')} style={{ cursor: 'pointer' }}>FECHA_OBJ <SortIco f="originalDate" /></th>
@@ -839,16 +844,16 @@ const AppointmentsPage = () => {
             <tbody>
               {loading
                 ? Array.from({ length: 6 }).map((_, i) => (
-                    <tr key={i}>
-                      {[isAdmin && 1, 1, 1, 1, 1, canEdit && 1].filter(Boolean).map((__, j) => (
-                        <td key={j}><div className="skeleton" style={{ height: '13px', width: `${50 + Math.random() * 40}%` }} /></td>
-                      ))}
-                    </tr>
-                  ))
+                  <tr key={i}>
+                    {[isAdmin && 1, isAdmin && 1, 1, 1, 1, 1, canEdit && 1].filter(Boolean).map((__, j) => (
+                      <td key={j}><div className="skeleton" style={{ height: '13px', width: `${50 + Math.random() * 40}%` }} /></td>
+                    ))}
+                  </tr>
+                ))
                 : filtered.length === 0
                   ? (
                     <tr>
-                      <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-3)' }}>
+                      <td colSpan={[isAdmin && 1, isAdmin && 1, 1, 1, 1, 1, canEdit && 1].filter(Boolean).length} style={{ textAlign: 'center', padding: '3rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-3)' }}>
                         &gt; NO_RECORDS_FOUND
                       </td>
                     </tr>
@@ -859,6 +864,14 @@ const AppointmentsPage = () => {
                       <tr key={apt.id}>
                         {isAdmin && (
                           <td className="mono" style={{ color: 'var(--text-3)', fontSize: '0.72rem' }}>#{String(apt.id).padStart(4, '0')}</td>
+                        )}
+                        {isAdmin && (
+                          <td style={{ fontSize: '0.75rem', color: 'var(--text-1)' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                              <span style={{ fontWeight: 600 }}>{apt.system_user_name || '—'}</span>
+                              <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>{apt.system_user_email || ''}</span>
+                            </div>
+                          </td>
                         )}
                         <td>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
