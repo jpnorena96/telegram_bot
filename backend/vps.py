@@ -180,14 +180,32 @@ DB_NAME={os.getenv("DB_NAME", "")}
                 f.write(requirements_content)
             logger.info("Uploaded requirements.txt")
 
+        # Check if the shared venv exists on the VPS
+        shared_venv = f"/home/{VPS_USER}/shared_venv"
+        check_out, check_err = _run_ssh_command(ssh, f"test -d {shared_venv} && echo 'YES' || echo 'NO'")
+        
+        if "YES" not in check_out:
+            logger.info(f"Shared virtual environment does not exist. Creating at {shared_venv} on VPS...")
+            if requirements_content:
+                with sftp.file(f"/home/{VPS_USER}/temp_reqs.txt", "w") as temp_req_f:
+                    temp_req_f.write(requirements_content)
+                logger.info("Uploaded temp_reqs.txt for shared venv installation")
+        
         sftp.close()
 
-        # Create venv and install deps
-        _run_ssh_command(ssh, f"python3 -m venv {base_path}/venv")
-        if requirements_content:
-            _run_ssh_command(ssh, f"{base_path}/venv/bin/pip install --upgrade pip")
-            _run_ssh_command(ssh, f"{base_path}/venv/bin/pip install -r {base_path}/requirements.txt")
-            logger.info("Dependencies installed")
+        if "YES" not in check_out:
+            _run_ssh_command(ssh, f"python3 -m venv {shared_venv}")
+            _run_ssh_command(ssh, f"{shared_venv}/bin/pip install --upgrade pip")
+            if requirements_content:
+                _run_ssh_command(ssh, f"{shared_venv}/bin/pip install -r /home/{VPS_USER}/temp_reqs.txt")
+                _run_ssh_command(ssh, f"rm /home/{VPS_USER}/temp_reqs.txt")
+            logger.info("Shared virtual environment created and dependencies installed.")
+        else:
+            logger.info("Reusing existing shared virtual environment on VPS.")
+
+        # Create symbolic link from base_path/venv to shared_venv
+        _run_ssh_command(ssh, f"ln -sfn {shared_venv} {base_path}/venv")
+        logger.info(f"Symlink created from {base_path}/venv to {shared_venv}")
 
         ssh.close()
         return True
