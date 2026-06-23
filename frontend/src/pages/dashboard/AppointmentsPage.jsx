@@ -169,7 +169,11 @@ const CreateWizard = ({ onClose, onCreated }) => {
 
   const handleDiscoverSchedules = async () => {
     if (!formData.email || !formData.password) {
-      setError('Por favor regresa al Paso 3 e ingresa el email y la contraseña.');
+      setError('Por favor regresa al Paso 1 e ingresa el email y la contraseña.');
+      return;
+    }
+    if (!formData.country || !formData.consulate) {
+      setError('Por favor regresa al Paso 2 e ingresa el país y la sede del consulado.');
       return;
     }
     setDiscovering(true);
@@ -204,18 +208,18 @@ const CreateWizard = ({ onClose, onCreated }) => {
   const handleNextStep = () => {
     setError('');
     if (currentStep === 1) {
-      if (!formData.country || !formData.consulate) {
-        setError('Debes configurar el país y la sede del consulado.');
-        return;
-      }
-      setCurrentStep(2);
-    } else if (currentStep === 2) {
-      setCurrentStep(3);
-    } else if (currentStep === 3) {
       if (!formData.email || !formData.password) {
         setError('Debes ingresar el correo y la contraseña del portal.');
         return;
       }
+      setCurrentStep(2);
+    } else if (currentStep === 2) {
+      if (!formData.country || !formData.consulate) {
+        setError('Debes configurar el país y la sede del consulado.');
+        return;
+      }
+      setCurrentStep(3);
+    } else if (currentStep === 3) {
       setCurrentStep(4);
     } else if (currentStep === 4) {
       if (mode === 'manual' && !formData.schedule_id) {
@@ -260,9 +264,9 @@ const CreateWizard = ({ onClose, onCreated }) => {
   };
 
   const steps = [
-    { num: 1, label: 'CONSULAR', desc: 'País y Sede' },
-    { num: 2, label: 'FECHAS', desc: 'Límites' },
-    { num: 3, label: 'ACCESO', desc: 'Credenciales' },
+    { num: 1, label: 'ACCESO', desc: 'Credenciales' },
+    { num: 2, label: 'CONSULAR', desc: 'País y Sede' },
+    { num: 3, label: 'FECHAS', desc: 'Límites' },
     { num: 4, label: 'VÍNCULO', desc: 'Schedule ID' },
     { num: 5, label: 'DESPLIEGUE', desc: 'Resumen' }
   ];
@@ -338,8 +342,29 @@ const CreateWizard = ({ onClose, onCreated }) => {
         {/* Cuerpo del paso actual */}
         <div style={{ minHeight: '260px' }}>
           
-          {/* PASO 1: CONFIGURACIÓN CONSULAR */}
+          {/* PASO 1: ACCESO */}
           {currentStep === 1 && (
+            <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Credenciales del Portal</h4>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Proporciona el correo y la contraseña con la que inicias sesión en el portal oficial de agendamiento de visas.</p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem', marginTop: '0.5rem' }}>
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><User size={11} /> EMAIL PORTAL</label>
+                  <input className="input-field" type="email" placeholder="cliente@email.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
+                </div>
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Lock size={11} /> CONTRASEÑA PORTAL</label>
+                  <input className="input-field" type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PASO 2: CONFIGURACIÓN CONSULAR */}
+          {currentStep === 2 && (
             <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
                 <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Configuración Consular y Sede</h4>
@@ -389,8 +414,8 @@ const CreateWizard = ({ onClose, onCreated }) => {
             </div>
           )}
 
-          {/* PASO 2: PARÁMETROS Y FECHAS */}
-          {currentStep === 2 && (
+          {/* PASO 3: PARÁMETROS Y FECHAS */}
+          {currentStep === 3 && (
             <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
                 <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Rango de Fechas Objetivo</h4>
@@ -405,27 +430,6 @@ const CreateWizard = ({ onClose, onCreated }) => {
                 <div className="input-group" style={{ marginBottom: 0 }}>
                   <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Calendar size={11} /> FECHA MÁXIMA</label>
                   <input className="input-field" type="date" value={formData.max_consulate_date} onChange={e => setFormData({...formData, max_consulate_date: e.target.value})} style={{ colorScheme: 'dark' }} />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* PASO 3: ACCESO */}
-          {currentStep === 3 && (
-            <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Credenciales del Portal</h4>
-                <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Proporciona el correo y la contraseña con la que inicias sesión en el portal oficial de agendamiento de visas.</p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem', marginTop: '0.5rem' }}>
-                <div className="input-group" style={{ marginBottom: 0 }}>
-                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><User size={11} /> EMAIL PORTAL</label>
-                  <input className="input-field" type="email" placeholder="cliente@email.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
-                </div>
-                <div className="input-group" style={{ marginBottom: 0 }}>
-                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Lock size={11} /> CONTRASEÑA PORTAL</label>
-                  <input className="input-field" type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required />
                 </div>
               </div>
             </div>
