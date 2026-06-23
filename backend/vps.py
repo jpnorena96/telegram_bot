@@ -33,12 +33,33 @@ SCRIPT_REQUIREMENTS_FILE = os.path.join(PROJECT_ROOT, "script_requirements.txt")
 
 
 def _get_facility_ids(consulate_name: str, need_cas: bool) -> tuple[str, str]:
-    """Returns (facility_id, asc_facility_id) based on consulate name."""
+    """Returns (facility_id, asc_facility_id) based on consulate name or facility ID."""
     key = consulate_name.strip().lower()
-    ids = CONSULATE_FACILITY_MAP.get(key, CONSULATE_FACILITY_MAP["_default"])
-    facility_id = ids["facility_id"]
+    
+    # 1. Intentar buscar por coincidencia exacta de facility_id en los valores del mapa
+    found_ids = None
+    for k, val in CONSULATE_FACILITY_MAP.items():
+        if val.get("facility_id") == consulate_name:
+            found_ids = val
+            break
+            
+    # 2. Si no se encontró, buscar por nombre clave (ej. "bogota")
+    if not found_ids:
+        found_ids = CONSULATE_FACILITY_MAP.get(key)
+        
+    # 3. Si aún así no se encuentra, pero es numérico (un ID enviado directamente), usarlo directamente
+    if not found_ids:
+        if key.isdigit() or (key and not any(c.isalpha() for c in key)):
+            facility_id = key
+            asc_facility_id = "None"
+            return facility_id, asc_facility_id
+        else:
+            # Fallback por defecto (Bogotá)
+            found_ids = CONSULATE_FACILITY_MAP["_default"]
+
+    facility_id = found_ids["facility_id"]
     # Only use asc_facility_id if CAS is needed AND the consulate supports it
-    asc = ids.get("asc_facility_id")
+    asc = found_ids.get("asc_facility_id")
     asc_facility_id = asc if (need_cas and asc) else "None"
     return facility_id, asc_facility_id
 
@@ -88,11 +109,20 @@ def create_vps_config(user_data: dict) -> bool:
         facility_id, asc_facility_id = _get_facility_ids(consulate_name, need_cas)
         logger.info(f"Consulate: {consulate_name} → FACILITY_ID={facility_id}, ASC={asc_facility_id}, NEED_ASC={need_cas}")
 
-        # Format dates from YYYY-MM-DD to DD.MM.YYYY
-        min_date_obj = datetime.strptime(user_data["min_consulate_date"], '%Y-%m-%d')
-        max_date_obj = datetime.strptime(user_data["max_consulate_date"], '%Y-%m-%d')
-        min_date_fmt = min_date_obj.strftime('%d.%m.%Y')
-        max_date_fmt = max_date_obj.strftime('%d.%m.%Y')
+        # Format dates from YYYY-MM-DD to DD.MM.YYYY (safely handle optional dates)
+        if user_data.get("min_consulate_date"):
+            min_date_obj = datetime.strptime(user_data["min_consulate_date"], '%Y-%m-%d')
+            min_date_fmt = min_date_obj.strftime('%d.%m.%Y')
+        else:
+            # Si no hay fecha mínima configurada, usar el día de hoy por defecto para evitar prompts
+            min_date_fmt = datetime.now().strftime('%d.%m.%Y')
+
+        if user_data.get("max_consulate_date"):
+            max_date_obj = datetime.strptime(user_data["max_consulate_date"], '%Y-%m-%d')
+            max_date_fmt = max_date_obj.strftime('%d.%m.%Y')
+        else:
+            # Si no hay fecha máxima, establecer como None string para script.py
+            max_date_fmt = "None"
 
         # Config WITHOUT SCHEDULE_ID (will be set after discovery)
         config_content = f"""EMAIL={email}

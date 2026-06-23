@@ -169,7 +169,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
 
   const handleDiscoverSchedules = async () => {
     if (!formData.email || !formData.password) {
-      setError('Por favor regresa al Paso 1 e ingresa el email y la contraseña.');
+      setError('Por favor regresa al Paso 3 e ingresa el email y la contraseña.');
       return;
     }
     setDiscovering(true);
@@ -204,12 +204,20 @@ const CreateWizard = ({ onClose, onCreated }) => {
   const handleNextStep = () => {
     setError('');
     if (currentStep === 1) {
-      if (!formData.email || !formData.password) {
-        setError('Debes ingresar el correo y la contraseña del portal.');
+      if (!formData.country || !formData.consulate) {
+        setError('Debes configurar el país y la sede del consulado.');
         return;
       }
       setCurrentStep(2);
     } else if (currentStep === 2) {
+      setCurrentStep(3);
+    } else if (currentStep === 3) {
+      if (!formData.email || !formData.password) {
+        setError('Debes ingresar el correo y la contraseña del portal.');
+        return;
+      }
+      setCurrentStep(4);
+    } else if (currentStep === 4) {
       if (mode === 'manual' && !formData.schedule_id) {
         setError('Debes ingresar el Schedule ID manualmente.');
         return;
@@ -218,14 +226,6 @@ const CreateWizard = ({ onClose, onCreated }) => {
         setError('Debes descubrir y seleccionar un Schedule ID del portal.');
         return;
       }
-      setCurrentStep(3);
-    } else if (currentStep === 3) {
-      if (!formData.country || !formData.consulate) {
-        setError('Debes configurar el país y la sede del consulado.');
-        return;
-      }
-      setCurrentStep(4);
-    } else if (currentStep === 4) {
       setCurrentStep(5);
     }
   };
@@ -260,10 +260,10 @@ const CreateWizard = ({ onClose, onCreated }) => {
   };
 
   const steps = [
-    { num: 1, label: 'ACCESO', desc: 'Credenciales' },
-    { num: 2, label: 'VÍNCULO', desc: 'Schedule ID' },
-    { num: 3, label: 'CONSULAR', desc: 'País y Sede' },
-    { num: 4, label: 'FECHAS', desc: 'Límites' },
+    { num: 1, label: 'CONSULAR', desc: 'País y Sede' },
+    { num: 2, label: 'FECHAS', desc: 'Límites' },
+    { num: 3, label: 'ACCESO', desc: 'Credenciales' },
+    { num: 4, label: 'VÍNCULO', desc: 'Schedule ID' },
     { num: 5, label: 'DESPLIEGUE', desc: 'Resumen' }
   ];
 
@@ -338,8 +338,80 @@ const CreateWizard = ({ onClose, onCreated }) => {
         {/* Cuerpo del paso actual */}
         <div style={{ minHeight: '260px' }}>
           
-          {/* PASO 1: ACCESO */}
+          {/* PASO 1: CONFIGURACIÓN CONSULAR */}
           {currentStep === 1 && (
+            <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Configuración Consular y Sede</h4>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Selecciona el país y el consulado correspondiente a la cita que deseas adelantar.</p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginTop: '0.5rem' }}>
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Globe size={11} /> PAÍS (CONSULADO)</label>
+                  <select className="input-field" style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }} value={formData.country} onChange={handleCountryChange} required>
+                    {Object.entries(COUNTRIES).map(([code, name]) => (
+                      <option key={code} value={code} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>{name}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                {COUNTRY_CONSULATES[formData.country] ? (
+                  <div className="input-group" style={{ marginBottom: 0 }}>
+                    <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Globe size={11} /> SEDE CONSULADO</label>
+                    <select className="input-field" style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }} value={formData.consulate} onChange={handleConsulateChange} required>
+                      {COUNTRY_CONSULATES[formData.country].map(c => (
+                        <option key={c.facility_id} value={c.facility_id} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <div className="input-group" style={{ marginBottom: 0 }}>
+                    <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Globe size={11} /> CIUDAD DE EMBAJADA</label>
+                    <input className="input-field" type="text" placeholder="Ej. Madrid" value={formData.consulate} onChange={handleConsulateChange} required />
+                  </div>
+                )}
+              </div>
+
+              {COUNTRY_CONSULATES[formData.country] && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.02)', padding: '0.875rem 1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', marginTop: '0.5rem' }}>
+                  <input type="checkbox" id="needs_cas" checked={formData.needs_cas} onChange={e => setFormData({...formData, needs_cas: e.target.checked})} style={{ width: '16px', height: '16px', accentColor: 'var(--lime)', cursor: 'pointer' }} />
+                  <div>
+                    <label htmlFor="needs_cas" style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-1)', cursor: 'pointer' }}>Requiere cita en Centro Externo (CAS/ASC)</label>
+                    {formData.needs_cas && (
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', marginTop: '0.1rem' }}>
+                        Sede CAS asignada: {formData.consulate_asc}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* PASO 2: PARÁMETROS Y FECHAS */}
+          {currentStep === 2 && (
+            <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Rango de Fechas Objetivo</h4>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Opcional. Especifica el rango de fechas en el cual el bot buscará reprogramar la cita. Si no se indica, reprogramará la más cercana disponible.</p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginTop: '0.5rem' }}>
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Calendar size={11} /> FECHA MÍNIMA</label>
+                  <input className="input-field" type="date" value={formData.min_consulate_date} onChange={e => setFormData({...formData, min_consulate_date: e.target.value})} style={{ colorScheme: 'dark' }} />
+                </div>
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Calendar size={11} /> FECHA MÁXIMA</label>
+                  <input className="input-field" type="date" value={formData.max_consulate_date} onChange={e => setFormData({...formData, max_consulate_date: e.target.value})} style={{ colorScheme: 'dark' }} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PASO 3: ACCESO */}
+          {currentStep === 3 && (
             <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
                 <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Credenciales del Portal</h4>
@@ -359,8 +431,8 @@ const CreateWizard = ({ onClose, onCreated }) => {
             </div>
           )}
 
-          {/* PASO 2: VÍNCULO (SCHEDULE ID) */}
-          {currentStep === 2 && (
+          {/* PASO 4: VÍNCULO (SCHEDULE ID) */}
+          {currentStep === 4 && (
             <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
                 <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Vinculación del Schedule ID</h4>
@@ -464,78 +536,6 @@ const CreateWizard = ({ onClose, onCreated }) => {
             </div>
           )}
 
-          {/* PASO 3: CONFIGURACIÓN CONSULAR */}
-          {currentStep === 3 && (
-            <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Configuración Consular y Sede</h4>
-                <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Selecciona el país y el consulado correspondiente a la cita que deseas adelantar.</p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginTop: '0.5rem' }}>
-                <div className="input-group" style={{ marginBottom: 0 }}>
-                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Globe size={11} /> PAÍS (CONSULADO)</label>
-                  <select className="input-field" style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }} value={formData.country} onChange={handleCountryChange} required>
-                    {Object.entries(COUNTRIES).map(([code, name]) => (
-                      <option key={code} value={code} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>{name}</option>
-                    ))}
-                  </select>
-                </div>
-                
-                {COUNTRY_CONSULATES[formData.country] ? (
-                  <div className="input-group" style={{ marginBottom: 0 }}>
-                    <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Globe size={11} /> SEDE CONSULADO</label>
-                    <select className="input-field" style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }} value={formData.consulate} onChange={handleConsulateChange} required>
-                      {COUNTRY_CONSULATES[formData.country].map(c => (
-                        <option key={c.facility_id} value={c.facility_id} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>{c.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                ) : (
-                  <div className="input-group" style={{ marginBottom: 0 }}>
-                    <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Globe size={11} /> CIUDAD DE EMBAJADA</label>
-                    <input className="input-field" type="text" placeholder="Ej. Madrid" value={formData.consulate} onChange={handleConsulateChange} required />
-                  </div>
-                )}
-              </div>
-
-              {COUNTRY_CONSULATES[formData.country] && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.02)', padding: '0.875rem 1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', marginTop: '0.5rem' }}>
-                  <input type="checkbox" id="needs_cas" checked={formData.needs_cas} onChange={e => setFormData({...formData, needs_cas: e.target.checked})} style={{ width: '16px', height: '16px', accentColor: 'var(--lime)', cursor: 'pointer' }} />
-                  <div>
-                    <label htmlFor="needs_cas" style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-1)', cursor: 'pointer' }}>Requiere cita en Centro Externo (CAS/ASC)</label>
-                    {formData.needs_cas && (
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', marginTop: '0.1rem' }}>
-                        Sede CAS asignada: {formData.consulate_asc}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* PASO 4: PARÁMETROS Y FECHAS */}
-          {currentStep === 4 && (
-            <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div style={{ borderLeft: '3px solid var(--lime)', paddingLeft: '0.75rem' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>Rango de Fechas Objetivo</h4>
-                <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Opcional. Especifica el rango de fechas en el cual el bot buscará reprogramar la cita. Si no se indica, reprogramará la más cercana disponible.</p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginTop: '0.5rem' }}>
-                <div className="input-group" style={{ marginBottom: 0 }}>
-                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Calendar size={11} /> FECHA MÍNIMA</label>
-                  <input className="input-field" type="date" value={formData.min_consulate_date} onChange={e => setFormData({...formData, min_consulate_date: e.target.value})} style={{ colorScheme: 'dark' }} />
-                </div>
-                <div className="input-group" style={{ marginBottom: 0 }}>
-                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Calendar size={11} /> FECHA MÁXIMA</label>
-                  <input className="input-field" type="date" value={formData.max_consulate_date} onChange={e => setFormData({...formData, max_consulate_date: e.target.value})} style={{ colorScheme: 'dark' }} />
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* PASO 5: RESUMEN Y DESPLIEGUE */}
           {currentStep === 5 && (
             <div className="animate-in">
@@ -617,7 +617,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
               type="button"
               className="btn btn-lime"
               onClick={currentStep === 5 ? handleFinish : handleNextStep}
-              disabled={loading || discovering || (currentStep === 2 && mode === 'discover' && !selectedScheduleId)}
+              disabled={loading || discovering || (currentStep === 4 && mode === 'discover' && !selectedScheduleId)}
               style={{
                 minWidth: '160px',
                 background: currentStep === 5 ? 'linear-gradient(135deg, var(--lime), var(--accent-2))' : 'var(--surface-3)',
