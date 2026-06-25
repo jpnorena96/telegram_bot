@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from .routes import auth, appointments, users, admin, notifications
+from .routes import auth, appointments, users, admin, notifications, documents
 
 app = FastAPI(title="GlobalVisas API")
 
@@ -33,6 +33,7 @@ app.include_router(appointments.router, prefix="/api/appointments", tags=["Appoi
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
+app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])
 
 @app.get("/api/health")
 def health_check():

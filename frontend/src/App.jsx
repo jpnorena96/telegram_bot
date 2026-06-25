@@ -8,6 +8,7 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardLayout from './components/layout/DashboardLayout';
 import OverviewPage from './pages/dashboard/OverviewPage';
 import AppointmentsPage from './pages/dashboard/AppointmentsPage';
+import DocumentsPage from './pages/dashboard/DocumentsPage';
 import UsersPage from './pages/dashboard/UsersPage';
 import SettingsPage from './pages/dashboard/SettingsPage';
 import AdminPage from './pages/dashboard/AdminPage';
@@ -53,6 +54,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<OverviewPage />} />
           <Route path="citas" element={<AppointmentsPage />} />
+          <Route path="documentos" element={<DocumentsPage />} />
           <Route path="usuarios" element={<UsersPage />} />
           <Route path="configuracion" element={<SettingsPage />} />
           <Route path="auditoria" element={<AdminPage />} />

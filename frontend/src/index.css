@@ -207,6 +207,8 @@ a:hover { color: var(--lime); }
 .tag-lime   { background: rgba(99,102,241,0.1); color: var(--lime); border-color: rgba(99,102,241,0.2); }
 .tag-green  { background: rgba(16,185,129,0.1); color: var(--green); border-color: rgba(16,185,129,0.2); }
 .tag-orange { background: rgba(245,158,11,0.1); color: var(--orange); border-color: rgba(245,158,11,0.2); }
+.tag-cyan   { background: rgba(56,189,248,0.1); color: var(--cyan); border-color: rgba(56,189,248,0.2); }
+.tag-gold   { background: rgba(234,179,8,0.1); color: var(--gold); border-color: rgba(234,179,8,0.2); }
 
 /* ═══════════════════════════════════
    TEXT GRADIENTS

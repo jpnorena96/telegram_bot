@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutGrid, CalendarCheck, Users, Settings, LogOut, ChevronLeft, ChevronRight, Shield } from 'lucide-react';
+import { LayoutGrid, CalendarCheck, Users, Settings, LogOut, ChevronLeft, ChevronRight, Shield, FolderOpen } from 'lucide-react';
 import { api } from '../../services/api';
 
 const ROLE_LABELS = {
@@ -12,6 +12,7 @@ const ROLE_LABELS = {
 const NAV = [
   { to: '/dashboard',               label: 'Resumen',       icon: LayoutGrid,    roles: ['ADMINISTRATOR','AUDITOR','VISA_MANAGER','TRAVEL_AGENCY','NATURAL_PERSON'] },
   { to: '/dashboard/citas',         label: 'Citas',         icon: CalendarCheck, roles: ['ADMINISTRATOR','AUDITOR','VISA_MANAGER','TRAVEL_AGENCY','NATURAL_PERSON'] },
+  { to: '/dashboard/documentos',    label: 'Documentos',    icon: FolderOpen,    roles: ['ADMINISTRATOR','AUDITOR','VISA_MANAGER','TRAVEL_AGENCY','NATURAL_PERSON'] },
   { to: '/dashboard/usuarios',      label: 'Usuarios',      icon: Users,         roles: ['ADMINISTRATOR','AUDITOR'] },
   { to: '/dashboard/auditoria',     label: 'Auditoría',     icon: Shield,        roles: ['ADMINISTRATOR','AUDITOR'] },
   { to: '/dashboard/configuracion', label: 'Configuración', icon: Settings,      roles: ['ADMINISTRATOR'] },

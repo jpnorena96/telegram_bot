@@ -175,4 +175,77 @@ export const api = {
     const token = localStorage.getItem('token');
     return `${API_URL}/admin/export/csv?token=${token}`;
   },
+  async getVisaProcesses() {
+    const response = await fetch(`${API_URL}/documents/processes`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  async getVisaProcessDetails(processId) {
+    const response = await fetch(`${API_URL}/documents/processes/${processId}`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  async createVisaProcess(data) {
+    const response = await fetch(`${API_URL}/documents/processes`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+  async updateVisaProcessStatus(processId, status) {
+    const response = await fetch(`${API_URL}/documents/processes/${processId}/status`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({ status }),
+    });
+    return handleResponse(response);
+  },
+  async addVisaApplicant(processId, data) {
+    const response = await fetch(`${API_URL}/documents/processes/${processId}/applicants`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+  async deleteVisaApplicant(processId, applicantId) {
+    const response = await fetch(`${API_URL}/documents/processes/${processId}/applicants/${applicantId}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  async uploadVisaDocument(applicantId, documentType, file) {
+    const formData = new FormData();
+    formData.append('document_type', documentType);
+    formData.append('file', file);
+    
+    const headers = getHeaders();
+    delete headers['Content-Type']; // Let browser set boundary
+    
+    const response = await fetch(`${API_URL}/documents/applicants/${applicantId}/upload`, {
+      method: 'POST',
+      headers: headers,
+      body: formData,
+    });
+    return handleResponse(response);
+  },
+  async updateVisaDocumentStatus(documentId, status, notes = '') {
+    const response = await fetch(`${API_URL}/documents/documents/${documentId}/status`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({ status, notes }),
+    });
+    return handleResponse(response);
+  },
+  async downloadVisaDocument(documentId) {
+    const response = await fetch(`${API_URL}/documents/download/${documentId}`, {
+      headers: getHeaders(),
+    });
+    if (!response.ok) throw new Error('Error al descargar archivo');
+    return response.blob();
+  },
 };

@@ -6,6 +6,7 @@ import { api } from '../../services/api';
 const PAGE_LABELS = {
   '/dashboard':               'Resumen',
   '/dashboard/citas':         'Citas',
+  '/dashboard/documentos':    'Documentos de Visa',
   '/dashboard/usuarios':      'Usuarios',
   '/dashboard/configuracion': 'Configuración',
 };
