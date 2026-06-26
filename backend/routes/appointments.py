@@ -153,10 +153,12 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
                 a.status as status,
                 a.date_created,
                 a.date_booked,
+                a.schedule_id as schedule_id,
                 u.full_name as system_user_name,
                 u.email as system_user_email
             FROM user_appointments a
             LEFT JOIN users u ON a.user_id = u.id
+            WHERE a.status != 'guardada'
             ORDER BY a.id DESC LIMIT 50
         """)
     else:
@@ -171,10 +173,11 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
                 status as status,
                 date_created,
                 date_booked,
+                schedule_id,
                 NULL as system_user_name,
                 NULL as system_user_email
             FROM user_appointments 
-            WHERE user_id = %s
+            WHERE user_id = %s AND status != 'guardada'
             ORDER BY id DESC
         """, (current_user["id"],))
         
@@ -191,9 +194,6 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
             apt["date_booked"] = apt["date_booked"].strftime('%Y-%m-%d %H:%M:%S')
         # Map statuses for frontend
         if apt["status"] == "pending":
-            apt["newDate"] = "Pendiente"
-            apt["status"] = "Buscando"
-        elif apt["status"] == "guardada":
             apt["newDate"] = "Pendiente"
             apt["status"] = "Buscando"
     

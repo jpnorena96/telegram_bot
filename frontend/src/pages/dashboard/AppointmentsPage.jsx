@@ -70,6 +70,7 @@ const Modal = ({ apt, onClose }) => {
 
   const modalRows = [
     ['CLIENTE', apt.client],
+    ['SCHEDULE_ID', apt.schedule_id || '—'],
     ['TIPO_VISA', apt.type],
     ['FECHA_OBJETIVO', apt.originalDate || '—'],
     ['FECHA_ADELANTO', apt.newDate || '—'],
@@ -704,6 +705,21 @@ const AppointmentsPage = () => {
       }
     }
 
+    // Filtrar duplicados por schedule_id (mantener el primero, que es el más reciente)
+    const seenSchedules = new Set();
+    r = r.filter(a => {
+      if (a.schedule_id) {
+        const sid = String(a.schedule_id).trim();
+        if (sid) {
+          if (seenSchedules.has(sid)) {
+            return false;
+          }
+          seenSchedules.add(sid);
+        }
+      }
+      return true;
+    });
+
     r.sort((a, b) => sortD === 'asc' ? String(a[sortF] ?? '').localeCompare(String(b[sortF] ?? '')) : String(b[sortF] ?? '').localeCompare(String(a[sortF] ?? '')));
     setFiltered(r);
   }, [apts, search, statusF, sortF, sortD, startDate, endDate, dateFilterType, isAdmin]);
@@ -835,6 +851,7 @@ const AppointmentsPage = () => {
                 {isAdmin && <th onClick={() => toggleSort('id')} style={{ cursor: 'pointer' }}>ID <SortIco f="id" /></th>}
                 {isAdmin && <th onClick={() => toggleSort('system_user_name')} style={{ cursor: 'pointer' }}>USUARIO_SISTEMA <SortIco f="system_user_name" /></th>}
                 <th onClick={() => toggleSort('client')} style={{ cursor: 'pointer' }}>CLIENTE <SortIco f="client" /></th>
+                <th onClick={() => toggleSort('schedule_id')} style={{ cursor: 'pointer' }}>SCHEDULE_ID <SortIco f="schedule_id" /></th>
                 <th>TIPO_VISA</th>
                 <th onClick={() => toggleSort('originalDate')} style={{ cursor: 'pointer' }}>FECHA_OBJ <SortIco f="originalDate" /></th>
                 <th>ESTADO</th>
@@ -845,7 +862,7 @@ const AppointmentsPage = () => {
               {loading
                 ? Array.from({ length: 6 }).map((_, i) => (
                   <tr key={i}>
-                    {[isAdmin && 1, isAdmin && 1, 1, 1, 1, 1, canEdit && 1].filter(Boolean).map((__, j) => (
+                    {[isAdmin && 1, isAdmin && 1, 1, 1, 1, 1, 1, canEdit && 1].filter(Boolean).map((__, j) => (
                       <td key={j}><div className="skeleton" style={{ height: '13px', width: `${50 + Math.random() * 40}%` }} /></td>
                     ))}
                   </tr>
@@ -853,7 +870,7 @@ const AppointmentsPage = () => {
                 : filtered.length === 0
                   ? (
                     <tr>
-                      <td colSpan={[isAdmin && 1, isAdmin && 1, 1, 1, 1, 1, canEdit && 1].filter(Boolean).length} style={{ textAlign: 'center', padding: '3rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-3)' }}>
+                      <td colSpan={[isAdmin && 1, isAdmin && 1, 1, 1, 1, 1, 1, canEdit && 1].filter(Boolean).length} style={{ textAlign: 'center', padding: '3rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-3)' }}>
                         &gt; NO_RECORDS_FOUND
                       </td>
                     </tr>
@@ -879,6 +896,7 @@ const AppointmentsPage = () => {
                             <span style={{ fontWeight: 600 }}>{apt.client}</span>
                           </div>
                         </td>
+                        <td className="mono" style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>{apt.schedule_id || '—'}</td>
                         <td className="mono" style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>{apt.type}</td>
                         <td className="mono" style={{ fontSize: '0.78rem', color: 'var(--text-2)' }}>{apt.originalDate || '—'}</td>
                         <td><span className={`tag ${tag}`}>{label}</span></td>
