@@ -83,6 +83,17 @@ def migrate():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         """)
         conn.commit()
+
+        # Check if schedule_names column exists in user_appointments
+        try:
+            cursor.execute("SELECT schedule_names FROM user_appointments LIMIT 1")
+            print("Column 'schedule_names' already exists in 'user_appointments'.")
+            cursor.fetchall()
+        except mysql.connector.Error as err:
+            if "Unknown column" in str(err):
+                print("Adding 'schedule_names' column to 'user_appointments' table...")
+                cursor.execute("ALTER TABLE user_appointments ADD COLUMN schedule_names VARCHAR(512) NULL DEFAULT NULL")
+                conn.commit()
                 
         print("Migration completed successfully!")
         

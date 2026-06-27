@@ -154,6 +154,7 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
                 a.date_created,
                 a.date_booked,
                 a.schedule_id as schedule_id,
+                a.schedule_names as schedule_names,
                 u.full_name as system_user_name,
                 u.email as system_user_email
             FROM user_appointments a
@@ -174,6 +175,7 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
                 date_created,
                 date_booked,
                 schedule_id,
+                schedule_names,
                 NULL as system_user_name,
                 NULL as system_user_email
             FROM user_appointments 
@@ -354,6 +356,7 @@ def discover_direct(req: DiscoverDirectRequest, current_user: dict = Depends(get
 
 class SelectScheduleRequest(BaseModel):
     schedule_id: str
+    schedule_names: Optional[str] = None
 
 
 @router.post("/{appointment_id}/select-schedule")
@@ -380,8 +383,8 @@ def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest,
         success = vps.set_schedule_id_and_start(apt["email"], req.schedule_id, appointment_id)
         if success:
             cursor.execute(
-                "UPDATE user_appointments SET schedule_id = %s, status = 'pending' WHERE id = %s",
-                (req.schedule_id, appointment_id)
+                "UPDATE user_appointments SET schedule_id = %s, schedule_names = %s, status = 'pending' WHERE id = %s",
+                (req.schedule_id, req.schedule_names, appointment_id)
             )
             # Insertar notificación
             cursor.execute(

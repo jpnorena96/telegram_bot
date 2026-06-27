@@ -163,11 +163,11 @@ export const api = {
     });
     return handleResponse(response);
   },
-  async selectSchedule(appointmentId, scheduleId) {
+  async selectSchedule(appointmentId, scheduleId, scheduleNames = '') {
     const response = await fetch(`${API_URL}/appointments/${appointmentId}/select-schedule`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ schedule_id: scheduleId }),
+      body: JSON.stringify({ schedule_id: scheduleId, schedule_names: scheduleNames }),
     });
     return handleResponse(response);
   },

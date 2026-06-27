@@ -71,6 +71,7 @@ const Modal = ({ apt, onClose }) => {
   const modalRows = [
     ['CLIENTE', apt.client],
     ['SCHEDULE_ID', apt.schedule_id || '—'],
+    ['SOLICITANTES', apt.schedule_names || '—'],
     ['TIPO_VISA', apt.type],
     ['FECHA_OBJETIVO', apt.originalDate || '—'],
     ['FECHA_ADELANTO', apt.newDate || '—'],
@@ -258,7 +259,8 @@ const CreateWizard = ({ onClose, onCreated }) => {
 
         await api.createAppointment(payload);
       } else {
-        await api.selectSchedule(tempAppointmentId, selectedScheduleId);
+        const selectedName = discoveredSchedules[selectedScheduleId] || '';
+        await api.selectSchedule(tempAppointmentId, selectedScheduleId, selectedName);
       }
       setSuccess(true);
     } catch (err) {
@@ -893,7 +895,14 @@ const AppointmentsPage = () => {
                         <td>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div style={{ width: '6px', height: '6px', background: 'var(--lime)', flexShrink: 0 }} />
-                            <span style={{ fontWeight: 600 }}>{apt.client}</span>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                              <span style={{ fontWeight: 600 }}>{apt.client}</span>
+                              {apt.schedule_names && (
+                                <span style={{ fontSize: '0.68rem', color: 'var(--text-3)' }}>
+                                  👥 {apt.schedule_names}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </td>
                         <td className="mono" style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>{apt.schedule_id || '—'}</td>
