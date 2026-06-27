@@ -1033,14 +1033,27 @@ class Bot:
                                     database=self.config.db_name
                                 )
                                 cursor = conn.cursor()
+                                # 1. Actualizar estado y fecha en la tabla de citas
                                 cursor.execute(
                                     "UPDATE user_appointments SET status = 'agendado', date_booked = NOW() WHERE email = %s",
                                     (self.config.email,)
                                 )
+                                # 2. Obtener el user_id para registrar la notificación
+                                cursor.execute(
+                                    "SELECT user_id FROM user_appointments WHERE email = %s ORDER BY id DESC LIMIT 1",
+                                    (self.config.email,)
+                                )
+                                row = cursor.fetchone()
+                                if row:
+                                    user_id = row[0]
+                                    cursor.execute(
+                                        "INSERT INTO notifications (user_id, message, status) VALUES (%s, %s, 'success')",
+                                        (user_id, f"¡Agendamiento exitoso! Se adelantó la cita para {self.config.email}.",)
+                                    )
                                 conn.commit()
                                 cursor.close()
                                 conn.close()
-                                self.logger("DB Status actualizado a 'agendado'")
+                                self.logger("DB Status y notificaciones actualizados a 'agendado'")
                             except Exception as db_err:
                                 self.logger(f"Error actualizando DB: {db_err}")
 
