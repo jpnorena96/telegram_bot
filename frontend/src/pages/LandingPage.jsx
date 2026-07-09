@@ -1,9 +1,9 @@
 ﻿import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
-  ArrowRight, Shield, Clock, Zap, CheckCircle2,
-  Globe, Calendar, Bell, Users, ChevronRight, Star, Lock,
-  TrendingUp, FileText, MessageCircle, Building2
+  ArrowRight, Shield, Calendar, Bell, Star,
+  Globe, FileText, MessageCircle, Building2, CheckCircle2
 } from "lucide-react";
 
 /* ─── Intersection Observer Hook ─── */
@@ -36,68 +36,11 @@ const Counter = ({ target, suffix = "", dur = 2200 }) => {
   return <span ref={ref}>{val.toLocaleString()}{suffix}</span>;
 };
 
-/* ─── Data ─── */
-const NAV_LINKS = [
-  { href: "#proceso", label: "El Proceso" },
-  { href: "#planes", label: "Planes" },
-  { href: "#agencias", label: "Agencias B2B" },
-];
-
-const PROCESS_STEPS = [
-  { icon: FileText, step: "01", title: "Analisis DS-160", desc: "Expertos revisan cada detalle de tu perfil para maximizar la probabilidad de aprobacion." },
-  { icon: Calendar, step: "02", title: "Monitoreo 24/7", desc: "El algoritmo escanea los consulados globales buscando los primeros espacios disponibles." },
-  { icon: Bell, step: "03", title: "Aseguramiento Automatico", desc: "Al detectar cancelaciones, aseguramos tu cita en milisegundos sin intervencion humana." },
-  { icon: Shield, step: "04", title: "Preparacion Final", desc: "Recibe simulacros de entrevista y acompañamiento hasta que salgas con tu visa aprobada." },
-];
-
-const PLANS_CLIENT = [
-  {
-    name: "Basico", price: "$99", period: "", desc: "La base profesional para iniciar tu proceso con confianza.", highlight: false, badge: null,
-    features: ["Acompañamiento formulario DS-160", "Revision experta de respuestas", "Mejores tips de entrevista", "Acompañamiento continuo via chat"],
-    cta: "Comenzar Proceso",
-  },
-  {
-    name: "Estandar", price: "$249", period: "", desc: "El balance ideal. Cita asegurada en menos de 3 meses.", highlight: true, badge: "Mas Solicitado",
-    features: ["Todo lo del plan Basico", "Monitoreo automatico de citas 24/7", "Cita consular en menos de 3 meses", "Notificaciones en tiempo real", "Soporte prioritario"],
-    cta: "Asegurar Cita",
-  },
-  {
-    name: "Premium", price: "$499", period: "", desc: "Maxima urgencia. Cita garantizada en 1 mes o menos.", highlight: false, badge: "Via Rapida",
-    features: ["Todo lo del plan Estandar", "Cita consular garantizada en 1 mes o menos", "Motor de scraping VIP (maxima prioridad)", "Asesoria de entrevista personalizada", "Soporte 24/7 dedicado"],
-    cta: "Solicitar Premium",
-  },
-];
-
-const PLANS_AGENCY = [
-  {
-    name: "Agencia Starter", price: "$199", period: "/mes", desc: "Infraestructura solida para agencias en crecimiento.",
-    features: ["Portal Marca Blanca (dominio neutro)", "Gestion hasta 50 clientes activos", "Dashboard unificado de seguimiento", "Notificaciones automaticas al cliente", "Acceso API REST basico"],
-    cta: "Contactar Ventas",
-  },
-  {
-    name: "Agencia Pro", price: "$499", period: "/mes", desc: "Escalabilidad sin limites para lideres del sector.",
-    features: ["Todo en Starter", "Clientes ilimitados", "Motor de adelanto VIP (prioridad maxima)", "White-label completo con tu marca", "Soporte dedicado + Account Manager"],
-    cta: "Contactar Ventas",
-  },
-];
-
-const STATS = [
-  { value: 5800, suffix: "+", label: "Visas Gestionadas" },
-  { value: 147, suffix: "", label: "Dias Ahorrados Promedio" },
-  { value: 98, suffix: "%", label: "Tasa de Exito" },
-  { value: 42, suffix: "+", label: "Paises Soportados" },
-];
-
-const TESTIMONIALS = [
-  { name: "Maria Gonzalez", role: "Ejecutiva, Colombia", text: "El nivel de profesionalismo es impecable. Tenia mi cita para el proximo año y lograron adelantarla a 3 semanas. Fundamental para mis viajes de negocios.", stars: 5 },
-  { name: "Carlos Rivas", role: "Emprendedor, Mexico", text: "Un proceso completamente transparente. El dashboard me mantenia informado, y el equipo reviso mi DS-160 corrigiendo errores que me hubieran costado la visa.", stars: 5 },
-  { name: "Visa360 Corp.", role: "Agencia Aliada, Peru", text: "Operamos mas de 100 perfiles mensuales a traves del plan Pro. La plataforma neutra nos permite mantener nuestra marca frente al cliente.", stars: 5 },
-];
-
 /* ════════════════════════════════════════
    COMPONENT
 ════════════════════════════════════════ */
 const LandingPage = () => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [agencyTab, setAgencyTab] = useState(false);
@@ -114,6 +57,68 @@ const LandingPage = () => {
     window.addEventListener("scroll", fn);
     return () => window.removeEventListener("scroll", fn);
   }, []);
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+  };
+
+  /* ── Dynamic Data using t() ── */
+  const NAV_LINKS = [
+    { href: "#proceso", label: t('nav.process') },
+    { href: "#planes", label: t('nav.plans') },
+    { href: "#agencias", label: t('nav.agencies') },
+  ];
+
+  const PROCESS_STEPS = [
+    { icon: FileText, step: "01", title: t('process.step1_title'), desc: t('process.step1_desc') },
+    { icon: Calendar, step: "02", title: t('process.step2_title'), desc: t('process.step2_desc') },
+    { icon: Bell, step: "03", title: t('process.step3_title'), desc: t('process.step3_desc') },
+    { icon: Shield, step: "04", title: t('process.step4_title'), desc: t('process.step4_desc') },
+  ];
+
+  const PLANS_CLIENT = [
+    {
+      name: t('pricing.b2c_basic_name'), price: "$99", period: "", desc: t('pricing.b2c_basic_desc'), highlight: false, badge: null,
+      features: ["Acompañamiento formulario DS-160", "Revision experta de respuestas", "Mejores tips de entrevista", "Acompañamiento continuo via chat"],
+      cta: t('pricing.cta_b2c'),
+    },
+    {
+      name: t('pricing.b2c_std_name'), price: "$249", period: "", desc: t('pricing.b2c_std_desc'), highlight: true, badge: t('pricing.b2c_std_badge'),
+      features: ["Todo lo del plan Basico", "Monitoreo automatico de citas 24/7", "Cita consular en menos de 3 meses", "Notificaciones en tiempo real", "Soporte prioritario"],
+      cta: t('pricing.cta_b2c'),
+    },
+    {
+      name: t('pricing.b2c_pro_name'), price: "$499", period: "", desc: t('pricing.b2c_pro_desc'), highlight: false, badge: t('pricing.b2c_pro_badge'),
+      features: ["Todo lo del plan Estandar", "Cita consular garantizada en 1 mes o menos", "Motor de scraping VIP (maxima prioridad)", "Asesoria de entrevista personalizada", "Soporte 24/7 dedicado"],
+      cta: t('pricing.cta_b2c'),
+    },
+  ];
+
+  const PLANS_AGENCY = [
+    {
+      name: t('pricing.b2b_start_name'), price: "$199", period: t('pricing.b2b_start_period'), desc: t('pricing.b2b_start_desc'),
+      features: ["Portal Marca Blanca (dominio neutro)", "Gestion até 50 clientes activos", "Dashboard unificado de seguimiento", "Notificaciones automaticas al cliente", "Acceso API REST basico"],
+      cta: t('pricing.cta_b2b'),
+    },
+    {
+      name: t('pricing.b2b_pro_name'), price: "$499", period: t('pricing.b2b_pro_period'), desc: t('pricing.b2b_pro_desc'),
+      features: ["Todo en Starter", "Clientes ilimitados", "Motor de adelanto VIP (prioridad maxima)", "White-label completo con tu marca", "Soporte dedicado + Account Manager"],
+      cta: t('pricing.cta_b2b'),
+    },
+  ];
+
+  const STATS = [
+    { value: 5800, suffix: "+", label: t('stats.visas') },
+    { value: 147, suffix: "", label: t('stats.days') },
+    { value: 98, suffix: "%", label: t('stats.success') },
+    { value: 42, suffix: "+", label: t('stats.countries') },
+  ];
+
+  const TESTIMONIALS = [
+    { name: t('testimonials.t1_name'), role: t('testimonials.t1_role'), text: t('testimonials.t1_text'), stars: 5 },
+    { name: t('testimonials.t2_name'), role: t('testimonials.t2_role'), text: t('testimonials.t2_text'), stars: 5 },
+    { name: t('testimonials.t3_name'), role: t('testimonials.t3_role'), text: t('testimonials.t3_text'), stars: 5 },
+  ];
 
   /* ── Styles ── */
   const S = {
@@ -154,9 +159,16 @@ const LandingPage = () => {
             >{l.label}</a>
           ))}
         </div>
-        <div style={{ display: "flex", gap: "0.75rem" }}>
-          <button onClick={() => navigate("/login")} className="btn btn-outline" style={{ fontSize: "0.875rem" }}>Acceso Clientes</button>
-          <button onClick={() => navigate("/register")} className="btn btn-lime" style={{ fontSize: "0.875rem" }}>Comenzar <ArrowRight size={16} /></button>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <div style={{ display: "flex", gap: "0.5rem", marginRight: "1rem" }}>
+            <button onClick={() => changeLanguage('en')} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: i18n.language === 'en' ? 'bold' : 'normal', color: i18n.language === 'en' ? 'var(--lime)' : 'var(--text-3)' }}>EN</button>
+            <span style={{ color: 'var(--border)' }}>|</span>
+            <button onClick={() => changeLanguage('es')} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: i18n.language === 'es' ? 'bold' : 'normal', color: i18n.language === 'es' ? 'var(--lime)' : 'var(--text-3)' }}>ES</button>
+            <span style={{ color: 'var(--border)' }}>|</span>
+            <button onClick={() => changeLanguage('pt')} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: i18n.language === 'pt' ? 'bold' : 'normal', color: i18n.language === 'pt' ? 'var(--lime)' : 'var(--text-3)' }}>PT</button>
+          </div>
+          <button onClick={() => navigate("/login")} className="btn btn-outline" style={{ fontSize: "0.875rem" }}>{t('nav.login')}</button>
+          <button onClick={() => navigate("/register")} className="btn btn-lime" style={{ fontSize: "0.875rem" }}>{t('nav.start')} <ArrowRight size={16} /></button>
         </div>
       </nav>
 
@@ -165,21 +177,21 @@ const LandingPage = () => {
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", gap: "4rem", flexWrap: "wrap" }}>
           <div style={{ flex: "1 1 500px", ...S.reveal(heroInView, 0) }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 1rem", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, color: "var(--lime)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.02)" }}>
-              <Shield size={14} /> Tramite Seguro y Garantizado
+              <Shield size={14} /> {t('hero.badge')}
             </div>
             <h1 style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1.1, marginBottom: "1.5rem", color: "var(--text-1)" }}>
-              Tu visa americana,<br />
-              gestionada por <span className="text-gradient-accent">expertos globales.</span>
+              {t('hero.title')}<br />
+              <span className="text-gradient-accent">{t('hero.title_highlight')}</span>
             </h1>
             <p style={{ fontSize: "1.125rem", color: "var(--text-2)", marginBottom: "2.5rem", lineHeight: 1.7, maxWidth: 550 }}>
-              Tecnologia de punta y acompañamiento profesional para adelantar tu cita consular y garantizar la presentacion perfecta de tu DS-160.
+              {t('hero.desc')}
             </p>
             <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
               <button onClick={() => navigate("/register")} className="btn btn-lime" style={{ padding: "0.9rem 2.25rem", fontSize: "1rem" }}>
-                Evaluar mi Perfil <ArrowRight size={18} />
+                {t('hero.cta_primary')} <ArrowRight size={18} />
               </button>
               <a href="#proceso" className="btn btn-outline" style={{ padding: "0.9rem 2.25rem", fontSize: "1rem", background: "var(--bg)" }}>
-                Conocer el Proceso
+                {t('hero.cta_secondary')}
               </a>
             </div>
             <div style={{ marginTop: "2.5rem", display: "flex", gap: "2rem", alignItems: "center" }}>
@@ -187,7 +199,7 @@ const LandingPage = () => {
                  {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="var(--gold)" color="var(--gold)" />)}
                </div>
                <div style={{ fontSize: "0.85rem", color: "var(--text-3)", fontWeight: 500 }}>
-                 +5,000 clientes satisfechos a nivel mundial.
+                 {t('hero.trust_text')}
                </div>
             </div>
           </div>
@@ -218,9 +230,9 @@ const LandingPage = () => {
       <section id="proceso" ref={processRef} style={{ padding: "7rem 2rem", background: "var(--surface-2)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "5rem" }}>
-            <h2 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "1rem", ...S.reveal(processInView, 0) }}>Nuestra Metodologia</h2>
+            <h2 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "1rem", ...S.reveal(processInView, 0) }}>{t('process.title')}</h2>
             <p style={{ fontSize: "1.1rem", color: "var(--text-2)", maxWidth: 600, margin: "0 auto", lineHeight: 1.7, ...S.reveal(processInView, 0.1) }}>
-              Un marco de trabajo riguroso diseñado para minimizar rechazos y acelerar tiempos de espera dramaticamente.
+              {t('process.desc')}
             </p>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.5rem" }}>
@@ -229,7 +241,7 @@ const LandingPage = () => {
                 <div style={{ width: 56, height: 56, borderRadius: 16, background: "var(--surface)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.5rem" }}>
                   <step.icon size={26} color="var(--lime)" strokeWidth={1.5} />
                 </div>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem", color: "var(--lime)", fontWeight: 700, marginBottom: "0.5rem" }}>PASO {step.step}</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem", color: "var(--lime)", fontWeight: 700, marginBottom: "0.5rem" }}>{t('process.step_label')} {step.step}</div>
                 <h3 style={{ fontSize: "1.25rem", fontWeight: 700, marginBottom: "1rem", color: "var(--text-1)" }}>{step.title}</h3>
                 <p style={{ color: "var(--text-2)", lineHeight: 1.6, fontSize: "0.95rem" }}>{step.desc}</p>
               </div>
@@ -246,17 +258,17 @@ const LandingPage = () => {
           </div>
           <div style={{ padding: "6rem 4rem", display: "flex", flexDirection: "column", justifyContent: "center", background: "var(--text-1)", color: "#fff" }}>
              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 1rem", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem", alignSelf: "flex-start" }}>
-               <Building2 size={14} /> Soluciones B2B
+               <Building2 size={14} /> {t('agency.badge')}
              </div>
              <h2 style={{ fontSize: "2.5rem", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "1.5rem", lineHeight: 1.1 }}>
-               Potencia tu agencia<br />con tecnologia global.
+               {t('agency.title')}
              </h2>
              <p style={{ fontSize: "1.1rem", color: "var(--text-3)", marginBottom: "2.5rem", lineHeight: 1.7, maxWidth: 500 }}>
-               Ofrecemos un portal marca blanca (white-label) para que agencias de viajes y gestores de visas brinden el servicio de adelanto de citas bajo su propia marca, con nuestra infraestructura tecnica detras.
+               {t('agency.desc')}
              </p>
              <div>
                <button onClick={() => { setAgencyTab(true); document.getElementById("planes")?.scrollIntoView(); }} className="btn" style={{ background: "#fff", color: "var(--text-1)", border: "none", padding: "1rem 2rem" }}>
-                 Ver Planes para Agencias
+                 {t('agency.cta')}
                </button>
              </div>
           </div>
@@ -267,15 +279,15 @@ const LandingPage = () => {
       <section id="planes" ref={pricingRef} style={{ padding: "7rem 2rem", background: "var(--surface)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "4rem" }}>
-            <h2 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "1rem", ...S.reveal(pricingInView, 0) }}>Planes y Licencias</h2>
+            <h2 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "1rem", ...S.reveal(pricingInView, 0) }}>{t('pricing.title')}</h2>
             <p style={{ fontSize: "1.1rem", color: "var(--text-2)", maxWidth: 520, margin: "0 auto", lineHeight: 1.7, ...S.reveal(pricingInView, 0.1) }}>
-              Elige el esquema que mejor se adapte a tus necesidades corporativas o personales.
+              {t('pricing.desc')}
             </p>
           </div>
           
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "3.5rem", ...S.reveal(pricingInView, 0.2) }}>
             <div style={{ display: "inline-flex", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 99, padding: 6, gap: 4, boxShadow: "0 2px 10px rgba(0,0,0,0.02)" }}>
-              {["Para Solicitantes (B2C)", "Para Agencias (B2B)"].map((label, i) => (
+              {[t('pricing.tab_b2c'), t('pricing.tab_b2b')].map((label, i) => (
                 <button key={i} onClick={() => setAgencyTab(i === 1)} style={{ padding: "0.6rem 1.75rem", borderRadius: 99, fontSize: "0.9rem", fontWeight: 600, border: "none", cursor: "pointer", fontFamily: "var(--font-ui)", transition: "all 0.25s ease", background: agencyTab === (i === 1) ? "var(--text-1)" : "transparent", color: agencyTab === (i === 1) ? "#fff" : "var(--text-2)" }}>
                   {label}
                 </button>
@@ -288,7 +300,7 @@ const LandingPage = () => {
               {PLANS_CLIENT.map((plan, i) => (
                 <div key={i} className="panel" style={{ padding: "2.5rem", position: "relative", border: plan.highlight ? "2px solid var(--lime)" : "1px solid var(--border)", transform: plan.highlight ? "scale(1.02)" : "none", ...S.reveal(pricingInView, 0.1 + i * 0.1) }}>
                   {plan.badge && (
-                    <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", padding: "4px 16px", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.06em", background: "var(--lime)", color: "#fff" }}>
+                    <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", padding: "4px 16px", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.06em", background: "var(--lime)", color: "#fff", whiteSpace: "nowrap" }}>
                       {plan.badge}
                     </div>
                   )}
@@ -343,7 +355,7 @@ const LandingPage = () => {
       <section ref={testRef} style={{ padding: "7rem 2rem", background: "var(--bg)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "4rem" }}>
-            <h2 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 800, letterSpacing: "-0.03em", ...S.reveal(testInView, 0) }}>Reputacion Impecable</h2>
+            <h2 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 800, letterSpacing: "-0.03em", ...S.reveal(testInView, 0) }}>{t('testimonials.title')}</h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem" }}>
             {TESTIMONIALS.map((t, i) => (
@@ -371,17 +383,17 @@ const LandingPage = () => {
       <section style={{ padding: "6rem 2rem", background: "var(--surface-2)" }}>
         <div style={{ maxWidth: 820, margin: "0 auto", textAlign: "center", background: "var(--lime)", borderRadius: 32, padding: "clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem)", boxShadow: "0 20px 40px rgba(37, 99, 235, 0.2)" }}>
           <h2 style={{ fontSize: "clamp(2rem, 4vw, 3.25rem)", fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: "1.25rem", color: "#fff" }}>
-            Tu visa esta lista.<br />Solo falta tu decision.
+            {t('cta.title1')}<br />{t('cta.title2')}
           </h2>
           <p style={{ fontSize: "1.1rem", color: "rgba(255,255,255,0.8)", maxWidth: 520, margin: "0 auto 2.5rem", lineHeight: 1.7 }}>
-            Inicia tu proceso hoy y unete a los miles de clientes y agencias que confian en nuestra infraestructura global.
+            {t('cta.desc')}
           </p>
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
             <button onClick={() => navigate("/register")} className="btn" style={{ padding: "1rem 2.5rem", fontSize: "1rem", background: "#fff", color: "var(--lime)", border: "none" }}>
-              Iniciar Proceso Ahora
+              {t('cta.btn_primary')}
             </button>
             <button onClick={() => navigate("/login")} className="btn btn-outline" style={{ padding: "1rem 2.5rem", fontSize: "1rem", color: "#fff", borderColor: "rgba(255,255,255,0.3)" }}>
-              Contactar Ventas B2B
+              {t('cta.btn_secondary')}
             </button>
           </div>
         </div>
@@ -397,37 +409,37 @@ const LandingPage = () => {
                 GlobalVisas
               </div>
               <p style={{ color: "var(--text-3)", fontSize: "0.9rem", lineHeight: 1.7 }}>
-                Infraestructura corporativa para gestion y aseguramiento de citas consulares B1/B2 a nivel mundial.
+                {t('footer.desc')}
               </p>
             </div>
             <div>
-              <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>Soluciones</div>
-              {["Particulares B2C", "Agencias B2B", "Casos de Exito", "Seguridad"].map(l => (
+              <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>{t('footer.solutions')}</div>
+              {[t('footer.s1'), t('footer.s2'), t('footer.s3'), t('footer.s4')].map(l => (
                 <div key={l} style={{ marginBottom: "0.6rem" }}><a href="#" style={{ color: "var(--text-2)", fontSize: "0.9rem" }}>{l}</a></div>
               ))}
             </div>
             <div>
-              <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>Legal</div>
-              {["Terminos de Servicio", "Politica de Privacidad", "Compliance"].map(l => (
+              <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>{t('footer.legal')}</div>
+              {[t('footer.l1'), t('footer.l2'), t('footer.l3')].map(l => (
                 <div key={l} style={{ marginBottom: "0.6rem" }}><a href="#" style={{ color: "var(--text-2)", fontSize: "0.9rem" }}>{l}</a></div>
               ))}
             </div>
             <div>
-              <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>Contacto</div>
+              <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>{t('footer.contact')}</div>
               <div style={{ color: "var(--text-2)", fontSize: "0.9rem", lineHeight: 1.8 }}>
                 <div>Business Center</div>
                 <div>corp@globalvisas.com</div>
                 <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", gap: "0.4rem", color: "var(--lime)", fontWeight: 600 }}>
-                  <MessageCircle size={16} /> Portal de Soporte 24/7
+                  <MessageCircle size={16} /> {t('footer.c_portal')}
                 </div>
               </div>
             </div>
           </div>
           <div style={{ borderTop: "1px solid var(--border)", paddingTop: "2rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", color: "var(--text-3)", fontSize: "0.85rem" }}>
-            <div>© 2026 GlobalVisas. Todos los derechos reservados.</div>
+            <div>{t('footer.rights')}</div>
             <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontWeight: 500 }}>
               <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--green)" }} />
-              Plataforma Operativa
+              {t('footer.status')}
             </div>
           </div>
         </div>

@@ -38,15 +38,7 @@ function App() {
       />
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex-1">
-              <LandingPage />
-            </main>
-            <Footer />
-          </div>
-        } />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 

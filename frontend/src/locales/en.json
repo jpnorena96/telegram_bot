@@ -1,0 +1,100 @@
+﻿{
+  "nav": {
+    "process": "The Process",
+    "plans": "Plans",
+    "agencies": "B2B Agencies",
+    "login": "Client Login",
+    "start": "Get Started"
+  },
+  "hero": {
+    "badge": "Secure & Guaranteed Process",
+    "title": "Your US Visa,",
+    "title_highlight": "managed by global experts.",
+    "desc": "Cutting-edge technology and professional guidance to fast-track your consular appointment and guarantee a flawless DS-160 presentation.",
+    "cta_primary": "Evaluate My Profile",
+    "cta_secondary": "Learn the Process",
+    "trust_text": "+5,000 satisfied clients worldwide."
+  },
+  "stats": {
+    "visas": "Visas Managed",
+    "days": "Average Days Saved",
+    "success": "Success Rate",
+    "countries": "Supported Countries"
+  },
+  "process": {
+    "title": "Our Methodology",
+    "desc": "A rigorous framework designed to minimize rejections and dramatically accelerate wait times.",
+    "step_label": "STEP",
+    "step1_title": "DS-160 Analysis",
+    "step1_desc": "Experts review every detail of your profile to maximize the probability of approval.",
+    "step2_title": "24/7 Monitoring",
+    "step2_desc": "Our algorithm scans global consulates looking for the first available slots.",
+    "step3_title": "Automatic Securing",
+    "step3_desc": "Upon detecting cancellations, we secure your appointment in milliseconds with no human intervention.",
+    "step4_title": "Final Preparation",
+    "step4_desc": "Receive mock interviews and guidance until you walk out with your approved visa."
+  },
+  "agency": {
+    "badge": "B2B Solutions",
+    "title": "Power your agency with global technology.",
+    "desc": "We offer a white-label portal for travel agencies and visa consultants to provide appointment expediting services under their own brand, powered by our technical infrastructure.",
+    "cta": "View Agency Plans"
+  },
+  "pricing": {
+    "title": "Plans & Licenses",
+    "desc": "Choose the framework that best fits your corporate or personal needs.",
+    "tab_b2c": "For Applicants (B2C)",
+    "tab_b2b": "For Agencies (B2B)",
+    "b2c_basic_name": "Basic",
+    "b2c_basic_desc": "The professional baseline to start your process with confidence.",
+    "b2c_std_name": "Standard",
+    "b2c_std_badge": "Most Popular",
+    "b2c_std_desc": "The ideal balance. Guaranteed appointment in under 3 months.",
+    "b2c_pro_name": "Premium",
+    "b2c_pro_badge": "Fast Track",
+    "b2c_pro_desc": "Maximum urgency. Guaranteed appointment in 1 month or less.",
+    "b2b_start_name": "Starter Agency",
+    "b2b_start_period": "/mo",
+    "b2b_start_desc": "Solid infrastructure for growing agencies.",
+    "b2b_pro_name": "Pro Agency",
+    "b2b_pro_period": "/mo",
+    "b2b_pro_desc": "Limitless scalability for industry leaders.",
+    "cta_b2c": "Start Process",
+    "cta_b2b": "Contact Sales"
+  },
+  "testimonials": {
+    "title": "Impeccable Reputation",
+    "t1_text": "The level of professionalism is impeccable. I had my appointment scheduled for next year and they managed to pull it forward to 3 weeks. Essential for my business trips.",
+    "t1_name": "Maria Gonzalez",
+    "t1_role": "Executive, Colombia",
+    "t2_text": "A completely transparent process. The dashboard kept me informed, and the team reviewed my DS-160, correcting errors that would have cost me the visa.",
+    "t2_name": "Carlos Rivas",
+    "t2_role": "Entrepreneur, Mexico",
+    "t3_text": "We operate over 100 profiles monthly through the Pro plan. The neutral platform allows us to maintain our brand in front of the client.",
+    "t3_name": "Visa360 Corp.",
+    "t3_role": "Partner Agency, Peru"
+  },
+  "cta": {
+    "title1": "Your visa is ready.",
+    "title2": "Only your decision remains.",
+    "desc": "Start your process today and join the thousands of clients and agencies that trust our global infrastructure.",
+    "btn_primary": "Start Process Now",
+    "btn_secondary": "Contact B2B Sales"
+  },
+  "footer": {
+    "desc": "Corporate infrastructure for managing and securing B1/B2 consular appointments worldwide.",
+    "solutions": "Solutions",
+    "s1": "B2C Individuals",
+    "s2": "B2B Agencies",
+    "s3": "Success Stories",
+    "s4": "Security",
+    "legal": "Legal",
+    "l1": "Terms of Service",
+    "l2": "Privacy Policy",
+    "l3": "Compliance",
+    "contact": "Contact",
+    "c_portal": "24/7 Support Portal",
+    "rights": "© 2026 GlobalVisas. All rights reserved.",
+    "status": "Platform Operational"
+  }
+}

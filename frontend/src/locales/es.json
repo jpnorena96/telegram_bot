@@ -1,0 +1,100 @@
+﻿{
+  "nav": {
+    "process": "El Proceso",
+    "plans": "Planes",
+    "agencies": "Agencias B2B",
+    "login": "Acceso Clientes",
+    "start": "Comenzar"
+  },
+  "hero": {
+    "badge": "Trámite Seguro y Garantizado",
+    "title": "Tu visa americana,",
+    "title_highlight": "gestionada por expertos globales.",
+    "desc": "Tecnología de punta y acompañamiento profesional para adelantar tu cita consular y garantizar la presentación perfecta de tu DS-160.",
+    "cta_primary": "Evaluar mi Perfil",
+    "cta_secondary": "Conocer el Proceso",
+    "trust_text": "+5,000 clientes satisfechos a nivel mundial."
+  },
+  "stats": {
+    "visas": "Visas Gestionadas",
+    "days": "Días Ahorrados Promedio",
+    "success": "Tasa de Éxito",
+    "countries": "Países Soportados"
+  },
+  "process": {
+    "title": "Nuestra Metodología",
+    "desc": "Un marco de trabajo riguroso diseñado para minimizar rechazos y acelerar tiempos de espera dramáticamente.",
+    "step_label": "PASO",
+    "step1_title": "Análisis DS-160",
+    "step1_desc": "Expertos revisan cada detalle de tu perfil para maximizar la probabilidad de aprobación.",
+    "step2_title": "Monitoreo 24/7",
+    "step2_desc": "El algoritmo escanea los consulados globales buscando los primeros espacios disponibles.",
+    "step3_title": "Aseguramiento Automático",
+    "step3_desc": "Al detectar cancelaciones, aseguramos tu cita en milisegundos sin intervención humana.",
+    "step4_title": "Preparación Final",
+    "step4_desc": "Recibe simulacros de entrevista y acompañamiento hasta que salgas con tu visa aprobada."
+  },
+  "agency": {
+    "badge": "Soluciones B2B",
+    "title": "Potencia tu agencia con tecnología global.",
+    "desc": "Ofrecemos un portal marca blanca (white-label) para que agencias de viajes y gestores de visas brinden el servicio de adelanto de citas bajo su propia marca, con nuestra infraestructura técnica detrás.",
+    "cta": "Ver Planes para Agencias"
+  },
+  "pricing": {
+    "title": "Planes y Licencias",
+    "desc": "Elige el esquema que mejor se adapte a tus necesidades corporativas o personales.",
+    "tab_b2c": "Para Solicitantes (B2C)",
+    "tab_b2b": "Para Agencias (B2B)",
+    "b2c_basic_name": "Básico",
+    "b2c_basic_desc": "La base profesional para iniciar tu proceso con confianza.",
+    "b2c_std_name": "Estándar",
+    "b2c_std_badge": "Más Solicitado",
+    "b2c_std_desc": "El balance ideal. Cita asegurada en menos de 3 meses.",
+    "b2c_pro_name": "Premium",
+    "b2c_pro_badge": "Vía Rápida",
+    "b2c_pro_desc": "Máxima urgencia. Cita garantizada en 1 mes o menos.",
+    "b2b_start_name": "Agencia Starter",
+    "b2b_start_period": "/mes",
+    "b2b_start_desc": "Infraestructura sólida para agencias en crecimiento.",
+    "b2b_pro_name": "Agencia Pro",
+    "b2b_pro_period": "/mes",
+    "b2b_pro_desc": "Escalabilidad sin límites para líderes del sector.",
+    "cta_b2c": "Iniciar Proceso",
+    "cta_b2b": "Contactar Ventas"
+  },
+  "testimonials": {
+    "title": "Reputación Impecable",
+    "t1_text": "El nivel de profesionalismo es impecable. Tenía mi cita para el próximo año y lograron adelantarla a 3 semanas. Fundamental para mis viajes de negocios.",
+    "t1_name": "María González",
+    "t1_role": "Ejecutiva, Colombia",
+    "t2_text": "Un proceso completamente transparente. El dashboard me mantenía informado, y el equipo revisó mi DS-160 corrigiendo errores que me hubieran costado la visa.",
+    "t2_name": "Carlos Rivas",
+    "t2_role": "Emprendedor, México",
+    "t3_text": "Operamos más de 100 perfiles mensuales a través del plan Pro. La plataforma neutra nos permite mantener nuestra marca frente al cliente.",
+    "t3_name": "Visa360 Corp.",
+    "t3_role": "Agencia Aliada, Perú"
+  },
+  "cta": {
+    "title1": "Tu visa está lista.",
+    "title2": "Solo falta tu decisión.",
+    "desc": "Inicia tu proceso hoy y únete a los miles de clientes y agencias que confían en nuestra infraestructura global.",
+    "btn_primary": "Iniciar Proceso Ahora",
+    "btn_secondary": "Contactar Ventas B2B"
+  },
+  "footer": {
+    "desc": "Infraestructura corporativa para gestión y aseguramiento de citas consulares B1/B2 a nivel mundial.",
+    "solutions": "Soluciones",
+    "s1": "Particulares B2C",
+    "s2": "Agencias B2B",
+    "s3": "Casos de Éxito",
+    "s4": "Seguridad",
+    "legal": "Legal",
+    "l1": "Términos de Servicio",
+    "l2": "Política de Privacidad",
+    "l3": "Compliance",
+    "contact": "Contacto",
+    "c_portal": "Portal de Soporte 24/7",
+    "rights": "© 2026 GlobalVisas. Todos los derechos reservados.",
+    "status": "Plataforma Operativa"
+  }
+}
