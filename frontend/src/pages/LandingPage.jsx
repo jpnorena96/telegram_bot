@@ -1,123 +1,437 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Sparkles, Shield, Clock, Zap } from 'lucide-react';
+﻿import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  ArrowRight, Shield, Clock, Zap, CheckCircle2,
+  Globe, Calendar, Bell, Users, ChevronRight, Star, Lock,
+  TrendingUp, FileText, MessageCircle, Building2
+} from "lucide-react";
 
-/* ─── animated counter ─── */
-const useCount = (target, dur = 2000) => {
-  const [v, setV] = useState(0);
+/* ─── Intersection Observer Hook ─── */
+const useInView = (threshold = 0.15) => {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
   useEffect(() => {
-    let s = 0;
-    const step = target / (dur / 16);
-    const t = setInterval(() => { s += step; if (s >= target) { setV(target); clearInterval(t); } else setV(Math.floor(s)); }, 16);
-    return () => clearInterval(t);
-  }, [target]);
-  return v;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setInView(true); }, { threshold });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return [ref, inView];
 };
 
-const FEATURES = [
-  { icon: Clock, title: 'Monitoreo 24/7 Global', desc: 'Nuestro motor vigila la disponibilidad en embajadas y consulados americanos en todo el mundo, sin interrupciones.' },
-  { icon: Zap, title: 'Adelanto Transfronterizo', desc: 'Al detectar cancelaciones en cualquier delegación, el sistema asegura tu nueva cita en milisegundos.' },
-  { icon: Shield, title: 'Cobertura Multi-País', desc: 'Gestiona aplicaciones desde múltiples ubicaciones geográficas bajo una sola interfaz centralizada y segura.' }
+/* ─── Animated Counter ─── */
+const Counter = ({ target, suffix = "", dur = 2200 }) => {
+  const [val, setVal] = useState(0);
+  const [ref, inView] = useInView(0.3);
+  useEffect(() => {
+    if (!inView) return;
+    let s = 0;
+    const step = target / (dur / 16);
+    const t = setInterval(() => {
+      s += step;
+      if (s >= target) { setVal(target); clearInterval(t); }
+      else setVal(Math.floor(s));
+    }, 16);
+    return () => clearInterval(t);
+  }, [inView, target, dur]);
+  return <span ref={ref}>{val.toLocaleString()}{suffix}</span>;
+};
+
+/* ─── Data ─── */
+const NAV_LINKS = [
+  { href: "#proceso", label: "El Proceso" },
+  { href: "#planes", label: "Planes" },
+  { href: "#agencias", label: "Agencias B2B" },
 ];
 
+const PROCESS_STEPS = [
+  { icon: FileText, step: "01", title: "Analisis DS-160", desc: "Expertos revisan cada detalle de tu perfil para maximizar la probabilidad de aprobacion." },
+  { icon: Calendar, step: "02", title: "Monitoreo 24/7", desc: "El algoritmo escanea los consulados globales buscando los primeros espacios disponibles." },
+  { icon: Bell, step: "03", title: "Aseguramiento Automatico", desc: "Al detectar cancelaciones, aseguramos tu cita en milisegundos sin intervencion humana." },
+  { icon: Shield, step: "04", title: "Preparacion Final", desc: "Recibe simulacros de entrevista y acompañamiento hasta que salgas con tu visa aprobada." },
+];
+
+const PLANS_CLIENT = [
+  {
+    name: "Basico", price: "$99", period: "", desc: "La base profesional para iniciar tu proceso con confianza.", highlight: false, badge: null,
+    features: ["Acompañamiento formulario DS-160", "Revision experta de respuestas", "Mejores tips de entrevista", "Acompañamiento continuo via chat"],
+    cta: "Comenzar Proceso",
+  },
+  {
+    name: "Estandar", price: "$249", period: "", desc: "El balance ideal. Cita asegurada en menos de 3 meses.", highlight: true, badge: "Mas Solicitado",
+    features: ["Todo lo del plan Basico", "Monitoreo automatico de citas 24/7", "Cita consular en menos de 3 meses", "Notificaciones en tiempo real", "Soporte prioritario"],
+    cta: "Asegurar Cita",
+  },
+  {
+    name: "Premium", price: "$499", period: "", desc: "Maxima urgencia. Cita garantizada en 1 mes o menos.", highlight: false, badge: "Via Rapida",
+    features: ["Todo lo del plan Estandar", "Cita consular garantizada en 1 mes o menos", "Motor de scraping VIP (maxima prioridad)", "Asesoria de entrevista personalizada", "Soporte 24/7 dedicado"],
+    cta: "Solicitar Premium",
+  },
+];
+
+const PLANS_AGENCY = [
+  {
+    name: "Agencia Starter", price: "$199", period: "/mes", desc: "Infraestructura solida para agencias en crecimiento.",
+    features: ["Portal Marca Blanca (dominio neutro)", "Gestion hasta 50 clientes activos", "Dashboard unificado de seguimiento", "Notificaciones automaticas al cliente", "Acceso API REST basico"],
+    cta: "Contactar Ventas",
+  },
+  {
+    name: "Agencia Pro", price: "$499", period: "/mes", desc: "Escalabilidad sin limites para lideres del sector.",
+    features: ["Todo en Starter", "Clientes ilimitados", "Motor de adelanto VIP (prioridad maxima)", "White-label completo con tu marca", "Soporte dedicado + Account Manager"],
+    cta: "Contactar Ventas",
+  },
+];
+
+const STATS = [
+  { value: 5800, suffix: "+", label: "Visas Gestionadas" },
+  { value: 147, suffix: "", label: "Dias Ahorrados Promedio" },
+  { value: 98, suffix: "%", label: "Tasa de Exito" },
+  { value: 42, suffix: "+", label: "Paises Soportados" },
+];
+
+const TESTIMONIALS = [
+  { name: "Maria Gonzalez", role: "Ejecutiva, Colombia", text: "El nivel de profesionalismo es impecable. Tenia mi cita para el proximo año y lograron adelantarla a 3 semanas. Fundamental para mis viajes de negocios.", stars: 5 },
+  { name: "Carlos Rivas", role: "Emprendedor, Mexico", text: "Un proceso completamente transparente. El dashboard me mantenia informado, y el equipo reviso mi DS-160 corrigiendo errores que me hubieran costado la visa.", stars: 5 },
+  { name: "Visa360 Corp.", role: "Agencia Aliada, Peru", text: "Operamos mas de 100 perfiles mensuales a traves del plan Pro. La plataforma neutra nos permite mantener nuestra marca frente al cliente.", stars: 5 },
+];
+
+/* ════════════════════════════════════════
+   COMPONENT
+════════════════════════════════════════ */
 const LandingPage = () => {
   const navigate = useNavigate();
-  const c1 = useCount(5800);
-  const c2 = useCount(147);
+  const [scrolled, setScrolled] = useState(false);
+  const [agencyTab, setAgencyTab] = useState(false);
+
+  const [heroRef, heroInView] = useInView(0.1);
+  const [statsRef, statsInView] = useInView(0.2);
+  const [processRef, processInView] = useInView(0.1);
+  const [agencyRef, agencyInView] = useInView(0.1);
+  const [pricingRef, pricingInView] = useInView(0.05);
+  const [testRef, testInView] = useInView(0.1);
+
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", fn);
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
+
+  /* ── Styles ── */
+  const S = {
+    page: { background: "var(--bg)", minHeight: "100vh", overflowX: "hidden", position: "relative" },
+    nav: {
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+      display: "flex", alignItems: "center", justifyContent: "space-between",
+      padding: "0 2.5rem", height: 72,
+      transition: "all 0.3s ease",
+      background: scrolled ? "rgba(255,255,255,0.95)" : "transparent",
+      backdropFilter: scrolled ? "blur(10px)" : "none",
+      borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
+      boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.03)" : "none",
+    },
+    logo: { display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "1.2rem", fontWeight: 800, cursor: "pointer", color: "var(--text-1)" },
+    logoIcon: { color: "var(--lime)" },
+    reveal: (inView, delay = 0) => ({
+      opacity: inView ? 1 : 0,
+      transform: inView ? "translateY(0)" : "translateY(24px)",
+      transition: `opacity 0.6s ease ${delay}s, transform 0.6s ease ${delay}s`,
+    }),
+  };
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', position: 'relative', overflow: 'hidden' }}>
-
-      {/* ─── Background Orbs (Spatial Feel) ─── */}
-      <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: '80vw', height: '600px', background: 'radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 70%)', filter: 'blur(60px)', zIndex: 0, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', top: '20%', right: '-10%', width: '40vw', height: '400px', background: 'radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 60%)', filter: 'blur(50px)', zIndex: 0, pointerEvents: 'none' }} />
-
-      {/* ════════ HERO ════════ */}
-      <section style={{ position: 'relative', zIndex: 1, padding: '10rem 2rem 6rem', textAlign: 'center', maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        
-        {/* Pill badge */}
-        <div className="animate-in" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.375rem 1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-2)', marginBottom: '2.5rem', backdropFilter: 'blur(10px)' }}>
-          <Sparkles size={14} color="var(--accent-2)" />
-          <span>Gestión Global de Visas Americanas B1/B2</span>
+    <div style={S.page}>
+      {/* ── NAVBAR ── */}
+      <nav style={S.nav}>
+        <div style={S.logo} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+          <Globe size={24} style={S.logoIcon} strokeWidth={2.5} />
+          <span>GlobalVisas</span>
         </div>
-
-        {/* Main headline */}
-        <h1 className="animate-in" style={{ fontSize: 'clamp(3rem, 6vw, 5.5rem)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '2rem', animationDelay: '0.1s' }}>
-          Adelanta tu visa americana <br />
-          <span className="text-gradient-accent">desde cualquier país.</span>
-        </h1>
-
-        {/* Subhead */}
-        <p className="animate-in" style={{ fontSize: '1.25rem', color: 'var(--text-2)', maxWidth: '650px', margin: '0 auto 3.5rem', lineHeight: 1.6, animationDelay: '0.2s' }}>
-          La infraestructura más avanzada a nivel mundial para gestionar, monitorear y adelantar citas consulares de visa americana. Sin fricción, sin fronteras.
-        </p>
-
-        {/* CTAs */}
-        <div className="animate-in" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', animationDelay: '0.3s' }}>
-          <button onClick={() => navigate('/register')} className="btn btn-lime" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>
-            Gestionar Mi Visa <ArrowRight size={18} />
-          </button>
-          <button onClick={() => navigate('/login')} className="btn btn-outline" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>
-            Acceso Global
-          </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "2.5rem" }} className="hide-mobile">
+          {NAV_LINKS.map(l => (
+            <a key={l.href} href={l.href}
+              style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--text-2)", transition: "color 0.2s" }}
+              onMouseOver={e => (e.target.style.color = "var(--lime)")}
+              onMouseOut={e => (e.target.style.color = "var(--text-2)")}
+            >{l.label}</a>
+          ))}
         </div>
+        <div style={{ display: "flex", gap: "0.75rem" }}>
+          <button onClick={() => navigate("/login")} className="btn btn-outline" style={{ fontSize: "0.875rem" }}>Acceso Clientes</button>
+          <button onClick={() => navigate("/register")} className="btn btn-lime" style={{ fontSize: "0.875rem" }}>Comenzar <ArrowRight size={16} /></button>
+        </div>
+      </nav>
 
-      </section>
-
-      {/* ════════ GLOWING STATS DASHBOARD ════════ */}
-      <section style={{ position: 'relative', zIndex: 1, padding: '0 2rem 8rem' }}>
-        <div className="panel animate-in" style={{ maxWidth: '1000px', margin: '0 auto', padding: '1px', background: 'linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)', borderRadius: '24px', animationDelay: '0.4s' }}>
-          <div style={{ background: 'var(--surface-2)', borderRadius: '23px', padding: '4rem 2rem', display: 'flex', justifyContent: 'space-around', alignItems: 'center', flexWrap: 'wrap', gap: '3rem' }}>
-            
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '4rem', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '0.5rem' }} className="text-gradient">{c1.toLocaleString()}+</div>
-              <div style={{ fontSize: '0.875rem', color: 'var(--text-3)', fontWeight: 500 }}>Citas Adelantadas</div>
+      {/* ── HERO (SPLIT LAYOUT) ── */}
+      <section ref={heroRef} style={{ position: "relative", zIndex: 1, padding: "10rem 2rem 5rem", background: "var(--surface)" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", gap: "4rem", flexWrap: "wrap" }}>
+          <div style={{ flex: "1 1 500px", ...S.reveal(heroInView, 0) }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 1rem", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, color: "var(--lime)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.02)" }}>
+              <Shield size={14} /> Tramite Seguro y Garantizado
             </div>
-
-            <div style={{ width: '1px', height: '80px', background: 'var(--border)' }} />
-
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '4rem', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '0.5rem' }} className="text-gradient">{c2}</div>
-              <div style={{ fontSize: '0.875rem', color: 'var(--text-3)', fontWeight: 500 }}>Días ahorrados promedio</div>
+            <h1 style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1.1, marginBottom: "1.5rem", color: "var(--text-1)" }}>
+              Tu visa americana,<br />
+              gestionada por <span className="text-gradient-accent">expertos globales.</span>
+            </h1>
+            <p style={{ fontSize: "1.125rem", color: "var(--text-2)", marginBottom: "2.5rem", lineHeight: 1.7, maxWidth: 550 }}>
+              Tecnologia de punta y acompañamiento profesional para adelantar tu cita consular y garantizar la presentacion perfecta de tu DS-160.
+            </p>
+            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+              <button onClick={() => navigate("/register")} className="btn btn-lime" style={{ padding: "0.9rem 2.25rem", fontSize: "1rem" }}>
+                Evaluar mi Perfil <ArrowRight size={18} />
+              </button>
+              <a href="#proceso" className="btn btn-outline" style={{ padding: "0.9rem 2.25rem", fontSize: "1rem", background: "var(--bg)" }}>
+                Conocer el Proceso
+              </a>
             </div>
-
+            <div style={{ marginTop: "2.5rem", display: "flex", gap: "2rem", alignItems: "center" }}>
+               <div style={{ display: "flex", gap: "0.2rem" }}>
+                 {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="var(--gold)" color="var(--gold)" />)}
+               </div>
+               <div style={{ fontSize: "0.85rem", color: "var(--text-3)", fontWeight: 500 }}>
+                 +5,000 clientes satisfechos a nivel mundial.
+               </div>
+            </div>
+          </div>
+          <div style={{ flex: "1 1 500px", position: "relative", ...S.reveal(heroInView, 0.2) }}>
+            <div style={{ position: "relative", borderRadius: 24, overflow: "hidden", boxShadow: "0 20px 40px rgba(15, 23, 42, 0.1)" }}>
+              <img src="/images/hero.png" alt="Global Travel" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(15,23,42,0.4), transparent)" }} />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ════════ FEATURES GRID ════════ */}
-      <section id="features" style={{ position: 'relative', zIndex: 1, padding: '6rem 2rem', background: 'var(--surface)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 700, letterSpacing: '-0.03em', marginBottom: '1rem' }} className="text-gradient">Infraestructura Premium</h2>
-            <p style={{ color: 'var(--text-2)', fontSize: '1.125rem' }}>Diseñado para la máxima eficiencia y velocidad.</p>
-          </div>
+      {/* ── STATS BAND ── */}
+      <section ref={statsRef} style={{ padding: "4rem 2rem", background: "var(--bg)", borderBottom: "1px solid var(--border)" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "2rem", textAlign: "center" }}>
+          {STATS.map((s, i) => (
+            <div key={i} style={{ opacity: statsInView ? 1 : 0, transition: `opacity 0.7s ease ${i * 0.1}s` }}>
+              <div style={{ fontSize: "clamp(2rem, 3vw, 2.5rem)", fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1, marginBottom: "0.5rem", color: "var(--lime)" }}>
+                <Counter target={s.value} suffix={s.suffix} />
+              </div>
+              <div style={{ fontSize: "0.875rem", color: "var(--text-2)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-            {FEATURES.map((f, i) => (
-              <div key={i} className="panel" style={{ padding: '2.5rem', transition: 'transform 0.3s ease', cursor: 'default' }} onMouseOver={e => e.currentTarget.style.transform='translateY(-4px)'} onMouseOut={e => e.currentTarget.style.transform='translateY(0)'}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', color: 'var(--text-1)' }}>
-                  <f.icon size={24} strokeWidth={1.5} />
+      {/* ── PROCESO ── */}
+      <section id="proceso" ref={processRef} style={{ padding: "7rem 2rem", background: "var(--surface-2)" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "5rem" }}>
+            <h2 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "1rem", ...S.reveal(processInView, 0) }}>Nuestra Metodologia</h2>
+            <p style={{ fontSize: "1.1rem", color: "var(--text-2)", maxWidth: 600, margin: "0 auto", lineHeight: 1.7, ...S.reveal(processInView, 0.1) }}>
+              Un marco de trabajo riguroso diseñado para minimizar rechazos y acelerar tiempos de espera dramaticamente.
+            </p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.5rem" }}>
+            {PROCESS_STEPS.map((step, i) => (
+              <div key={i} className="panel" style={{ ...S.reveal(processInView, 0.1 + i * 0.1), padding: "2.5rem" }}>
+                <div style={{ width: 56, height: 56, borderRadius: 16, background: "var(--surface)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.5rem" }}>
+                  <step.icon size={26} color="var(--lime)" strokeWidth={1.5} />
                 </div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.75rem' }}>{f.title}</h3>
-                <p style={{ color: 'var(--text-2)', lineHeight: 1.6 }}>{f.desc}</p>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem", color: "var(--lime)", fontWeight: 700, marginBottom: "0.5rem" }}>PASO {step.step}</div>
+                <h3 style={{ fontSize: "1.25rem", fontWeight: 700, marginBottom: "1rem", color: "var(--text-1)" }}>{step.title}</h3>
+                <p style={{ color: "var(--text-2)", lineHeight: 1.6, fontSize: "0.95rem" }}>{step.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ════════ FOOTER ════════ */}
-      <footer style={{ borderTop: '1px solid var(--border)', padding: '3rem 2rem', position: 'relative', zIndex: 1, background: 'var(--bg)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--text-3)', fontSize: '0.875rem' }}>
-          <div>© 2026 GlobalVisas.</div>
-          <div style={{ display: 'flex', gap: '2rem' }}>
-            <a href="#">Privacidad</a>
-            <a href="#">Términos</a>
+      {/* ── AGENCY BANNER (IMAGE INTEGRATION) ── */}
+      <section id="agencias" ref={agencyRef} style={{ padding: "0", background: "var(--bg)" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))" }}>
+          <div style={{ position: "relative", minHeight: 400 }}>
+             <img src="/images/business.png" alt="Corporate Team" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+          </div>
+          <div style={{ padding: "6rem 4rem", display: "flex", flexDirection: "column", justifyContent: "center", background: "var(--text-1)", color: "#fff" }}>
+             <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 1rem", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem", alignSelf: "flex-start" }}>
+               <Building2 size={14} /> Soluciones B2B
+             </div>
+             <h2 style={{ fontSize: "2.5rem", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "1.5rem", lineHeight: 1.1 }}>
+               Potencia tu agencia<br />con tecnologia global.
+             </h2>
+             <p style={{ fontSize: "1.1rem", color: "var(--text-3)", marginBottom: "2.5rem", lineHeight: 1.7, maxWidth: 500 }}>
+               Ofrecemos un portal marca blanca (white-label) para que agencias de viajes y gestores de visas brinden el servicio de adelanto de citas bajo su propia marca, con nuestra infraestructura tecnica detras.
+             </p>
+             <div>
+               <button onClick={() => { setAgencyTab(true); document.getElementById("planes")?.scrollIntoView(); }} className="btn" style={{ background: "#fff", color: "var(--text-1)", border: "none", padding: "1rem 2rem" }}>
+                 Ver Planes para Agencias
+               </button>
+             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── PRICING ── */}
+      <section id="planes" ref={pricingRef} style={{ padding: "7rem 2rem", background: "var(--surface)" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "4rem" }}>
+            <h2 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "1rem", ...S.reveal(pricingInView, 0) }}>Planes y Licencias</h2>
+            <p style={{ fontSize: "1.1rem", color: "var(--text-2)", maxWidth: 520, margin: "0 auto", lineHeight: 1.7, ...S.reveal(pricingInView, 0.1) }}>
+              Elige el esquema que mejor se adapte a tus necesidades corporativas o personales.
+            </p>
+          </div>
+          
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "3.5rem", ...S.reveal(pricingInView, 0.2) }}>
+            <div style={{ display: "inline-flex", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 99, padding: 6, gap: 4, boxShadow: "0 2px 10px rgba(0,0,0,0.02)" }}>
+              {["Para Solicitantes (B2C)", "Para Agencias (B2B)"].map((label, i) => (
+                <button key={i} onClick={() => setAgencyTab(i === 1)} style={{ padding: "0.6rem 1.75rem", borderRadius: 99, fontSize: "0.9rem", fontWeight: 600, border: "none", cursor: "pointer", fontFamily: "var(--font-ui)", transition: "all 0.25s ease", background: agencyTab === (i === 1) ? "var(--text-1)" : "transparent", color: agencyTab === (i === 1) ? "#fff" : "var(--text-2)" }}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {!agencyTab ? (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", alignItems: "stretch" }}>
+              {PLANS_CLIENT.map((plan, i) => (
+                <div key={i} className="panel" style={{ padding: "2.5rem", position: "relative", border: plan.highlight ? "2px solid var(--lime)" : "1px solid var(--border)", transform: plan.highlight ? "scale(1.02)" : "none", ...S.reveal(pricingInView, 0.1 + i * 0.1) }}>
+                  {plan.badge && (
+                    <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", padding: "4px 16px", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.06em", background: "var(--lime)", color: "#fff" }}>
+                      {plan.badge}
+                    </div>
+                  )}
+                  <div style={{ marginBottom: "0.5rem", fontSize: "0.85rem", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
+                  <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem", marginBottom: "0.75rem" }}>
+                    <span style={{ fontSize: "3rem", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1, color: "var(--text-1)" }}>{plan.price}</span>
+                  </div>
+                  <p style={{ color: "var(--text-3)", fontSize: "0.95rem", marginBottom: "2rem", lineHeight: 1.6 }}>{plan.desc}</p>
+                  <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem 0", flex: 1 }}>
+                    {plan.features.map((f, j) => (
+                      <li key={j} style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem", alignItems: "flex-start" }}>
+                        <CheckCircle2 size={18} color="var(--lime)" style={{ flexShrink: 0, marginTop: 2 }} />
+                        <span style={{ color: "var(--text-2)", fontSize: "0.9rem", lineHeight: 1.5 }}>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button onClick={() => navigate("/register")} className={plan.highlight ? "btn btn-lime" : "btn btn-outline"} style={{ width: "100%", padding: "1rem", justifyContent: "center" }}>
+                    {plan.cta}
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "1.5rem", maxWidth: 800, margin: "0 auto" }}>
+              {PLANS_AGENCY.map((plan, i) => (
+                <div key={i} className="panel" style={{ padding: "2.5rem", position: "relative", border: i === 1 ? "2px solid var(--lime)" : "1px solid var(--border)", ...S.reveal(true, i * 0.1) }}>
+                  <div style={{ marginBottom: "0.5rem", fontSize: "0.85rem", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
+                  <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem", marginBottom: "0.75rem" }}>
+                    <span style={{ fontSize: "3rem", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1, color: "var(--text-1)" }}>{plan.price}</span>
+                    <span style={{ fontSize: "1rem", color: "var(--text-3)", paddingBottom: "0.4rem", fontWeight: 500 }}>{plan.period}</span>
+                  </div>
+                  <p style={{ color: "var(--text-3)", fontSize: "0.95rem", marginBottom: "2rem", lineHeight: 1.6 }}>{plan.desc}</p>
+                  <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem 0", flex: 1 }}>
+                    {plan.features.map((f, j) => (
+                      <li key={j} style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem", alignItems: "flex-start" }}>
+                        <CheckCircle2 size={18} color="var(--lime)" style={{ flexShrink: 0, marginTop: 2 }} />
+                        <span style={{ color: "var(--text-2)", fontSize: "0.9rem", lineHeight: 1.5 }}>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button className={i === 1 ? "btn btn-lime" : "btn btn-outline"} style={{ width: "100%", padding: "1rem", justifyContent: "center" }}>
+                    {plan.cta}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── TESTIMONIALS ── */}
+      <section ref={testRef} style={{ padding: "7rem 2rem", background: "var(--bg)" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "4rem" }}>
+            <h2 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 800, letterSpacing: "-0.03em", ...S.reveal(testInView, 0) }}>Reputacion Impecable</h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem" }}>
+            {TESTIMONIALS.map((t, i) => (
+              <div key={i} className="panel" style={{ ...S.reveal(testInView, i * 0.1), padding: "2.5rem" }}>
+                <div style={{ display: "flex", gap: "4px", marginBottom: "1.25rem" }}>
+                  {[...Array(t.stars)].map((_, j) => <Star key={j} size={16} color="var(--gold)" fill="var(--gold)" />)}
+                </div>
+                <p style={{ color: "var(--text-2)", lineHeight: 1.7, fontSize: "0.95rem", marginBottom: "1.5rem", fontStyle: "italic" }}>"{t.text}"</p>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginTop: "auto" }}>
+                  <div style={{ width: 42, height: 42, borderRadius: "50%", background: "var(--surface-2)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1rem", fontWeight: 700, color: "var(--text-1)", flexShrink: 0 }}>
+                    {t.name[0]}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: "0.9rem", color: "var(--text-1)" }}>{t.name}</div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--text-3)" }}>{t.role}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA FINAL ── */}
+      <section style={{ padding: "6rem 2rem", background: "var(--surface-2)" }}>
+        <div style={{ maxWidth: 820, margin: "0 auto", textAlign: "center", background: "var(--lime)", borderRadius: 32, padding: "clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem)", boxShadow: "0 20px 40px rgba(37, 99, 235, 0.2)" }}>
+          <h2 style={{ fontSize: "clamp(2rem, 4vw, 3.25rem)", fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: "1.25rem", color: "#fff" }}>
+            Tu visa esta lista.<br />Solo falta tu decision.
+          </h2>
+          <p style={{ fontSize: "1.1rem", color: "rgba(255,255,255,0.8)", maxWidth: 520, margin: "0 auto 2.5rem", lineHeight: 1.7 }}>
+            Inicia tu proceso hoy y unete a los miles de clientes y agencias que confian en nuestra infraestructura global.
+          </p>
+          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
+            <button onClick={() => navigate("/register")} className="btn" style={{ padding: "1rem 2.5rem", fontSize: "1rem", background: "#fff", color: "var(--lime)", border: "none" }}>
+              Iniciar Proceso Ahora
+            </button>
+            <button onClick={() => navigate("/login")} className="btn btn-outline" style={{ padding: "1rem 2.5rem", fontSize: "1rem", color: "#fff", borderColor: "rgba(255,255,255,0.3)" }}>
+              Contactar Ventas B2B
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer style={{ borderTop: "1px solid var(--border)", padding: "4rem 2rem", background: "var(--bg)" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "3rem", marginBottom: "3rem" }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "1.1rem", fontWeight: 800, marginBottom: "1rem", color: "var(--text-1)" }}>
+                <Globe size={20} color="var(--lime)" strokeWidth={2.5} />
+                GlobalVisas
+              </div>
+              <p style={{ color: "var(--text-3)", fontSize: "0.9rem", lineHeight: 1.7 }}>
+                Infraestructura corporativa para gestion y aseguramiento de citas consulares B1/B2 a nivel mundial.
+              </p>
+            </div>
+            <div>
+              <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>Soluciones</div>
+              {["Particulares B2C", "Agencias B2B", "Casos de Exito", "Seguridad"].map(l => (
+                <div key={l} style={{ marginBottom: "0.6rem" }}><a href="#" style={{ color: "var(--text-2)", fontSize: "0.9rem" }}>{l}</a></div>
+              ))}
+            </div>
+            <div>
+              <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>Legal</div>
+              {["Terminos de Servicio", "Politica de Privacidad", "Compliance"].map(l => (
+                <div key={l} style={{ marginBottom: "0.6rem" }}><a href="#" style={{ color: "var(--text-2)", fontSize: "0.9rem" }}>{l}</a></div>
+              ))}
+            </div>
+            <div>
+              <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>Contacto</div>
+              <div style={{ color: "var(--text-2)", fontSize: "0.9rem", lineHeight: 1.8 }}>
+                <div>Business Center</div>
+                <div>corp@globalvisas.com</div>
+                <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", gap: "0.4rem", color: "var(--lime)", fontWeight: 600 }}>
+                  <MessageCircle size={16} /> Portal de Soporte 24/7
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style={{ borderTop: "1px solid var(--border)", paddingTop: "2rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", color: "var(--text-3)", fontSize: "0.85rem" }}>
+            <div>© 2026 GlobalVisas. Todos los derechos reservados.</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontWeight: 500 }}>
+              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--green)" }} />
+              Plataforma Operativa
+            </div>
           </div>
         </div>
       </footer>
-
     </div>
   );
 };

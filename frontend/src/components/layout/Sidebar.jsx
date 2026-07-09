@@ -10,12 +10,12 @@ const ROLE_LABELS = {
 };
 
 const NAV = [
-  { to: '/dashboard',               label: 'Resumen',       icon: LayoutGrid,    roles: ['ADMINISTRATOR','AUDITOR','VISA_MANAGER','TRAVEL_AGENCY','NATURAL_PERSON'] },
-  { to: '/dashboard/citas',         label: 'Citas',         icon: CalendarCheck, roles: ['ADMINISTRATOR','AUDITOR','VISA_MANAGER','TRAVEL_AGENCY','NATURAL_PERSON'] },
-  { to: '/dashboard/documentos',    label: 'Documentos',    icon: FolderOpen,    roles: ['ADMINISTRATOR','AUDITOR','VISA_MANAGER','TRAVEL_AGENCY','NATURAL_PERSON'] },
-  { to: '/dashboard/usuarios',      label: 'Usuarios',      icon: Users,         roles: ['ADMINISTRATOR','AUDITOR'] },
-  { to: '/dashboard/auditoria',     label: 'Auditoría',     icon: Shield,        roles: ['ADMINISTRATOR','AUDITOR'] },
-  { to: '/dashboard/configuracion', label: 'Configuración', icon: Settings,      roles: ['ADMINISTRATOR'] },
+  { to: '/dashboard', label: 'Resumen', icon: LayoutGrid, roles: ['ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER', 'TRAVEL_AGENCY', 'NATURAL_PERSON'] },
+  { to: '/dashboard/citas', label: 'Citas', icon: CalendarCheck, roles: ['ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER', 'TRAVEL_AGENCY', 'NATURAL_PERSON'] },
+  { to: '/dashboard/documentos', label: 'Documentos', icon: FolderOpen, roles: ['ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER', 'TRAVEL_AGENCY', 'NATURAL_PERSON'] },
+  { to: '/dashboard/usuarios', label: 'Usuarios', icon: Users, roles: ['ADMINISTRATOR', 'AUDITOR'] },
+  { to: '/dashboard/auditoria', label: 'Auditoría', icon: Shield, roles: ['ADMINISTRATOR', 'AUDITOR'] },
+  { to: '/dashboard/configuracion', label: 'Configuración', icon: Settings, roles: ['ADMINISTRATOR'] },
 ];
 
 const Sidebar = ({ role, userName }) => {
@@ -42,7 +42,7 @@ const Sidebar = ({ role, userName }) => {
           </div>
           {!collapsed && (
             <span style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
-              GlobalVisas
+
             </span>
           )}
         </div>
@@ -56,9 +56,9 @@ const Sidebar = ({ role, userName }) => {
             to={link.to}
             end={link.to === '/dashboard'}
             className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-            style={{ 
-              display: 'flex', alignItems: 'center', gap: '0.875rem', 
-              padding: '0.625rem 0.875rem', textDecoration: 'none', color: 'var(--text-2)', 
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.875rem',
+              padding: '0.625rem 0.875rem', textDecoration: 'none', color: 'var(--text-2)',
               fontSize: '0.875rem', fontWeight: 500, borderRadius: '8px',
               justifyContent: collapsed ? 'center' : 'flex-start',
               transition: 'all 0.2s'
@@ -91,21 +91,21 @@ const Sidebar = ({ role, userName }) => {
             </div>
           </div>
         )}
-        
+
         <div style={{ display: 'flex', gap: '0.5rem', flexDirection: collapsed ? 'column' : 'row' }}>
           <button
             onClick={() => setCollapsed(c => !c)}
             style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.5rem', background: 'none', border: '1px solid transparent', borderRadius: '8px', cursor: 'pointer', color: 'var(--text-2)', transition: 'all 0.2s' }}
-            onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = 'var(--text-1)'}}
-            onMouseOut={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-2)'}}
+            onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = 'var(--text-1)' }}
+            onMouseOut={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-2)' }}
           >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
           <button
             onClick={() => { api.logout(); navigate('/login'); }}
             style={{ flex: collapsed ? 'none' : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.5rem', background: 'none', border: '1px solid transparent', borderRadius: '8px', cursor: 'pointer', color: 'var(--text-2)', transition: 'all 0.2s' }}
-            onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = 'var(--text-1)'}}
-            onMouseOut={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-2)'}}
+            onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = 'var(--text-1)' }}
+            onMouseOut={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-2)' }}
             title="Cerrar sesión"
           >
             <LogOut size={18} />

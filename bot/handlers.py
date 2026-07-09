@@ -1104,7 +1104,7 @@ async def schedule_select_callback(update: Update, context: ContextTypes.DEFAULT
         return await show_main_menu(
             update, context,
             text=(
-                f"✅ *Script iniciado correctamente!*\n\n"
+                f"✅ *Busqueda iniciada correctamente!*\n\n"
                 f"🆔 IDENTIFICADOR: `{schedule_id}`\n"
                 f"📧 Email: `{appt_email}`\n\n"
                 "🎯 *Menú Principal*\n\nSelecciona una opción:"
@@ -1153,7 +1153,7 @@ async def manual_schedule_id(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return await show_main_menu(
             update, context,
             text=(
-                f"✅ *Script iniciado correctamente!*\n\n"
+                f"✅ *Cita iniciado correctamente!*\n\n"
                 f"🆔 IDENTIFICADOR: `{schedule_id}`\n"
                 f"📧 Email: `{appt_email}`\n\n"
                 "🎯 *Menú Principal*\n\nSelecciona una opción:"
