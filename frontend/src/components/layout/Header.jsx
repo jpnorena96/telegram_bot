@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Bell, X, Search } from 'lucide-react';
+import { Bell, X, Search, CheckCircle2, AlertCircle, Info, ShieldAlert } from 'lucide-react';
 import { api } from '../../services/api';
 
 const PAGE_LABELS = {
@@ -19,7 +19,6 @@ const Header = () => {
   const ref = useRef(null);
   const label = PAGE_LABELS[location.pathname] || 'Panel';
 
-  // Fetch notifications from API
   const fetchNotifications = async () => {
     try {
       if (api.isAuthenticated()) {
@@ -35,7 +34,6 @@ const Header = () => {
 
   useEffect(() => {
     fetchNotifications();
-    // Polling every 15 seconds to check for new notifications
     const interval = setInterval(fetchNotifications, 15000);
     return () => clearInterval(interval);
   }, []);
@@ -56,7 +54,6 @@ const Header = () => {
       try {
         await api.markNotificationsRead();
         setUnreadCount(0);
-        // Refresh local items as read
         setNotifications(prev => prev.map(n => ({ ...n, is_read: 1 })));
       } catch (e) {
         console.error('Error marking notifications as read:', e);
@@ -64,129 +61,184 @@ const Header = () => {
     }
   };
 
-  // Helper function to format dates nicely
   const formatTime = (dateStr) => {
     if (!dateStr) return '';
     try {
       const date = new Date(dateStr.replace(' ', 'T'));
       const diffMs = new Date() - date;
       const diffMin = Math.floor(diffMs / 1000 / 60);
-      if (diffMin < 1) return 'Hace un momento';
-      if (diffMin < 60) return `Hace ${diffMin} min`;
+      if (diffMin < 1) return 'Ahora';
+      if (diffMin < 60) return `${diffMin} min`;
       const diffHours = Math.floor(diffMin / 60);
-      if (diffHours < 24) return `Hace ${diffHours} h`;
+      if (diffHours < 24) return `${diffHours} h`;
       return date.toLocaleDateString();
     } catch (e) {
       return dateStr;
     }
   };
 
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'success': return <CheckCircle2 size={16} color="var(--green)" />;
+      case 'warning': return <AlertCircle size={16} color="var(--orange)" />;
+      case 'error': return <ShieldAlert size={16} color="#ef4444" />;
+      case 'info': default: return <Info size={16} color="var(--lime)" />;
+    }
+  };
+
+  const getStatusBg = (status) => {
+    switch (status) {
+      case 'success': return 'rgba(16, 185, 129, 0.1)';
+      case 'warning': return 'rgba(245, 158, 11, 0.1)';
+      case 'error': return 'rgba(239, 68, 68, 0.1)';
+      case 'info': default: return 'var(--lime-glow)';
+    }
+  };
+
   return (
-    <header style={{ background: 'rgba(10,10,10,0.8)', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, zIndex: 50, backdropFilter: 'blur(20px)' }}>
+    <header style={{ 
+      background: 'rgba(255, 255, 255, 0.9)', 
+      borderBottom: '1px solid var(--border)', 
+      position: 'sticky', 
+      top: 0, 
+      zIndex: 50, 
+      backdropFilter: 'blur(12px)',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+    }}>
       <style>{`
         @keyframes ringing {
           0% { transform: rotate(0); }
-          1% { transform: rotate(20deg); }
-          3% { transform: rotate(-18deg); }
-          5% { transform: rotate(22deg); }
-          7% { transform: rotate(-20deg); }
-          9% { transform: rotate(18deg); }
-          11% { transform: rotate(-16deg); }
-          13% { transform: rotate(14deg); }
-          15% { transform: rotate(-12deg); }
-          17% { transform: rotate(10deg); }
-          19% { transform: rotate(-8deg); }
-          21% { transform: rotate(6deg); }
-          23% { transform: rotate(-4deg); }
-          25% { transform: rotate(2deg); }
-          27% { transform: rotate(-1deg); }
-          29% { transform: rotate(0); }
+          10% { transform: rotate(15deg); }
+          20% { transform: rotate(-10deg); }
+          30% { transform: rotate(15deg); }
+          40% { transform: rotate(-10deg); }
+          50% { transform: rotate(0); }
           100% { transform: rotate(0); }
         }
-        @keyframes pulse {
-          0% { transform: scale(0.9); box-shadow: 0 0 6px var(--lime); }
-          100% { transform: scale(1.15); box-shadow: 0 0 12px var(--lime); }
-        }
-        @keyframes slideIn {
-          from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+        @keyframes slideDownFade {
+          from { opacity: 0; transform: translateY(-8px) scale(0.98); }
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
+        .notif-item { transition: all 0.2s ease; }
+        .notif-item:hover { background: var(--surface-2); }
       `}</style>
       
       <div style={{ padding: '0 2rem', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 
         {/* Title */}
-        <h1 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-1)' }}>
+        <h1 style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.02em', margin: 0 }}>
           {label}
         </h1>
 
         {/* Right */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
 
-          {/* Search (fake) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.375rem 0.75rem', color: 'var(--text-3)' }}>
+          {/* Search */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '99px', padding: '0.4rem 1rem', color: 'var(--text-3)', transition: 'all 0.2s', cursor: 'text' }}
+               onMouseOver={e => e.currentTarget.style.borderColor = 'var(--border-2)'}
+               onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border)'}>
             <Search size={14} />
-            <span style={{ fontSize: '0.8125rem' }}>Buscar...</span>
-            <div style={{ marginLeft: '1rem', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', padding: '0.125rem 0.375rem', fontSize: '0.625rem', color: 'var(--text-2)' }}>⌘K</div>
+            <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Buscar...</span>
+            <div style={{ marginLeft: '2rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.125rem 0.375rem', fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-2)' }}>⌘K</div>
           </div>
 
           <div style={{ width: '1px', height: '24px', background: 'var(--border)' }} />
 
           {/* Notifications */}
           <div ref={ref} style={{ position: 'relative' }}>
-            <button onClick={handleToggleNotifications} style={{ background: 'none', border: 'none', cursor: 'pointer', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', color: unreadCount > 0 ? 'var(--text-1)' : 'var(--text-2)', transition: 'all 0.3s ease', borderRadius: '8px' }}
-              onMouseOver={e => { e.currentTarget.style.color = 'var(--text-1)'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
-              onMouseOut={e => { e.currentTarget.style.color = unreadCount > 0 ? 'var(--text-1)' : 'var(--text-2)'; e.currentTarget.style.background = 'none' }}
+            <button onClick={handleToggleNotifications} 
+              style={{ 
+                background: unreadCount > 0 ? 'var(--lime-glow)' : 'transparent', 
+                border: '1px solid ' + (unreadCount > 0 ? 'var(--lime-subtle)' : 'transparent'), 
+                cursor: 'pointer', 
+                width: '36px', height: '36px', 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                position: 'relative', 
+                color: unreadCount > 0 ? 'var(--lime)' : 'var(--text-2)', 
+                transition: 'all 0.2s ease', 
+                borderRadius: '50%' 
+              }}
+              onMouseOver={e => { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text-1)'; }}
+              onMouseOut={e => { e.currentTarget.style.background = unreadCount > 0 ? 'var(--lime-glow)' : 'transparent'; e.currentTarget.style.color = unreadCount > 0 ? 'var(--lime)' : 'var(--text-2)'; }}
             >
-              <Bell size={16} style={{ animation: unreadCount > 0 ? 'ringing 2.5s ease infinite' : 'none' }} />
+              <Bell size={18} style={{ animation: unreadCount > 0 ? 'ringing 3s ease infinite' : 'none' }} />
               {unreadCount > 0 && (
-                <span style={{ position: 'absolute', top: '5px', right: '5px', minWidth: '14px', height: '14px', borderRadius: '7px', background: 'var(--lime)', color: '#000', fontSize: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px', boxShadow: '0 0 10px var(--lime)', animation: 'pulse 1.5s infinite alternate' }} >
+                <span style={{ 
+                  position: 'absolute', top: '0px', right: '0px', 
+                  minWidth: '16px', height: '16px', borderRadius: '8px', 
+                  background: 'var(--lime)', color: '#fff', 
+                  fontSize: '9px', fontWeight: 800, 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                  border: '2px solid #fff'
+                }} >
                   {unreadCount}
                 </span>
               )}
             </button>
 
             {showN && (
-              <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: '340px', background: 'rgba(15,15,15,0.92)', border: '1px solid var(--border)', borderRadius: '12px', backdropFilter: 'blur(25px)', boxShadow: '0 15px 40px rgba(0,0,0,0.6)', zIndex: 200, overflow: 'hidden', animation: 'slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}>
-                <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-1)' }}>Centro de Notificaciones</span>
-                  <button onClick={() => setShowN(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)' }}><X size={14} /></button>
+              <div style={{ 
+                position: 'absolute', right: 0, top: 'calc(100% + 12px)', 
+                width: '380px', background: '#fff', 
+                border: '1px solid var(--border)', borderRadius: '16px', 
+                boxShadow: '0 10px 40px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.02)', 
+                zIndex: 200, overflow: 'hidden', 
+                animation: 'slideDownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards' 
+              }}>
+                <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface)' }}>
+                  <span style={{ fontSize: '1rem', fontFamily: 'var(--font-heading)', fontWeight: 700, color: 'var(--text-1)' }}>Notificaciones</span>
+                  <button onClick={() => setShowN(false)} style={{ background: 'var(--surface-2)', border: 'none', cursor: 'pointer', color: 'var(--text-2)', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }} onMouseOver={e=>e.currentTarget.style.background='var(--border)'} onMouseOut={e=>e.currentTarget.style.background='var(--surface-2)'}>
+                    <X size={14} />
+                  </button>
                 </div>
                 
-                <div style={{ maxHeight: '360px', overflowY: 'auto' }}>
+                <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                   {notifications.length === 0 ? (
-                    <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-3)' }}>
-                      <p style={{ fontSize: '0.8125rem', margin: 0 }}>No tienes notificaciones por el momento.</p>
+                    <div style={{ padding: '3rem 2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                      <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Bell size={20} color="var(--text-3)" />
+                      </div>
+                      <p style={{ fontSize: '0.9rem', color: 'var(--text-3)', margin: 0, fontWeight: 500 }}>No hay notificaciones nuevas.</p>
                     </div>
                   ) : (
-                    notifications.map(n => {
-                      const colorMap = {
-                        success: '#10b981', // green
-                        info: '#06b6d4',    // cyan
-                        warning: '#f97316', // orange
-                        error: '#ef4444'     // red
-                      };
-                      const color = colorMap[n.status] || '#a3a3a3';
-                      return (
-                        <div key={n.id} style={{ padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.03)', display: 'flex', gap: '0.75rem', alignItems: 'flex-start', background: !n.is_read ? 'rgba(255,255,255,0.01)' : 'transparent', transition: 'background-color 0.2s' }}
-                          onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
-                          onMouseOut={e => e.currentTarget.style.background = !n.is_read ? 'rgba(255,255,255,0.01)' : 'transparent'}
-                        >
-                          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: color, marginTop: '5px', flexShrink: 0, boxShadow: `0 0 10px ${color}` }} />
-                          <div style={{ flex: 1 }}>
-                            <p style={{ fontSize: '0.8125rem', color: !n.is_read ? 'var(--text-1)' : 'var(--text-2)', margin: 0, lineHeight: 1.4, fontWeight: !n.is_read ? 500 : 400 }}>{n.message}</p>
-                            <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: '0.375rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span>{formatTime(n.created_at)}</span>
-                              {!n.is_read && (
-                                <span style={{ color: 'var(--lime)', fontSize: '9px', fontWeight: 'bold' }}>NUEVA</span>
-                              )}
-                            </p>
-                          </div>
+                    notifications.map(n => (
+                      <div key={n.id} className="notif-item" style={{ 
+                        padding: '1.25rem 1.5rem', 
+                        borderBottom: '1px solid var(--border)', 
+                        display: 'flex', gap: '1rem', alignItems: 'flex-start', 
+                        background: !n.is_read ? 'var(--lime-glow)' : 'transparent',
+                        position: 'relative'
+                      }}>
+                        {!n.is_read && <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '3px', background: 'var(--lime)' }} />}
+                        
+                        <div style={{ 
+                          width: '36px', height: '36px', borderRadius: '10px', 
+                          background: getStatusBg(n.status), 
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 
+                        }}>
+                          {getStatusIcon(n.status)}
                         </div>
-                      );
-                    })
+                        
+                        <div style={{ flex: 1 }}>
+                          <p style={{ fontSize: '0.875rem', color: 'var(--text-1)', margin: '0 0 0.25rem 0', lineHeight: 1.4, fontWeight: !n.is_read ? 600 : 400 }}>
+                            {n.message}
+                          </p>
+                          <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', margin: 0, fontWeight: 500 }}>
+                            {formatTime(n.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                    ))
                   )}
                 </div>
+                
+                {notifications.length > 0 && (
+                  <div style={{ padding: '0.75rem', borderTop: '1px solid var(--border)', textAlign: 'center', background: 'var(--surface)' }}>
+                    <button style={{ background: 'none', border: 'none', color: 'var(--lime)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>
+                      Ver todo el historial
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

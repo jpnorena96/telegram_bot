@@ -14,15 +14,14 @@ import toast from 'react-hot-toast';
 const StatCard = ({ label, value, icon: Icon, color = 'var(--lime)', delta, loading }) => (
   <div 
     style={{
-      background: 'rgba(10, 10, 10, 0.6)',
+      background: 'var(--surface)',
       border: '1px solid var(--border)',
       borderRadius: 'var(--radius-md)',
       padding: '1.25rem',
-      backdropFilter: 'blur(20px)',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
       position: 'relative',
       overflow: 'hidden',
       transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',

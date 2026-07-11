@@ -1,46 +1,47 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 /* ═══════════════════════════════════
-   GLOBALVISAS — CORPORATE LIGHT THEME
-   Concept: Trust, Clean, Worldwide, Professional
+   GLOBALVISAS — EXCLUSIVE PREMIUM THEME
+   Concept: High-end Agency, Exclusive, Novel
 ═══════════════════════════════════ */
 
 :root {
-  /* Core Light Palette */
-  --bg:          #FFFFFF;
-  --surface:     #F8FAFC;
-  --surface-2:   #F1F5F9;
-  --surface-3:   #E2E8F0;
+  /* Core Light Palette - Zinc & Pure White */
+  --bg:          #FAFAFA;
+  --surface:     #FFFFFF;
+  --surface-2:   #F4F4F5;
+  --surface-3:   #E4E4E7;
 
-  --black:       #FFFFFF;
-  --black-2:     #F8FAFC;
-  --black-3:     #F1F5F9;
+  --black:       #09090B;
+  --black-2:     #18181B;
+  --black-3:     #27272A;
 
-  /* ACCENT: Corporate Blues */
-  --lime:        #2563EB; /* Primary Blue */
-  --lime-dim:    #1D4ED8;
-  --lime-glow:   rgba(37, 99, 235, 0.15);
-  --lime-subtle: rgba(37, 99, 235, 0.08);
+  /* ACCENT: Royal Indigo (Exclusive & Premium) */
+  --lime:        #4F46E5; /* Indigo 600 */
+  --lime-dim:    #4338CA; /* Indigo 700 */
+  --lime-glow:   rgba(79, 70, 229, 0.15);
+  --lime-subtle: rgba(79, 70, 229, 0.08);
 
-  --accent-2:    #0284C7; /* Sky Blue */
+  --accent-2:    #8B5CF6; /* Violet */
   
   /* Status Colors */
   --orange:      #F59E0B;
-  --cyan:        #0EA5E9;
+  --cyan:        #06B6D4;
   --gold:        #D97706; /* Trust Gold */
   --green:       #10B981;
 
   /* Text Colors */
-  --text-1:      #0F172A; /* Slate 900 */
-  --text-2:      #475569; /* Slate 600 */
-  --text-3:      #64748B; /* Slate 500 */
+  --text-1:      #09090B; /* Zinc 950 */
+  --text-2:      #52525B; /* Zinc 600 */
+  --text-3:      #71717A; /* Zinc 500 */
   
   /* Borders */
-  --border:      #E2E8F0;
-  --border-2:    #CBD5E1;
+  --border:      #E4E4E7;
+  --border-2:    #D4D4D8;
 
   /* Typography */
-  --font-ui:      'Inter', system-ui, sans-serif;
+  --font-heading: 'Outfit', sans-serif;
+  --font-ui:      'Plus Jakarta Sans', system-ui, sans-serif;
   --font-mono:    'JetBrains Mono', monospace;
 
   --sidebar-w: 260px;
@@ -64,6 +65,12 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 #root { display: flex; flex-direction: column; min-height: 100vh; }

@@ -24,7 +24,7 @@ const DashboardLayout = () => {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
       <Sidebar role={role} userName={userName} />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0, background: 'var(--bg)', position: 'relative' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0, background: 'var(--surface-2)', position: 'relative' }}>
         
         {/* Subtle background glow */}
         <div style={{ position: 'absolute', top: 0, left: '20%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 60%)', pointerEvents: 'none', zIndex: 0 }} />
