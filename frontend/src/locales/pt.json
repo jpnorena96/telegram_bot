@@ -203,6 +203,61 @@
         "logs": "Registro de Atividades e Alertas",
         "recent": "HISTÓRICO RECENTE"
       }
+    },
+    "appointments": {
+      "title": "Agendamentos",
+      "desc": "Monitoramento e antecipação de agendamentos consulares B1/B2.",
+      "new_btn": "Novo Agendamento",
+      "refresh": "Atualizar",
+      "id": "ID",
+      "client": "CLIENTE",
+      "type": "TIPO",
+      "orig_date": "D. OBJETIVO",
+      "new_date": "D. ANTECIPADA",
+      "status": "STATUS",
+      "action": "AÇÃO",
+      "modal_title": "DETALHES DO AGENDAMENTO",
+      "btn_close": "FECHAR",
+      "advanced": "ANTECIPADA",
+      "searching": "BUSCANDO",
+      "pending": "PENDENTE"
+    },
+    "documents": {
+      "title": "Gestor de Documentos",
+      "desc": "Sistema abrangente para coleta e verificação de documentos.",
+      "new_btn": "Novo Processo",
+      "no_files": "Nenhum processo ativo",
+      "upload_btn": "Carregar Arquivo",
+      "verify": "VERIFICAR",
+      "approve": "APROVAR",
+      "reject": "REJEITAR",
+      "pending": "Pendente",
+      "approved": "Aprovado"
+    },
+    "users": {
+      "title": "Diretório de Usuários",
+      "desc": "Gestão de funções e permissões corporativas.",
+      "new_btn": "Convidar Usuário",
+      "name": "NOME",
+      "role": "FUNÇÃO",
+      "status": "STATUS",
+      "joined": "REGISTRO",
+      "actions": "AÇÕES"
+    },
+    "settings": {
+      "title": "Configurações",
+      "desc": "Preferências da conta e sistema.",
+      "save": "Salvar Alterações",
+      "theme": "Tema",
+      "language": "Idioma",
+      "profile": "Perfil"
+    },
+    "admin": {
+      "title": "Painel de Administração",
+      "desc": "Métricas e controle global do sistema.",
+      "users_monitored": "Usuários Monitorados",
+      "active_bots": "Bots Ativos",
+      "total_revenue": "Receita Estimada"
     }
   }
 }

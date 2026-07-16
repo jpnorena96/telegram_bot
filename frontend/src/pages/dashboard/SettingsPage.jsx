@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useOutletContext } from 'react-router-dom';
 import { Save, Check, ShieldOff } from 'lucide-react';
 
@@ -23,8 +24,8 @@ const ConfigRow = ({ k, desc, children }) => (
 
 /* ── SECTION ── */
 const Section = ({ label, children }) => (
-  <div style={{ background: 'var(--black-2)', border: '1px solid var(--border)' }}>
-    <div style={{ padding: '0.625rem 1.25rem', borderBottom: '1px solid var(--border)', background: 'var(--black-3)' }}>
+  <div style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+    <div style={{ padding: '0.625rem 1.25rem', borderBottom: '1px solid var(--border)', background: 'var(--surface-2)' }}>
       <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--lime)' }}>&gt;_ {label}</span>
     </div>
     <div style={{ padding: '0 1.25rem 0.5rem' }}>{children}</div>
@@ -32,6 +33,7 @@ const Section = ({ label, children }) => (
 );
 
 const SettingsPage = () => {
+  const { t } = useTranslation();
   const { role, userName } = useOutletContext();
   const isAdmin = role === 'ADMINISTRATOR';
 

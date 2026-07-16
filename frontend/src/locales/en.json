@@ -203,6 +203,61 @@
         "logs": "Activity & Alerts Log",
         "recent": "RECENT HISTORY"
       }
+    },
+    "appointments": {
+      "title": "Appointments",
+      "desc": "Monitoring and advancement of B1/B2 consular appointments.",
+      "new_btn": "New Appointment",
+      "refresh": "Refresh",
+      "id": "ID",
+      "client": "CLIENT",
+      "type": "TYPE",
+      "orig_date": "TARGET DATE",
+      "new_date": "ADVANCED DATE",
+      "status": "STATUS",
+      "action": "ACTION",
+      "modal_title": "APPOINTMENT DETAILS",
+      "btn_close": "CLOSE",
+      "advanced": "ADVANCED",
+      "searching": "SEARCHING",
+      "pending": "PENDING"
+    },
+    "documents": {
+      "title": "Document Manager",
+      "desc": "Comprehensive system for document collection and verification.",
+      "new_btn": "New File",
+      "no_files": "No active files",
+      "upload_btn": "Upload File",
+      "verify": "VERIFY",
+      "approve": "APPROVE",
+      "reject": "REJECT",
+      "pending": "Pending",
+      "approved": "Approved"
+    },
+    "users": {
+      "title": "User Directory",
+      "desc": "Management of corporate roles and permissions.",
+      "new_btn": "Invite User",
+      "name": "NAME",
+      "role": "ROLE",
+      "status": "STATUS",
+      "joined": "JOINED",
+      "actions": "ACTIONS"
+    },
+    "settings": {
+      "title": "Settings",
+      "desc": "Account and system preferences.",
+      "save": "Save Changes",
+      "theme": "Theme",
+      "language": "Language",
+      "profile": "Profile"
+    },
+    "admin": {
+      "title": "Admin Panel",
+      "desc": "Metrics and global system control.",
+      "users_monitored": "Monitored Users",
+      "active_bots": "Active Bots",
+      "total_revenue": "Estimated Revenue"
     }
   }
 }

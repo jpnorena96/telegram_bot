@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -78,31 +78,31 @@ const LandingPage = () => {
 
   const PLANS_CLIENT = [
     {
-      name: t('pricing.b2c_basic_name'), price: "$99", period: "", desc: t('pricing.b2c_basic_desc'), highlight: false, badge: null,
-      features: ["Acompañamiento formulario DS-160", "Revision experta de respuestas", "Mejores tips de entrevista", "Acompañamiento continuo via chat"],
+      name: t('pricing.b2c_basic_name'), price: "$39", period: "pago único", desc: t('pricing.b2c_basic_desc'), highlight: false, badge: null,
+      features: ["Análisis de perfil DS-160", "Revisión experta de respuestas", "Guía de entrevista consular", "Soporte vía chat"],
       cta: t('pricing.cta_b2c'),
     },
     {
-      name: t('pricing.b2c_std_name'), price: "$249", period: "", desc: t('pricing.b2c_std_desc'), highlight: true, badge: t('pricing.b2c_std_badge'),
-      features: ["Todo lo del plan Basico", "Monitoreo automatico de citas 24/7", "Cita consular en menos de 3 meses", "Notificaciones en tiempo real", "Soporte prioritario"],
+      name: t('pricing.b2c_std_name'), price: "$89", period: "pago único", desc: t('pricing.b2c_std_desc'), highlight: true, badge: t('pricing.b2c_std_badge'),
+      features: ["Todo del plan Básico", "Cita en menos de 3 meses", "Bot rastreador 24/7", "Alertas SMS / Email en vivo", "Prioridad en agendamiento"],
       cta: t('pricing.cta_b2c'),
     },
     {
-      name: t('pricing.b2c_pro_name'), price: "$499", period: "", desc: t('pricing.b2c_pro_desc'), highlight: false, badge: t('pricing.b2c_pro_badge'),
-      features: ["Todo lo del plan Estandar", "Cita consular garantizada en 1 mes o menos", "Motor de scraping VIP (maxima prioridad)", "Asesoria de entrevista personalizada", "Soporte 24/7 dedicado"],
+      name: t('pricing.b2c_pro_name'), price: "$149", period: "pago único", desc: t('pricing.b2c_pro_desc'), highlight: false, badge: t('pricing.b2c_pro_badge'),
+      features: ["Todo del plan Estándar", "Cita garantizada < 30 días", "Motor de rastreo VIP", "Simulacro de entrevista (1h)", "Atención telefónica dedicada"],
       cta: t('pricing.cta_b2c'),
     },
   ];
 
   const PLANS_AGENCY = [
     {
-      name: t('pricing.b2b_start_name'), price: "$199", period: t('pricing.b2b_start_period'), desc: t('pricing.b2b_start_desc'),
-      features: ["Portal Marca Blanca (dominio neutro)", "Gestion até 50 clientes activos", "Dashboard unificado de seguimiento", "Notificaciones automaticas al cliente", "Acceso API REST basico"],
+      name: t('pricing.b2b_start_name'), price: "$69", period: t('pricing.b2b_start_period'), desc: t('pricing.b2b_start_desc'),
+      features: ["Portal Marca Blanca (White-label)", "Hasta 50 clientes simultáneos", "Dashboard de monitoreo global", "Notificaciones B2C automáticas", "Soporte técnico estándar"],
       cta: t('pricing.cta_b2b'),
     },
     {
-      name: t('pricing.b2b_pro_name'), price: "$499", period: t('pricing.b2b_pro_period'), desc: t('pricing.b2b_pro_desc'),
-      features: ["Todo en Starter", "Clientes ilimitados", "Motor de adelanto VIP (prioridad maxima)", "White-label completo con tu marca", "Soporte dedicado + Account Manager"],
+      name: t('pricing.b2b_pro_name'), price: "$149", period: t('pricing.b2b_pro_period'), desc: t('pricing.b2b_pro_desc'),
+      features: ["Todo en Agencia Starter", "Clientes y perfiles ilimitados", "Adelanto VIP (máxima prioridad)", "Dominio personalizado (CNAME)", "Ejecutivo de cuenta exclusivo"],
       cta: t('pricing.cta_b2b'),
     },
   ];
@@ -288,7 +288,7 @@ const LandingPage = () => {
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "3.5rem", ...S.reveal(pricingInView, 0.2) }}>
             <div style={{ display: "inline-flex", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 99, padding: 6, gap: 4, boxShadow: "0 2px 10px rgba(0,0,0,0.02)" }}>
               {[t('pricing.tab_b2c'), t('pricing.tab_b2b')].map((label, i) => (
-                <button key={i} onClick={() => setAgencyTab(i === 1)} style={{ padding: "0.6rem 1.75rem", borderRadius: 99, fontSize: "0.9rem", fontWeight: 600, border: "none", cursor: "pointer", fontFamily: "var(--font-ui)", transition: "all 0.25s ease", background: agencyTab === (i === 1) ? "var(--text-1)" : "transparent", color: agencyTab === (i === 1) ? "#fff" : "var(--text-2)" }}>
+                <button key={i} onClick={() => setAgencyTab(i === 1)} style={{ padding: "0.6rem 1.75rem", borderRadius: 99, fontSize: "0.9rem", fontWeight: 600, border: "none", cursor: "pointer", transition: "all 0.25s ease", background: agencyTab === (i === 1) ? "var(--lime)" : "transparent", color: agencyTab === (i === 1) ? "#fff" : "var(--text-2)" }}>
                   {label}
                 </button>
               ))}
@@ -298,50 +298,51 @@ const LandingPage = () => {
           {!agencyTab ? (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", alignItems: "stretch" }}>
               {PLANS_CLIENT.map((plan, i) => (
-                <div key={i} className="panel" style={{ padding: "2.5rem", position: "relative", border: plan.highlight ? "2px solid var(--lime)" : "1px solid var(--border)", transform: plan.highlight ? "scale(1.02)" : "none", ...S.reveal(pricingInView, 0.1 + i * 0.1) }}>
+                <div key={i} className="panel" style={{ padding: "2.5rem", position: "relative", border: plan.highlight ? "2px solid var(--lime)" : "1px solid var(--border)", transform: plan.highlight ? "scale(1.03)" : "none", boxShadow: plan.highlight ? "0 20px 40px rgba(79, 70, 229, 0.1)" : "0 4px 10px rgba(0,0,0,0.02)", ...S.reveal(pricingInView, 0.1 + i * 0.1) }}>
                   {plan.badge && (
                     <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", padding: "4px 16px", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.06em", background: "var(--lime)", color: "#fff", whiteSpace: "nowrap" }}>
                       {plan.badge}
                     </div>
                   )}
-                  <div style={{ marginBottom: "0.5rem", fontSize: "0.85rem", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
+                  <div style={{ marginBottom: "0.5rem", fontSize: "0.9rem", fontWeight: 700, color: plan.highlight ? "var(--lime)" : "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
                   <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem", marginBottom: "0.75rem" }}>
-                    <span style={{ fontSize: "3rem", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1, color: "var(--text-1)" }}>{plan.price}</span>
+                    <span style={{ fontSize: "3.5rem", fontFamily: "var(--font-heading)", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1, color: "var(--text-1)" }}>{plan.price}</span>
+                    <span style={{ fontSize: "0.85rem", color: "var(--text-3)", paddingBottom: "0.6rem", fontWeight: 600, textTransform: "uppercase" }}>{plan.period}</span>
                   </div>
-                  <p style={{ color: "var(--text-3)", fontSize: "0.95rem", marginBottom: "2rem", lineHeight: 1.6 }}>{plan.desc}</p>
+                  <p style={{ color: "var(--text-3)", fontSize: "0.9rem", marginBottom: "2rem", lineHeight: 1.5 }}>{plan.desc}</p>
                   <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem 0", flex: 1 }}>
                     {plan.features.map((f, j) => (
                       <li key={j} style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem", alignItems: "flex-start" }}>
-                        <CheckCircle2 size={18} color="var(--lime)" style={{ flexShrink: 0, marginTop: 2 }} />
-                        <span style={{ color: "var(--text-2)", fontSize: "0.9rem", lineHeight: 1.5 }}>{f}</span>
+                        <CheckCircle2 size={18} color={plan.highlight ? "var(--lime)" : "var(--text-3)"} style={{ flexShrink: 0, marginTop: 2 }} />
+                        <span style={{ color: "var(--text-2)", fontSize: "0.9rem", lineHeight: 1.4, fontWeight: plan.highlight ? 500 : 400 }}>{f}</span>
                       </li>
                     ))}
                   </ul>
-                  <button onClick={() => navigate("/register")} className={plan.highlight ? "btn btn-lime" : "btn btn-outline"} style={{ width: "100%", padding: "1rem", justifyContent: "center" }}>
+                  <button onClick={() => navigate("/register")} className={plan.highlight ? "btn btn-lime" : "btn btn-outline"} style={{ width: "100%", padding: "1rem", justifyContent: "center", fontSize: "1rem" }}>
                     {plan.cta}
                   </button>
                 </div>
               ))}
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "1.5rem", maxWidth: 800, margin: "0 auto" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "2rem", maxWidth: 900, margin: "0 auto" }}>
               {PLANS_AGENCY.map((plan, i) => (
-                <div key={i} className="panel" style={{ padding: "2.5rem", position: "relative", border: i === 1 ? "2px solid var(--lime)" : "1px solid var(--border)", ...S.reveal(true, i * 0.1) }}>
-                  <div style={{ marginBottom: "0.5rem", fontSize: "0.85rem", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
+                <div key={i} className="panel" style={{ padding: "3rem", position: "relative", border: i === 1 ? "2px solid var(--lime)" : "1px solid var(--border)", boxShadow: i === 1 ? "0 20px 40px rgba(79, 70, 229, 0.1)" : "0 4px 10px rgba(0,0,0,0.02)", ...S.reveal(true, i * 0.1) }}>
+                  <div style={{ marginBottom: "0.5rem", fontSize: "0.9rem", fontWeight: 700, color: i === 1 ? "var(--lime)" : "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
                   <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem", marginBottom: "0.75rem" }}>
-                    <span style={{ fontSize: "3rem", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1, color: "var(--text-1)" }}>{plan.price}</span>
-                    <span style={{ fontSize: "1rem", color: "var(--text-3)", paddingBottom: "0.4rem", fontWeight: 500 }}>{plan.period}</span>
+                    <span style={{ fontSize: "3.5rem", fontFamily: "var(--font-heading)", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1, color: "var(--text-1)" }}>{plan.price}</span>
+                    <span style={{ fontSize: "0.85rem", color: "var(--text-3)", paddingBottom: "0.6rem", fontWeight: 600, textTransform: "uppercase" }}>{plan.period}</span>
                   </div>
-                  <p style={{ color: "var(--text-3)", fontSize: "0.95rem", marginBottom: "2rem", lineHeight: 1.6 }}>{plan.desc}</p>
-                  <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem 0", flex: 1 }}>
+                  <p style={{ color: "var(--text-3)", fontSize: "0.95rem", marginBottom: "2.5rem", lineHeight: 1.6 }}>{plan.desc}</p>
+                  <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2.5rem 0", flex: 1 }}>
                     {plan.features.map((f, j) => (
-                      <li key={j} style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem", alignItems: "flex-start" }}>
-                        <CheckCircle2 size={18} color="var(--lime)" style={{ flexShrink: 0, marginTop: 2 }} />
-                        <span style={{ color: "var(--text-2)", fontSize: "0.9rem", lineHeight: 1.5 }}>{f}</span>
+                      <li key={j} style={{ display: "flex", gap: "0.85rem", marginBottom: "1.25rem", alignItems: "flex-start" }}>
+                        <CheckCircle2 size={20} color={i === 1 ? "var(--lime)" : "var(--text-3)"} style={{ flexShrink: 0, marginTop: 1 }} />
+                        <span style={{ color: "var(--text-2)", fontSize: "1rem", lineHeight: 1.5, fontWeight: i === 1 ? 500 : 400 }}>{f}</span>
                       </li>
                     ))}
                   </ul>
-                  <button className={i === 1 ? "btn btn-lime" : "btn btn-outline"} style={{ width: "100%", padding: "1rem", justifyContent: "center" }}>
+                  <button onClick={() => navigate("/register")} className={i === 1 ? "btn btn-lime" : "btn btn-outline"} style={{ width: "100%", padding: "1rem", justifyContent: "center", fontSize: "1rem" }}>
                     {plan.cta}
                   </button>
                 </div>

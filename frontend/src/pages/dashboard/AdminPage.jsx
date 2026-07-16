@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../services/api';
 import { Download, Users, Calendar, DollarSign, ShieldAlert, CheckCircle, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AdminPage = () => {
+  const { t } = useTranslation();
   const [summary, setSummary] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);

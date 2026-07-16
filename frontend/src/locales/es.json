@@ -203,6 +203,61 @@
         "logs": "Registro de Actividad y Alertas",
         "recent": "HISTORIAL RECIENTE"
       }
+    },
+    "appointments": {
+      "title": "Agendamientos",
+      "desc": "Monitoreo y adelanto de citas consulares B1/B2.",
+      "new_btn": "Nuevo Agendamiento",
+      "refresh": "Actualizar",
+      "id": "ID",
+      "client": "CLIENTE",
+      "type": "TIPO",
+      "orig_date": "F. OBJETIVO",
+      "new_date": "F. ADELANTO",
+      "status": "ESTADO",
+      "action": "ACCIÓN",
+      "modal_title": "DETALLE DE CITA",
+      "btn_close": "CERRAR",
+      "advanced": "ADELANTADA",
+      "searching": "BUSCANDO",
+      "pending": "PENDIENTE"
+    },
+    "documents": {
+      "title": "Gestor Documental",
+      "desc": "Sistema integral de recolección y verificación de documentos.",
+      "new_btn": "Nuevo Expediente",
+      "no_files": "No hay expedientes activos",
+      "upload_btn": "Cargar Archivo",
+      "verify": "VERIFICAR",
+      "approve": "APROBAR",
+      "reject": "RECHAZAR",
+      "pending": "Pendiente",
+      "approved": "Aprobado"
+    },
+    "users": {
+      "title": "Directorio de Usuarios",
+      "desc": "Gestión de roles y permisos corporativos.",
+      "new_btn": "Invitar Usuario",
+      "name": "NOMBRE",
+      "role": "ROL",
+      "status": "ESTADO",
+      "joined": "REGISTRO",
+      "actions": "ACCIONES"
+    },
+    "settings": {
+      "title": "Configuración",
+      "desc": "Preferencias de la cuenta y sistema.",
+      "save": "Guardar Cambios",
+      "theme": "Tema",
+      "language": "Idioma",
+      "profile": "Perfil"
+    },
+    "admin": {
+      "title": "Panel de Administración",
+      "desc": "Métricas y control global del sistema.",
+      "users_monitored": "Usuarios Monitoreados",
+      "active_bots": "Bots Activos",
+      "total_revenue": "Ingresos Estimados"
     }
   }
 }

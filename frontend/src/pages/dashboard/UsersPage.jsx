@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useOutletContext } from 'react-router-dom';
 import { Search, RefreshCw, UserPlus, X, ChevronUp, ChevronDown, ShieldOff, Trash2, CheckCircle, Edit } from 'lucide-react';
 import { api } from '../../services/api';
@@ -13,6 +14,7 @@ const ROLE_TAG = {
 };
 
 const UsersPage = () => {
+  const { t } = useTranslation();
   const { role } = useOutletContext();
   const [users, setUsers] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -119,7 +121,7 @@ const UsersPage = () => {
       </div>
 
       {/* ── FILTERS ── */}
-      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center', padding: '0.875rem', background: 'var(--black-3)', border: '1px solid var(--border)' }}>
+      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center', padding: '0.875rem', background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
         <div style={{ flex: 1, minWidth: '200px', position: 'relative' }}>
           <Search size={13} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
           <input
@@ -148,15 +150,15 @@ const UsersPage = () => {
       </div>
 
       {/* ── TABLE ── */}
-      <div style={{ background: 'var(--black-2)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table className="data-table">
             <thead>
               <tr>
                 <th onClick={() => toggleSort('id')} style={{ cursor: 'pointer' }}>ID <SortIco f="id" /></th>
                 <th onClick={() => toggleSort('name')} style={{ cursor: 'pointer' }}>OPERADOR <SortIco f="name" /></th>
-                <th>ROL</th>
-                <th>ESTADO</th>
+                <th>{t('dashboard.users.role')}</th>
+                <th>{t('dashboard.users.status')}</th>
                 {isAdmin && <th>OPS</th>}
               </tr>
             </thead>

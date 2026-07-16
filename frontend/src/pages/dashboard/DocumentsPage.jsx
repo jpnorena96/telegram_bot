@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useOutletContext } from 'react-router-dom';
 import { 
   FileText, CheckCircle2, AlertTriangle, UploadCloud, Download, 
@@ -24,6 +25,7 @@ const DOC_TYPE_LABELS = {
 };
 
 const DocumentsPage = () => {
+  const { t } = useTranslation();
   const { role } = useOutletContext();
   
   // Auth roles flags
@@ -328,7 +330,7 @@ const DocumentsPage = () => {
 
       {/* ── FORMULARIO DE CREACIÓN DE EXPEDIENTE ── */}
       {showCreator && (
-        <div className="panel" style={{ padding: '1.5rem', background: 'var(--black-2)', border: '1px solid var(--border-2)', borderRadius: 'var(--radius-lg)' }}>
+        <div className="panel" style={{ padding: '1.5rem', background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 'var(--radius-lg)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--lime)' }}>Crear Nuevo Expediente de Visa B1/B2</h3>
             <button className="btn btn-icon btn-sm" onClick={() => setShowCreator(false)} style={{ border: 'none' }}><X size={14} /></button>
@@ -439,7 +441,7 @@ const DocumentsPage = () => {
 
       {/* ── EXPEDIENTES GENERALES LISTA (Para admin / agencias) ── */}
       {!selectedProcess && (
-        <div className="panel" style={{ background: 'var(--black-2)', border: '1px solid var(--border)' }}>
+        <div className="panel" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
           <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 className="panel-title">Expedientes de Carga de Documentos</h2>
             <span style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', color: 'var(--text-3)' }}>{processes.length} EXPEDIENTES TOTALES</span>
@@ -596,7 +598,7 @@ const DocumentsPage = () => {
                       onClick={() => setActiveApplicantId(app.id)}
                       style={{
                         padding: '0.875rem 1rem',
-                        background: isActive ? 'rgba(163,230,53,0.03)' : 'var(--black-2)',
+                        background: isActive ? 'rgba(163,230,53,0.03)' : 'var(--surface)',
                         border: '1px solid ' + (isActive ? 'var(--lime)' : 'var(--border)'),
                         borderRadius: 'var(--radius-md)',
                         cursor: 'pointer',
@@ -644,7 +646,7 @@ const DocumentsPage = () => {
                         <Plus size={12} /> AÑADIR FAMILIAR
                       </button>
                     ) : (
-                      <form onSubmit={handleAddFamilyMember} className="panel" style={{ padding: '0.875rem', background: 'var(--black-2)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                      <form onSubmit={handleAddFamilyMember} className="panel" style={{ padding: '0.875rem', background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span style={{ fontSize: '0.72rem', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--lime)' }}>Nuevo Integrante</span>
                           <button type="button" style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer' }} onClick={() => setShowAddMemberForm(false)}><X size={12} /></button>
@@ -697,7 +699,7 @@ const DocumentsPage = () => {
                       <div 
                         key={type} 
                         style={{
-                          background: 'var(--black-2)',
+                          background: 'var(--surface)',
                           border: '1px solid ' + statusConfig.border,
                           borderRadius: 'var(--radius-lg)',
                           padding: '1.25rem',
@@ -807,7 +809,7 @@ const DocumentsPage = () => {
       {/* ── MODAL PARA RECHAZO DE DOCUMENTO (Comentarios) ── */}
       {rejectionDocId && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-          <div style={{ width: '100%', maxWidth: '420px', background: 'var(--black-2)', border: '1px solid var(--border-2)', padding: '1.25rem', borderRadius: 'var(--radius-lg)' }} className="animate-in">
+          <div style={{ width: '100%', maxWidth: '420px', background: 'var(--surface)', border: '1px solid var(--border-2)', padding: '1.25rem', borderRadius: 'var(--radius-lg)' }} className="animate-in">
             <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#F87171', marginBottom: '0.5rem', display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
               <ShieldAlert size={16} /> Rechazar Documentación
             </h4>
@@ -828,7 +830,7 @@ const DocumentsPage = () => {
               
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 <button type="button" className="btn btn-outline btn-sm" onClick={() => setRejectionDocId(null)}>CANCELAR</button>
-                <button type="submit" className="btn btn-sm btn-lime" style={{ background: '#EF4444', borderColor: '#EF4444', color: '#fff' }}>RECHAZAR DOCUMENTO</button>
+                <button type="submit" className="btn btn-sm btn-lime" style={{ background: '#EF4444', borderColor: '#EF4444', color: 'var(--text-1)' }}>RECHAZAR DOCUMENTO</button>
               </div>
             </form>
           </div>

@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { useOutletContext } from 'react-router-dom';
 import { Search, RefreshCw, Plus, X, ChevronUp, ChevronDown, Eye, ArrowLeft, ArrowRight, Lock, Globe, Calendar, CheckCircle2, AlertTriangle, User } from 'lucide-react';
 import { api } from '../../services/api';
 
 const STATUS_MAP = {
-  'Adelantada': { tag: 'tag-lime', label: 'ADELANTADA' },
-  'Buscando': { tag: 'tag-gold', label: 'BUSCANDO' },
-  'Pendiente': { tag: 'tag-cyan', label: 'PENDIENTE' },
+  'Adelantada': { tag: 'tag-lime', label: t ? t('dashboard.appointments.advanced') : 'ADELANTADA' },
+  'Buscando': { tag: 'tag-gold', label: t ? t('dashboard.appointments.searching') : 'BUSCANDO' },
+  'Pendiente': { tag: 'tag-cyan', label: t ? t('dashboard.appointments.pending') : 'PENDIENTE' },
 };
 const getTag = s => STATUS_MAP[s] || { tag: 'tag-cyan', label: s?.toUpperCase() || '—' };
 
@@ -64,17 +65,17 @@ const COUNTRY_CONSULATES = {
 };
 
 /* ── MODAL ── */
-const Modal = ({ apt, onClose }) => {
+const Modal = ({ apt, onClose, t }) => {
   if (!apt) return null;
   const { tag, label } = getTag(apt.status);
 
   const modalRows = [
-    ['CLIENTE', apt.client],
+    [t('dashboard.appointments.client'), apt.client],
     ['SCHEDULE_ID', apt.schedule_id || '—'],
     ['SOLICITANTES', apt.schedule_names || '—'],
-    ['TIPO_VISA', apt.type],
-    ['FECHA_OBJETIVO', apt.originalDate || '—'],
-    ['FECHA_ADELANTO', apt.newDate || '—'],
+    [t('dashboard.appointments.type'), apt.type],
+    [t('dashboard.appointments.orig_date'), apt.originalDate || '—'],
+    [t('dashboard.appointments.new_date'), apt.newDate || '—'],
   ];
 
   if (apt.system_user_name) {
@@ -90,9 +91,9 @@ const Modal = ({ apt, onClose }) => {
 
   return createPortal(
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-      <div onClick={e => e.stopPropagation()} className="animate-in" style={{ width: '100%', maxWidth: '480px', background: 'var(--black-2)', border: '1px solid var(--border-2)' }}>
+      <div onClick={e => e.stopPropagation()} className="animate-in" style={{ width: '100%', maxWidth: '480px', background: 'var(--surface)', border: '1px solid var(--border-2)' }}>
         {/* header */}
-        <div style={{ padding: '0.875rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--black-3)' }}>
+        <div style={{ padding: '0.875rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-2)' }}>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--lime)' }}>CITA #{apt.id}</span>
           <button className="btn btn-icon" onClick={onClose} style={{ border: 'none', width: '24px', height: '24px' }}><X size={13} /></button>
         </div>
@@ -105,12 +106,12 @@ const Modal = ({ apt, onClose }) => {
             </div>
           ))}
           <div style={{ display: 'flex', padding: '0.625rem 0' }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.1em', minWidth: '140px' }}>ESTADO</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.1em', minWidth: '140px' }}>{t('dashboard.appointments.status')}</div>
             <span className={`tag ${tag}`}>{label}</span>
           </div>
         </div>
         <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--border)' }}>
-          <button className="btn btn-lime" style={{ width: '100%' }} onClick={onClose}>CERRAR</button>
+          <button className="btn btn-lime" style={{ width: '100%' }} onClick={onClose}>{t('dashboard.appointments.btn_close')}</button>
         </div>
       </div>
     </div>,
@@ -279,7 +280,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
   ];
 
   return (
-    <div className="panel animate-in" style={{ width: '100%', maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', border: '1px solid var(--border-2)', background: 'var(--black-2)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+    <div className="panel animate-in" style={{ width: '100%', maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', border: '1px solid var(--border-2)', background: 'var(--surface)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
 
       {/* Cabecera del Asistente */}
       <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.01)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -287,7 +288,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.15em', color: 'var(--lime)' }}>MÓDULO: CREACIÓN_DE_AGENDAMIENTOS</span>
           <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-1)', marginTop: '0.25rem' }}>Asistente de Configuración Experto</h3>
         </div>
-        <button type="button" className="btn btn-icon" onClick={onClose} style={{ border: 'none', width: '32px', height: '32px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%' }}><X size={14} /></button>
+        <button type="button" className="btn btn-icon" onClick={onClose} style={{ border: 'none', width: '32px', height: '32px', background: 'var(--surface-2)', borderRadius: '50%' }}><X size={14} /></button>
       </div>
 
       <div style={{ padding: '1.5rem' }}>
@@ -406,7 +407,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
               </div>
 
               {COUNTRY_CONSULATES[formData.country] && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.02)', padding: '0.875rem 1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', marginTop: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'var(--bg)', padding: '0.875rem 1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', marginTop: '0.5rem' }}>
                   <input type="checkbox" id="needs_cas" checked={formData.needs_cas} onChange={e => setFormData({ ...formData, needs_cas: e.target.checked })} style={{ width: '16px', height: '16px', accentColor: 'var(--lime)', cursor: 'pointer' }} />
                   <div>
                     <label htmlFor="needs_cas" style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-1)', cursor: 'pointer' }}>Requiere cita en Centro Externo (CAS/ASC)</label>
@@ -658,6 +659,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
 
 /* ── MAIN ── */
 const AppointmentsPage = () => {
+  const { t } = useTranslation();
   const { role } = useOutletContext();
   const [apts, setApts] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -762,7 +764,7 @@ const AppointmentsPage = () => {
       </div>
 
       {/* ── FILTERS ── */}
-      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center', padding: '0.875rem', background: 'var(--black-3)', border: '1px solid var(--border)' }}>
+      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center', padding: '0.875rem', background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
         <div style={{ flex: 1, minWidth: '200px', position: 'relative' }}>
           <Search size={13} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
           <input
@@ -795,18 +797,18 @@ const AppointmentsPage = () => {
 
       {/* ── DATE FILTERS (ADMIN ONLY) ── */}
       {isAdmin && (
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', padding: '0.875rem', background: 'var(--black-3)', border: '1px solid var(--border)', borderTop: 'none', marginTop: '-1.25rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', padding: '0.875rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderTop: 'none', marginTop: '-1.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-3)', letterSpacing: '0.05em' }}>FILTRAR POR:</span>
             <select
               value={dateFilterType}
               onChange={e => setDateFilterType(e.target.value)}
               className="input-field"
-              style={{ height: '32px', fontSize: '0.75rem', padding: '0 0.5rem', width: 'auto', background: 'var(--black-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}
+              style={{ height: '32px', fontSize: '0.75rem', padding: '0 0.5rem', width: 'auto', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}
             >
-              <option value="originalDate" style={{ background: 'var(--black-2)' }}>Fecha Objetivo</option>
-              <option value="date_booked" style={{ background: 'var(--black-2)' }}>Fecha de Agendado</option>
-              <option value="date_created" style={{ background: 'var(--black-2)' }}>Fecha de Registro</option>
+              <option value="originalDate" style={{ background: 'var(--surface)' }}>Fecha Objetivo</option>
+              <option value="date_booked" style={{ background: 'var(--surface)' }}>Fecha de Agendado</option>
+              <option value="date_created" style={{ background: 'var(--surface)' }}>Fecha de Registro</option>
             </select>
           </div>
 
@@ -817,7 +819,7 @@ const AppointmentsPage = () => {
               value={startDate}
               onChange={e => setStartDate(e.target.value)}
               className="input-field"
-              style={{ height: '32px', fontSize: '0.75rem', width: '135px', colorScheme: 'dark', background: 'var(--black-2)', border: '1px solid var(--border)', padding: '0 0.5rem', borderRadius: 'var(--radius-sm)' }}
+              style={{ height: '32px', fontSize: '0.75rem', width: '135px', colorScheme: 'dark', background: 'var(--surface)', border: '1px solid var(--border)', padding: '0 0.5rem', borderRadius: 'var(--radius-sm)' }}
             />
           </div>
 
@@ -828,7 +830,7 @@ const AppointmentsPage = () => {
               value={endDate}
               onChange={e => setEndDate(e.target.value)}
               className="input-field"
-              style={{ height: '32px', fontSize: '0.75rem', width: '135px', colorScheme: 'dark', background: 'var(--black-2)', border: '1px solid var(--border)', padding: '0 0.5rem', borderRadius: 'var(--radius-sm)' }}
+              style={{ height: '32px', fontSize: '0.75rem', width: '135px', colorScheme: 'dark', background: 'var(--surface)', border: '1px solid var(--border)', padding: '0 0.5rem', borderRadius: 'var(--radius-sm)' }}
             />
           </div>
 
@@ -845,7 +847,7 @@ const AppointmentsPage = () => {
       )}
 
       {/* ── TABLE ── */}
-      <div style={{ background: 'var(--black-2)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table className="data-table">
             <thead>
@@ -856,7 +858,7 @@ const AppointmentsPage = () => {
                 <th onClick={() => toggleSort('schedule_id')} style={{ cursor: 'pointer' }}>SCHEDULE_ID <SortIco f="schedule_id" /></th>
                 <th>TIPO_VISA</th>
                 <th onClick={() => toggleSort('originalDate')} style={{ cursor: 'pointer' }}>FECHA_OBJ <SortIco f="originalDate" /></th>
-                <th>ESTADO</th>
+                <th>{t('dashboard.appointments.status')}</th>
                 {canEdit && <th>OPS</th>}
               </tr>
             </thead>
