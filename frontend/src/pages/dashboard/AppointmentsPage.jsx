@@ -67,7 +67,7 @@ const COUNTRY_CONSULATES = {
 /* ── MODAL ── */
 const Modal = ({ apt, onClose, t }) => {
   if (!apt) return null;
-  const { tag, label } = getTag(apt.status);
+  const { tag, label } = getTag(apt.status, t);
 
   const modalRows = [
     [t('dashboard.appointments.client'), apt.client],
@@ -880,7 +880,7 @@ const AppointmentsPage = () => {
                     </tr>
                   )
                   : filtered.map(apt => {
-                    const { tag, label } = getTag(apt.status);
+                    const { tag, label } = getTag(apt.status, t);
                     return (
                       <tr key={apt.id}>
                         {isAdmin && (

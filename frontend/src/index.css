@@ -224,11 +224,13 @@ a:hover { color: var(--lime); }
 .text-gradient {
   background: linear-gradient(135deg, var(--text-1) 0%, var(--text-2) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .text-gradient-accent {
   background: linear-gradient(135deg, var(--lime) 0%, var(--accent-2) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
