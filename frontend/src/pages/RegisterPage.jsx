@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { Globe, ArrowRight, ShieldCheck, UserPlus } from 'lucide-react';
@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ fullName: '', email: '', password: '', role: 'NATURAL_PERSON' });
+  const [form, setForm] = useState({ full_name: '', email: '', password: '', role: 'NATURAL_PERSON' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -86,8 +86,8 @@ const RegisterPage = () => {
                 <input
                   type="text"
                   placeholder="Tu nombre o el de tu agencia"
-                  value={form.fullName}
-                  onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))}
+                  value={form.full_name}
+                  onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
                   required
                   style={{
                     width: '100%', padding: '0.85rem 1rem', borderRadius: '10px',
