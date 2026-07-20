@@ -12,6 +12,8 @@ import DocumentsPage from './pages/dashboard/DocumentsPage';
 import UsersPage from './pages/dashboard/UsersPage';
 import SettingsPage from './pages/dashboard/SettingsPage';
 import AdminPage from './pages/dashboard/AdminPage';
+import SearchPage from './pages/dashboard/SearchPage';
+import NotificationsHistory from './pages/dashboard/NotificationsHistory';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -50,6 +52,8 @@ function App() {
           <Route path="usuarios" element={<UsersPage />} />
           <Route path="configuracion" element={<SettingsPage />} />
           <Route path="auditoria" element={<AdminPage />} />
+          <Route path="buscar" element={<SearchPage />} />
+          <Route path="notificaciones" element={<NotificationsHistory />} />
         </Route>
       </Routes>
     </Router>

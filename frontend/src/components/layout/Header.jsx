@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Bell, X, Search, CheckCircle2, AlertCircle, Info, ShieldAlert } from 'lucide-react';
 import { api } from '../../services/api';
 
@@ -13,6 +13,8 @@ const PAGE_LABELS = {
 
 const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
   const [showN, setShowN] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -134,13 +136,20 @@ const Header = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
 
           {/* Search */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '99px', padding: '0.4rem 1rem', color: 'var(--text-3)', transition: 'all 0.2s', cursor: 'text' }}
-               onMouseOver={e => e.currentTarget.style.borderColor = 'var(--border-2)'}
-               onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border)'}>
+          <form onSubmit={(e) => { e.preventDefault(); if (searchQuery.trim()) navigate(`/dashboard/buscar?q=${encodeURIComponent(searchQuery)}`); }} 
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '99px', padding: '0.4rem 1rem', color: 'var(--text-3)', transition: 'all 0.2s', cursor: 'text' }}
+                onMouseOver={e => e.currentTarget.style.borderColor = 'var(--border-2)'}
+                onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border)'}>
             <Search size={14} />
-            <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Buscar...</span>
-            <div style={{ marginLeft: '2rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.125rem 0.375rem', fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-2)' }}>⌘K</div>
-          </div>
+            <input 
+              type="text" 
+              placeholder="Buscar..." 
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-1)', width: '120px' }}
+            />
+            <div style={{ marginLeft: '1rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.125rem 0.375rem', fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-2)' }}>↵ Enter</div>
+          </form>
 
           <div style={{ width: '1px', height: '24px', background: 'var(--border)' }} />
 
@@ -234,7 +243,7 @@ const Header = () => {
                 
                 {notifications.length > 0 && (
                   <div style={{ padding: '0.75rem', borderTop: '1px solid var(--border)', textAlign: 'center', background: 'var(--surface)' }}>
-                    <button style={{ background: 'none', border: 'none', color: 'var(--lime)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>
+                    <button onClick={() => { setShowN(false); navigate('/dashboard/notificaciones'); }} style={{ background: 'none', border: 'none', color: 'var(--lime)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>
                       Ver todo el historial
                     </button>
                   </div>
