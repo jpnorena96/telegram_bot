@@ -6,11 +6,15 @@ import { Search, RefreshCw, Plus, X, ChevronUp, ChevronDown, Eye, ArrowLeft, Arr
 import { api } from '../../services/api';
 
 const STATUS_MAP = {
-  'Adelantada': { tag: 'tag-lime', label: t ? t('dashboard.appointments.advanced') : 'ADELANTADA' },
-  'Buscando': { tag: 'tag-gold', label: t ? t('dashboard.appointments.searching') : 'BUSCANDO' },
-  'Pendiente': { tag: 'tag-cyan', label: t ? t('dashboard.appointments.pending') : 'PENDIENTE' },
+  'Adelantada': { tag: 'tag-lime', i18nKey: 'dashboard.appointments.advanced', fallback: 'ADELANTADA' },
+  'Buscando': { tag: 'tag-gold', i18nKey: 'dashboard.appointments.searching', fallback: 'BUSCANDO' },
+  'Pendiente': { tag: 'tag-cyan', i18nKey: 'dashboard.appointments.pending', fallback: 'PENDIENTE' },
 };
-const getTag = s => STATUS_MAP[s] || { tag: 'tag-cyan', label: s?.toUpperCase() || '—' };
+const getTag = (s, t) => {
+  const map = STATUS_MAP[s];
+  if (map) return { tag: map.tag, label: t ? t(map.i18nKey) : map.fallback };
+  return { tag: 'tag-cyan', label: s?.toUpperCase() || '—' };
+};
 
 const COUNTRIES = {
   "ar": "Argentina", "ec": "Ecuador", "bs": "The Bahamas", "gy": "Guyana", "bb": "Barbados",
