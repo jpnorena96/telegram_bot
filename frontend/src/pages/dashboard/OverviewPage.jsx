@@ -5,7 +5,7 @@ import {
   DollarSign, ArrowUpRight, ArrowDownRight, CreditCard
 } from 'lucide-react';
 import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
 
@@ -87,26 +87,24 @@ const OverviewPage = () => {
         {/* Main Area Chart */}
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.5rem' }}>
           <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: 'var(--text-1)', fontWeight: 700 }}>Flujo Financiero ({timeFilter})</h3>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={REVENUE_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--lime)" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="var(--lime)" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--text-3)', fontSize: 12}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--text-3)', fontSize: 12}} />
-                <Tooltip 
-                  contentStyle={{ background: 'var(--surface)', borderRadius: '8px', border: '1px solid var(--border)' }}
-                  itemStyle={{ fontWeight: 600 }}
-                />
-                <Area type="monotone" dataKey="ingresos" stroke="var(--lime)" strokeWidth={3} fillOpacity={1} fill="url(#colorIngresos)" />
-                <Area type="monotone" dataKey="gastos" stroke="#ef4444" strokeWidth={2} fillOpacity={0.1} fill="#ef4444" />
-              </AreaChart>
-            </ResponsiveContainer>
+          <div style={{ width: '100%', height: 300, overflowX: 'auto' }}>
+            <AreaChart width={600} height={300} data={REVENUE_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--lime)" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="var(--lime)" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--text-3)', fontSize: 12}} dy={10} />
+              <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--text-3)', fontSize: 12}} />
+              <Tooltip 
+                contentStyle={{ background: 'var(--surface)', borderRadius: '8px', border: '1px solid var(--border)' }}
+                itemStyle={{ fontWeight: 600 }}
+              />
+              <Area type="monotone" dataKey="ingresos" stroke="var(--lime)" strokeWidth={3} fillOpacity={1} fill="url(#colorIngresos)" />
+              <Area type="monotone" dataKey="gastos" stroke="#ef4444" strokeWidth={2} fillOpacity={0.1} fill="#ef4444" />
+            </AreaChart>
           </div>
         </div>
 
@@ -114,16 +112,14 @@ const OverviewPage = () => {
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: 'var(--text-1)', fontWeight: 700 }}>Estado de Trámites</h3>
           <div style={{ width: '100%', height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={STATUS_DATA} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                  {STATUS_DATA.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ background: 'var(--surface)', borderRadius: '8px', border: '1px solid var(--border)' }} />
-              </PieChart>
-            </ResponsiveContainer>
+            <PieChart width={220} height={220}>
+              <Pie data={STATUS_DATA} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                {STATUS_DATA.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                ))}
+              </Pie>
+              <Tooltip contentStyle={{ background: 'var(--surface)', borderRadius: '8px', border: '1px solid var(--border)' }} />
+            </PieChart>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: 'auto' }}>
             {STATUS_DATA.map(d => (
