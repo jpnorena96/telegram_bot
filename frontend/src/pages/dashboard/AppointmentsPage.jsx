@@ -944,7 +944,7 @@ const AppointmentsPage = () => {
         )}
       </div>
 
-      <Modal apt={selected} onClose={() => setSelected(null)} />
+      <Modal apt={selected} onClose={() => setSelected(null)} t={t} />
     </div>
   );
 };
