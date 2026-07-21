@@ -9,7 +9,10 @@ logger = logging.getLogger(__name__)
 
 # Mapping: consulate name → (facility_id, asc_facility_id)
 CONSULATE_FACILITY_MAP = {
-    "bogota": {"facility_id": "25", "asc_facility_id": "26"},
+    # Colombia
+    "bogotá": {"facility_id": "25", "asc_facility_id": "26"},
+    
+    # Mexico
     "ciudad juarez": {"facility_id": "65", "asc_facility_id": "76"},
     "guadalajara": {"facility_id": "66", "asc_facility_id": "77"},
     "hermosillo": {"facility_id": "67", "asc_facility_id": "78"},
@@ -20,8 +23,37 @@ CONSULATE_FACILITY_MAP = {
     "nogales": {"facility_id": "72", "asc_facility_id": "84"},
     "nuevo laredo": {"facility_id": "73", "asc_facility_id": "85"},
     "tijuana": {"facility_id": "74", "asc_facility_id": "88"},
-    # Perú – Lima no necesita CAS
+    
+    # Argentina
+    "buenos aires": {"facility_id": "Buenos Aires", "asc_facility_id": "Buenos Aires_cas"},
+    
+    # Brazil
+    "brasilia": {"facility_id": "Brasilia", "asc_facility_id": "Brasilia_cas"},
+    "são paulo": {"facility_id": "São Paulo", "asc_facility_id": "São Paulo_cas"},
+    "río de janeiro": {"facility_id": "Río", "asc_facility_id": "Río_cas"},
+    "recife": {"facility_id": "Recife", "asc_facility_id": "Recife_cas"},
+    "porto alegre": {"facility_id": "Porto Alegre", "asc_facility_id": "Porto Alegre_cas"},
+    
+    # Ecuador
+    "quito": {"facility_id": "Quito", "asc_facility_id": "Quito_cas"},
+    "guayaquil": {"facility_id": "Guayaquil", "asc_facility_id": "Guayaquil_cas"},
+    
+    # Peru
     "lima": {"facility_id": "115", "asc_facility_id": None},
+    
+    # Chile
+    "santiago": {"facility_id": "Santiago", "asc_facility_id": "Santiago_cas"},
+    
+    # Uruguay
+    "montevideo": {"facility_id": "Montevideo", "asc_facility_id": "Montevideo_cas"},
+    
+    # Jamaica
+    "kingston": {"facility_id": "Kingston", "asc_facility_id": "Kingston_cas"},
+    
+    # Canada
+    "toronto": {"facility_id": "Toronto", "asc_facility_id": "Toronto_cas"},
+    "vancouver": {"facility_id": "Vancouver", "asc_facility_id": "Vancouver_cas"},
+    
     # Default (fallback)
     "_default": {"facility_id": "25", "asc_facility_id": "26"},
 }

@@ -16,6 +16,16 @@ const getTag = (s, t) => {
   return { tag: 'tag-cyan', label: s?.toUpperCase() || '—' };
 };
 
+const formatNames = (str) => {
+  if (!str) return '—';
+  try {
+    const parsed = JSON.parse(str);
+    return parsed.nombre || str;
+  } catch (e) {
+    return str;
+  }
+};
+
 const COUNTRIES = {
   "ar": "Argentina", "ec": "Ecuador", "bs": "The Bahamas", "gy": "Guyana", "bb": "Barbados",
   "jm": "Jamaica", "bz": "Belize", "mx": "Mexico", "br": "Brazil", "py": "Paraguay",
@@ -76,7 +86,7 @@ const Modal = ({ apt, onClose, t }) => {
   const modalRows = [
     [t('dashboard.appointments.client'), apt.client],
     ['SCHEDULE_ID', apt.schedule_id || '—'],
-    ['SOLICITANTES', apt.schedule_names || '—'],
+    ['SOLICITANTES', formatNames(apt.schedule_names)],
     [t('dashboard.appointments.type'), apt.type],
     [t('dashboard.appointments.orig_date'), apt.originalDate || '—'],
     [t('dashboard.appointments.new_date'), apt.newDate || '—'],
@@ -155,27 +165,27 @@ const CreateWizard = ({ onClose, onCreated }) => {
     setFormData({
       ...formData,
       country: newCountry,
-      consulate: consulates ? consulates[0].facility_id : '',
+      consulate: consulates ? consulates[0].name : '',
       consulate_asc: consulates ? consulates[0].asc_facility_id : '',
       needs_cas: !!consulates,
     });
   };
 
   const handleConsulateChange = (e) => {
-    const facility_id = e.target.value;
+    const val = e.target.value;
     const consulates = COUNTRY_CONSULATES[formData.country];
     if (consulates) {
-      const selected = consulates.find(c => c.facility_id === facility_id);
+      const selected = consulates.find(c => c.name === val);
       if (selected) {
         setFormData({
           ...formData,
-          consulate: selected.facility_id,
+          consulate: selected.name,
           consulate_asc: selected.asc_facility_id,
         });
         return;
       }
     }
-    setFormData({ ...formData, consulate: facility_id });
+    setFormData({ ...formData, consulate: val });
   };
 
   const handleDiscoverSchedules = async () => {
@@ -265,7 +275,8 @@ const CreateWizard = ({ onClose, onCreated }) => {
         await api.createAppointment(payload);
       } else {
         const selectedName = discoveredSchedules[selectedScheduleId] || '';
-        await api.selectSchedule(tempAppointmentId, selectedScheduleId, selectedName);
+        const jsonPayload = JSON.stringify({ nombre: selectedName, id: selectedScheduleId });
+        await api.selectSchedule(tempAppointmentId, selectedScheduleId, jsonPayload);
       }
       setSuccess(true);
     } catch (err) {
@@ -398,7 +409,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
                     <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Globe size={11} /> SEDE CONSULADO</label>
                     <select className="input-field" style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }} value={formData.consulate} onChange={handleConsulateChange} required>
                       {COUNTRY_CONSULATES[formData.country].map(c => (
-                        <option key={c.facility_id} value={c.facility_id} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>{c.name}</option>
+                        <option key={c.name} value={c.name} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>{c.name}</option>
                       ))}
                     </select>
                   </div>
@@ -905,7 +916,7 @@ const AppointmentsPage = () => {
                               <span style={{ fontWeight: 600 }}>{apt.client}</span>
                               {apt.schedule_names && (
                                 <span style={{ fontSize: '0.68rem', color: 'var(--text-3)' }}>
-                                  👥 {apt.schedule_names}
+                                  👥 {formatNames(apt.schedule_names)}
                                 </span>
                               )}
                             </div>
