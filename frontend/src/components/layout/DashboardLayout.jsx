@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { api } from '../../services/api';
@@ -11,8 +12,43 @@ const DashboardLayout = () => {
 
   useEffect(() => {
     if (!api.isAuthenticated()) { navigate('/login'); return; }
-    setRole(localStorage.getItem('userRole') || 'NATURAL_PERSON');
+    const currentRole = localStorage.getItem('userRole') || 'NATURAL_PERSON';
+    setRole(currentRole);
     setUserName(localStorage.getItem('userName') || 'Usuario');
+    
+    let userId = null;
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        userId = payload.id;
+      }
+    } catch(e) {}
+
+    // Real-time SSE Connection
+    const sse = new EventSource('http://localhost:8000/api/webhooks/stream');
+    
+    sse.addEventListener('session_revoked', (e) => {
+      const data = JSON.parse(e.data);
+      // Fallback: If we don't have userId in localStorage, we can check email or just force logout to be safe if the role is matching or we decode JWT.
+      // Assuming backend emits session_revoked for everyone but client filters:
+      if (userId && data.user_id === parseInt(userId)) {
+        toast.error('Sesión revocada por el Administrador.');
+        api.logout();
+        navigate('/login');
+      }
+    });
+
+    sse.addEventListener('schedule_discovered', (e) => {
+      const data = JSON.parse(e.data);
+      if (currentRole === 'AGENCY' || currentRole === 'ADMINISTRATOR') {
+        toast.success(`Nuevo Schedule: ${data.schedule_id} para ${data.client_name}`);
+      }
+    });
+
+    return () => {
+      sse.close();
+    };
   }, [navigate]);
 
   if (!role) return (

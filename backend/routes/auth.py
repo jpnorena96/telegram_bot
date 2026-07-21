@@ -71,13 +71,17 @@ def get_password_hash(password):
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
+    now = datetime.utcnow()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = now + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
+        expire = now + timedelta(minutes=15)
+    to_encode.update({"exp": expire, "iat": now.timestamp()})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+# In-memory blacklist for MVP: { user_id: timestamp_revoked }
+revoked_users = {}
 
 security = HTTPBearer()
 
@@ -99,8 +103,16 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Security(securi
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
+        user_id: int = payload.get("id")
+        iat = payload.get("iat", 0)
+        
         if email is None:
             raise credentials_exception
+            
+        # Check against blacklist
+        if user_id in revoked_users and iat < revoked_users[user_id]:
+            raise credentials_exception
+            
         return payload
     except JWTError:
         raise credentials_exception

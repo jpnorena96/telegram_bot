@@ -5,7 +5,9 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import DB_CONFIG
-from .auth import get_current_user, get_db
+from .auth import get_current_user, get_db, revoked_users
+from backend.sse import sse_manager
+from datetime import datetime
 
 router = APIRouter()
 
@@ -67,3 +69,15 @@ def delete_user(user_id: int, current_user: dict = Depends(get_current_user), db
     db.commit()
     cursor.close()
     return {"status": "ok"}
+
+@router.post("/{user_id}/revoke")
+async def revoke_user_session(user_id: int, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    """Revoca el acceso de un usuario y fuerza su desconexión en tiempo real"""
+    role = current_user["roles"][0]
+    if role != "ADMINISTRATOR":
+        raise HTTPException(status_code=403, detail="Only administrators can revoke sessions")
+        
+    revoked_users[user_id] = datetime.utcnow().timestamp()
+    await sse_manager.broadcast("session_revoked", {"user_id": user_id})
+    
+    return {"status": "success", "message": "Session revoked successfully"}
