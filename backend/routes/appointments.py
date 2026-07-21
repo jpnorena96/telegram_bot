@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from typing import List, Optional
@@ -12,6 +12,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import DB_CONFIG
 from .auth import SECRET_KEY, ALGORITHM, get_db
 from backend import vps
+from backend.telegram_service import notify_new_appointment
+import datetime
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
@@ -49,7 +51,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     return {"email": email, "id": user_id, "roles": roles}
 
 @router.post("/")
-def create_appointment(apt: AppointmentCreate, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+def create_appointment(apt: AppointmentCreate, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     cursor = db.cursor(dictionary=True)
     try:
         # 1. Insertar agendamiento en la base de datos
@@ -72,6 +74,10 @@ def create_appointment(apt: AppointmentCreate, current_user: dict = Depends(get_
         db.commit()
         new_id = cursor_insert.lastrowid
         cursor_insert.close()
+
+        # Enviar notificación a Telegram en background
+        fecha_registro = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        background_tasks.add_task(notify_new_appointment, apt.email, apt.consulate, fecha_registro, apt.type if hasattr(apt, 'type') else "B1/B2")
 
         # 2. Preparar datos para configuración en VPS (fijamos telegram_user_id a vacío para no notificar por Telegram al ser creado desde la web)
         need_cas = bool(apt.consulate_asc and apt.consulate_asc.strip().lower() not in ["ninguno", "none", "null", ""])

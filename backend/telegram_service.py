@@ -3,9 +3,9 @@ import os
 import logging
 
 # Set your bot token in the environment variables or replace here for testing.
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_TELEGRAM_BOT_TOKEN")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8451235369:AAHhokjI65kP9o_mFvj6UW7LsVWh8Z-vl3s")
 # You can set a global chat ID or pass it per message
-DEFAULT_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "YOUR_CHAT_ID")
+DEFAULT_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "7568579919")
 
 logger = logging.getLogger(__name__)
 
@@ -47,5 +47,19 @@ async def notify_new_schedule(schedule_id: str, client_name: str, date: str):
         f"<b>Cliente:</b> {client_name}\n"
         f"<b>Fecha:</b> {date}\n\n"
         f"<i>El sistema ha sincronizado este registro exitosamente.</i>"
+    )
+    return await send_telegram_message(msg)
+
+async def notify_new_appointment(client_email: str, consulate: str, date_created: str, type_visa: str = "B1/B2"):
+    """
+    Sends a notification when a new appointment is created from the frontend.
+    """
+    msg = (
+        f"✅ <b>NUEVA CITA CREADA EN FRONTEND</b> ✅\n\n"
+        f"<b>Cliente (Email):</b> {client_email}\n"
+        f"<b>Consulado:</b> {consulate}\n"
+        f"<b>Fecha de Registro:</b> {date_created}\n"
+        f"<b>Tipo:</b> {type_visa}\n\n"
+        f"<i>El sistema ha registrado la cita exitosamente.</i>"
     )
     return await send_telegram_message(msg)
