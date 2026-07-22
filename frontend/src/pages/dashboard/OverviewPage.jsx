@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useOutletContext } from 'react-router-dom';
 import { 
   TrendingUp, Users, CalendarCheck, Clock, 
-  DollarSign, ArrowUpRight, ArrowDownRight, CreditCard
+  DollarSign, ArrowUpRight, ArrowDownRight, CreditCard,
+  FileText, CheckCircle, Search
 } from 'lucide-react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
+import { api } from '../../services/api';
+import toast from 'react-hot-toast';
 
 // Dummy Data for charts
 const REVENUE_DATA = [
@@ -53,7 +57,62 @@ const StatCard = ({ label, value, icon: Icon, delta, isCurrency }) => (
 
 const OverviewPage = () => {
   const { t } = useTranslation();
+  const { role, userName } = useOutletContext();
   const [timeFilter, setTimeFilter] = useState('Semana');
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (role === 'NATURAL_PERSON') {
+      const fetchApts = async () => {
+        try {
+          const data = await api.getAppointments();
+          setAppointments(data);
+        } catch (e) {
+          toast.error('Error cargando citas');
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchApts();
+    } else {
+      setLoading(false);
+    }
+  }, [role]);
+
+  if (role === 'NATURAL_PERSON') {
+    if (loading) return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-3)' }}>Cargando resumen...</div>;
+    const total = appointments.length;
+    const aprobadas = appointments.filter(a => ['Adelantada', 'agendado'].includes(a.status)).length;
+    const buscando = appointments.filter(a => ['pending', 'Buscando'].includes(a.status)).length;
+
+    return (
+      <div className="animate-in" style={{ paddingBottom: '2rem' }}>
+        <div style={{ marginBottom: '2rem' }}>
+          <h1 style={{ fontSize: '1.75rem', fontFamily: 'var(--font-heading)', fontWeight: 700, margin: '0 0 0.25rem 0', color: 'var(--text-1)' }}>Hola, {userName || 'Cliente'} 👋</h1>
+          <p style={{ margin: 0, color: 'var(--text-2)', fontSize: '0.95rem' }}>Bienvenido a tu panel de control de GlobalVisas.</p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+          <StatCard label="Total de Trámites" value={total} icon={FileText} />
+          <StatCard label="Citas Aseguradas" value={aprobadas} icon={CheckCircle} />
+          <StatCard label="En Búsqueda Continua" value={buscando} icon={Search} />
+        </div>
+
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.5rem' }}>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', color: 'var(--text-1)', fontWeight: 700 }}>Información Importante</h3>
+          <p style={{ color: 'var(--text-2)', fontSize: '0.9rem', lineHeight: '1.6', margin: '0 0 1rem 0' }}>
+            Puedes ver el progreso detallado y fechas de tus trámites en la pestaña de <strong>Citas</strong> en el menú lateral.
+          </p>
+          <div style={{ padding: '1rem', background: 'var(--surface-2)', borderRadius: '8px', borderLeft: '3px solid var(--lime)' }}>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-1)', lineHeight: '1.5' }}>
+              ℹ️ Si el estado de tu trámite es <strong>En Búsqueda Continua</strong>, nuestro sistema automatizado está intentando adelantar tu cita 24/7 en el consulado. Recibirás una notificación por WhatsApp cuando logremos reprogramarla con éxito hacia la fecha deseada.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-in" style={{ paddingBottom: '2rem' }}>
