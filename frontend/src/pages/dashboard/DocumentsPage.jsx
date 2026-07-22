@@ -31,7 +31,7 @@ const DocumentsPage = () => {
   // Auth roles flags
   const isAdmin = role === 'ADMINISTRATOR' || role === 'AUDITOR';
   const isAgency = role === 'TRAVEL_AGENCY';
-  const isClient = role === 'NATURAL_PERSON';
+  const isClient = role === 'NATURAL_PERSON' || role === 'TRAVEL_AGENCY';
   const canEdit = role !== 'AUDITOR';
 
   // State variables
