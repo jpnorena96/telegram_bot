@@ -62,8 +62,10 @@ const OverviewPage = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const isAdmin = role === 'ADMINISTRATOR' || role === 'AUDITOR';
+
   useEffect(() => {
-    if (role === 'NATURAL_PERSON' || role === 'TRAVEL_AGENCY') {
+    if (!isAdmin) {
       const fetchApts = async () => {
         try {
           const data = await api.getAppointments();
@@ -80,7 +82,7 @@ const OverviewPage = () => {
     }
   }, [role]);
 
-  if (role === 'NATURAL_PERSON' || role === 'TRAVEL_AGENCY') {
+  if (!isAdmin) {
     if (loading) return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-3)' }}>Cargando resumen...</div>;
     const total = appointments.length;
     const aprobadas = appointments.filter(a => ['Adelantada', 'agendado'].includes(a.status)).length;
