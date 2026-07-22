@@ -30,7 +30,7 @@ class AppointmentCreate(BaseModel):
     max_consulate_time: Optional[time] = None
     schedule_id: Optional[str] = None
     ivr: Optional[str] = 'null'
-    process_type: Optional[str] = 'Individual'
+
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -54,29 +54,22 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 def create_appointment(apt: AppointmentCreate, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     cursor = db.cursor(dictionary=True)
     try:
-        # Validar límite de trámites para NATURAL_PERSON
-        if "NATURAL_PERSON" in current_user["roles"] and "TRAVEL_AGENCY" not in current_user["roles"]:
-            cursor.execute("SELECT COUNT(*) as count FROM user_appointments WHERE user_id = %s", (current_user["id"],))
-            result = cursor.fetchone()
-            if result and result["count"] >= 1:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Solo puedes gestionar un trámite a la vez.")
-
         # 1. Insertar agendamiento en la base de datos
         cursor_insert = db.cursor()
         cursor_insert.execute("""
             INSERT INTO user_appointments (
                 user_id, email, password, country, consulate, consulate_asc,
                 min_consulate_date, max_consulate_date, min_consulate_time, max_consulate_time,
-                schedule_id, ivr, status, process_type
+                schedule_id, ivr, status
             ) VALUES (
                 %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s,
-                %s, %s, 'pending', %s
+                %s, %s, 'pending'
             )
         """, (
             current_user["id"], apt.email, apt.password, apt.country, apt.consulate, apt.consulate_asc,
             apt.min_consulate_date, apt.max_consulate_date, apt.min_consulate_time, apt.max_consulate_time,
-            apt.schedule_id, apt.ivr, apt.process_type
+            apt.schedule_id, apt.ivr
         ))
         db.commit()
         new_id = cursor_insert.lastrowid

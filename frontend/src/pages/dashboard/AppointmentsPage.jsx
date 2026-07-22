@@ -147,7 +147,6 @@ const CreateWizard = ({ onClose, onCreated }) => {
     ivr: 'null',
     min_consulate_date: '',
     max_consulate_date: '',
-    process_type: 'Individual',
   });
 
   const [mode, setMode] = useState('discover'); // 'discover' | 'manual'
@@ -382,13 +381,6 @@ const CreateWizard = ({ onClose, onCreated }) => {
                 <div className="input-group" style={{ marginBottom: 0 }}>
                   <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Lock size={11} /> CONTRASEÑA PORTAL</label>
                   <input className="input-field" type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} required />
-                </div>
-                <div className="input-group" style={{ marginBottom: 0 }}>
-                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><User size={11} /> TIPO DE TRÁMITE</label>
-                  <select className="input-field" value={formData.process_type} onChange={e => setFormData({ ...formData, process_type: e.target.value })} required>
-                    <option value="Individual">Individual</option>
-                    <option value="Familiar">Familiar</option>
-                  </select>
                 </div>
               </div>
             </div>
@@ -782,17 +774,7 @@ const AppointmentsPage = () => {
           <button className="btn btn-sm" onClick={load} style={{ gap: '0.4rem' }}>
             <RefreshCw size={11} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />SYNC
           </button>
-          {canEdit && (
-            role === 'NATURAL_PERSON' && apts.length >= 1 ? (
-              <button className="btn btn-sm" style={{ opacity: 0.5, cursor: 'not-allowed' }} title="Solo puedes gestionar un proceso de visa a la vez.">
-                <Plus size={11} /> LÍMITE ALCANZADO
-              </button>
-            ) : (
-              <button className="btn btn-sm btn-lime" onClick={() => setIsCreating(true)}>
-                <Plus size={11} /> NUEVA
-              </button>
-            )
-          )}
+          {canEdit && <button className="btn btn-sm btn-lime" onClick={() => setIsCreating(true)}><Plus size={11} /> NUEVA</button>}
         </div>
       </div>
 
