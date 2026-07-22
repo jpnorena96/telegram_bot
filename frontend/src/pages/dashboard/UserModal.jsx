@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { api } from '../../../services/api';
+import { api } from '../../services/api';
 
 const UserModal = ({ isOpen, onClose, user, onSuccess }) => {
   const [formData, setFormData] = useState({
