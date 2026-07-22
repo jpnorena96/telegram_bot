@@ -1366,7 +1366,7 @@ async def admin_create_user_email_received(update: Update, context: ContextTypes
 
 
 async def admin_create_user_pass_received(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Saves the password and shows role selection buttons."""
+    """Saves the password and asks for WhatsApp number."""
     password_msg = update.message
     password_text = password_msg.text.strip()
     
@@ -1377,6 +1377,19 @@ async def admin_create_user_pass_received(update: Update, context: ContextTypes.
         
     context.user_data["new_user_pass"] = password_text
     
+    await update.message.reply_text(
+        "📱 Ingresa el *Número de WhatsApp* (con indicativo, ej. +57316...):",
+        reply_markup=NAV_KEYBOARD,
+        parse_mode='Markdown'
+    )
+    return ADMIN_CREATE_USER_WHATSAPP
+
+
+async def admin_create_user_whatsapp_received(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Saves the WhatsApp number and shows role selection buttons."""
+    whatsapp_text = update.message.text.strip()
+    context.user_data["new_user_whatsapp"] = whatsapp_text
+
     keyboard = [
         [InlineKeyboardButton("Persona Natural (NATURAL_PERSON)", callback_data="adm_usr_setrole_NATURAL_PERSON")],
         [InlineKeyboardButton("Agencia de Viajes (TRAVEL_AGENCY)", callback_data="adm_usr_setrole_TRAVEL_AGENCY")],
@@ -1420,16 +1433,18 @@ async def admin_create_user_plan_received(update: Update, context: ContextTypes.
     email = context.user_data.get("new_user_email")
     password = context.user_data.get("new_user_pass")
     role = context.user_data.get("new_user_role")
+    whatsapp = context.user_data.get("new_user_whatsapp")
     
     await query.edit_message_text("⏳ Creando usuario en el sistema...")
     
-    new_id = db.admin_create_user(name, email, password, role, plan)
+    new_id = db.admin_create_user(name, email, password, role, plan, whatsapp_number=whatsapp)
     
     if new_id > 0:
         text = (
             f"✅ *Usuario creado exitosamente!*\n\n"
             f"📛 Nombre: `{name}`\n"
             f"📧 Email: `{email}`\n"
+            f"📱 WhatsApp: `{whatsapp}`\n"
             f"🔑 Rol: `{role}`\n"
             f"💎 Plan: `{plan.capitalize()}`\n"
         )
@@ -1437,7 +1452,7 @@ async def admin_create_user_plan_received(update: Update, context: ContextTypes.
         text = "❌ Error al crear el usuario. Es posible que el correo electrónico ya esté registrado."
         
     # Clean up user data
-    for k in ["new_user_name", "new_user_email", "new_user_pass", "new_user_role"]:
+    for k in ["new_user_name", "new_user_email", "new_user_pass", "new_user_role", "new_user_whatsapp"]:
         if k in context.user_data:
             del context.user_data[k]
             

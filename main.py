@@ -19,7 +19,8 @@ from bot.handlers import (
     consulate_asc, consulate_asc_callback, min_date, max_date,
     select_appointment_callback, confirm_delete_callback, schedule_select_callback,
     manual_schedule_id, cancel, nav_handler, NAV_TRIGGERS,
-    admin_create_user_name_received, admin_create_user_email_received, admin_create_user_pass_received
+    admin_create_user_name_received, admin_create_user_email_received, admin_create_user_pass_received,
+    admin_create_user_whatsapp_received
 )
 
 # Enable logging
@@ -127,6 +128,10 @@ def main() -> None:
             ADMIN_CREATE_USER_PASS: [
                 MessageHandler(NAV_FILTER, nav_handler),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, admin_create_user_pass_received),
+            ],
+            ADMIN_CREATE_USER_WHATSAPP: [
+                MessageHandler(NAV_FILTER, nav_handler),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, admin_create_user_whatsapp_received),
             ],
         },
         fallbacks=[

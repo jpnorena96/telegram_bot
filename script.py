@@ -1050,10 +1050,28 @@ class Bot:
                                         "INSERT INTO notifications (user_id, message, status) VALUES (%s, %s, 'success')",
                                         (user_id, f"¡Agendamiento exitoso! Se adelantó la cita para {self.config.email}.",)
                                     )
+                                    # Whatsapp Notification
+                                    cursor.execute("SELECT whatsapp_number, full_name FROM users WHERE id = %s", (user_id,))
+                                    u_info = cursor.fetchone()
+                                    if u_info and u_info[0]:
+                                        whatsapp_number = u_info[0]
+                                        client_name = u_info[1] or self.config.email
+                                        date_str = f"{self.appointment_datetime.strftime('%Y-%m-%d')} a las {self.appointment_datetime.strftime('%H:%M')}"
+                                        try:
+                                            from backend.whatsapp_service import notify_appointment_scheduled
+                                            import asyncio
+                                            # Create new event loop for async call since this is sync context
+                                            loop = asyncio.new_event_loop()
+                                            asyncio.set_event_loop(loop)
+                                            loop.run_until_complete(notify_appointment_scheduled(whatsapp_number, client_name, date_str))
+                                            loop.close()
+                                        except Exception as wa_err:
+                                            self.logger(f"Error enviando WhatsApp: {wa_err}")
+                                            
                                 conn.commit()
                                 cursor.close()
                                 conn.close()
-                                self.logger("DB Status y notificaciones actualizados a 'agendado'")
+                                self.logger("DB Status, notificaciones y WhatsApp actualizados a 'agendado'")
                             except Exception as db_err:
                                 self.logger(f"Error actualizando DB: {db_err}")
 

@@ -509,7 +509,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
               <div style={{ marginTop: '0.5rem' }}>
                 {mode === 'manual' ? (
                   <div className="input-group" style={{ marginBottom: 0 }}>
-                    <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>SCHEDULE ID (8 DÍGITOS)</label>
+                    <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em' }}>IDENTIFICADOR (8 DÍGITOS)</label>
                     <input className="input-field" type="text" placeholder="Ej. 12345678" value={formData.schedule_id} onChange={e => setFormData({ ...formData, schedule_id: e.target.value })} required={mode === 'manual'} />
                   </div>
                 ) : (
@@ -518,8 +518,8 @@ const CreateWizard = ({ onClose, onCreated }) => {
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', gap: '0.75rem', textAlign: 'center' }}>
                         <RefreshCw size={28} style={{ animation: 'spin 1.5s linear infinite', color: 'var(--lime)' }} />
                         <div>
-                          <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-1)', display: 'block' }}>Buscando Schedule ID en el servidor...</span>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', display: 'block', marginTop: '0.25rem' }}>Iniciando sesión remota de forma segura. Este proceso en la VPS suele tardar entre 1 y 2 minutos.</span>
+                          <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-1)', display: 'block' }}>Buscando Identificador en el servidor...</span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', display: 'block', marginTop: '0.25rem' }}>Iniciando sesión de forma segura. Este proceso suele tardar entre 1 y 2 minutos.</span>
                         </div>
                       </div>
                     ) : discoveredSchedules && Object.keys(discoveredSchedules).length > 0 ? (
@@ -545,7 +545,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', textAlign: 'center', padding: '0.5rem 0' }}>
                         <span style={{ fontSize: '0.78rem', color: 'var(--text-2)', maxWidth: '480px' }}>
-                          Conectaremos de forma remota a la VPS para iniciar sesión en la plataforma y extraer tus Schedule IDs automáticamente.
+                          Conectaremos de forma remotapara iniciar sesión en la plataforma y extraer tus Identificadores automáticamente.
                         </span>
                         <button
                           type="button"

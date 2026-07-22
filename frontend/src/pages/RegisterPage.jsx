@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ full_name: '', email: '', password: '', role: 'NATURAL_PERSON' });
+  const [form, setForm] = useState({ full_name: '', email: '', password: '', role: 'NATURAL_PERSON', whatsapp_number: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -88,6 +88,27 @@ const RegisterPage = () => {
                   placeholder="Tu nombre o el de tu agencia"
                   value={form.full_name}
                   onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
+                  required
+                  style={{
+                    width: '100%', padding: '0.85rem 1rem', borderRadius: '10px',
+                    border: '1px solid var(--border-2)', background: 'var(--bg)',
+                    color: 'var(--text-1)', fontSize: '0.95rem', transition: 'all 0.2s',
+                    outline: 'none', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.01)'
+                  }}
+                  onFocus={e => { e.target.style.borderColor = 'var(--lime)'; e.target.style.boxShadow = '0 0 0 3px var(--lime-subtle)'; }}
+                  onBlur={e => { e.target.style.borderColor = 'var(--border-2)'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.01)'; }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-1)', marginBottom: '0.5rem' }}>
+                  Número de WhatsApp (con indicativo, ej. +5731...)
+                </label>
+                <input
+                  type="tel"
+                  placeholder="+573161234567"
+                  value={form.whatsapp_number}
+                  onChange={e => setForm(f => ({ ...f, whatsapp_number: e.target.value }))}
                   required
                   style={{
                     width: '100%', padding: '0.85rem 1rem', borderRadius: '10px',

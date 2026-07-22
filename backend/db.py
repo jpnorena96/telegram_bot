@@ -315,7 +315,7 @@ def get_admin_users() -> List[dict]:
         return []
 
 
-def admin_create_user(name: str, email: str, password_text: str, role: str, plan: str) -> int:
+def admin_create_user(name: str, email: str, password_text: str, role: str, plan: str, whatsapp_number: str = None) -> int:
     """Creates a new user with proper password hashing and returns the new ID, or 0 on error."""
     import hashlib
     import bcrypt
@@ -327,8 +327,8 @@ def admin_create_user(name: str, email: str, password_text: str, role: str, plan
         
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor()
-        sql = "INSERT INTO users (full_name, email, password, role, plan, is_authorized, country) VALUES (%s, %s, %s, %s, %s, 1, 'co')"
-        cursor.execute(sql, (name, email, hashed_password, role, plan))
+        sql = "INSERT INTO users (full_name, email, password, role, plan, is_authorized, country, whatsapp_number) VALUES (%s, %s, %s, %s, %s, 1, 'co', %s)"
+        cursor.execute(sql, (name, email, hashed_password, role, plan, whatsapp_number))
         conn.commit()
         new_id = cursor.lastrowid
         cursor.close()

@@ -37,6 +37,7 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
     role: str
+    whatsapp_number: Optional[str] = None
 
 # --- Security Utilities ---
 def verify_password(plain_password, hashed_password):
@@ -181,8 +182,8 @@ def register(request: RegisterRequest, db = Depends(get_db)):
         # Natural persons are authorized by default, managers and agencies need approval
         is_authorized = 1 if request.role == 'NATURAL_PERSON' else 0
         cursor.execute(
-            "INSERT INTO users (email, password, role, full_name, country, is_authorized) VALUES (%s, %s, %s, %s, 'co', %s)",
-            (request.email, hashed_password, request.role, request.full_name, is_authorized)
+            "INSERT INTO users (email, password, role, full_name, country, is_authorized, whatsapp_number) VALUES (%s, %s, %s, %s, 'co', %s, %s)",
+            (request.email, hashed_password, request.role, request.full_name, is_authorized, request.whatsapp_number)
         )
     except mysql.connector.Error as err:
         cursor.close()
