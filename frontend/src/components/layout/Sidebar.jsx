@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutGrid, CalendarCheck, Users, Settings, LogOut, ChevronLeft, ChevronRight, Shield } from 'lucide-react';
 import { api } from '../../services/api';
@@ -40,8 +40,8 @@ const Sidebar = ({ role, userName }) => {
             <div style={{ width: '12px', height: '12px', background: 'var(--bg)', borderRadius: '3px' }} />
           </div>
           {!collapsed && (
-            <span style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
-              GlobalVisas
+            <span style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--text-1)', letterSpacing: '-0.02em', lineHeight: 1 }}>
+              AdelantaVisa
             </span>
           )}
         </div>

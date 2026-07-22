@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from .routes import auth, appointments, users, admin, notifications, documents, webhooks
 
-app = FastAPI(title="GlobalVisas API")
+app = FastAPI(title="AdelantaVisa API")
 
 # Configure CORS for the frontend
 app.add_middleware(
@@ -42,4 +42,4 @@ app.include_router(webhooks.router, prefix="/api/webhooks", tags=["Webhooks"])
 
 @app.get("/api/health")
 def health_check():
-    return {"status": "ok", "message": "GlobalVisas API is running"}
+    return {"status": "ok", "message": "AdelantaVisa API is running"}

@@ -40,7 +40,7 @@ const SettingsPage = () => {
   const [cfg, setCfg] = useState({
     twoFA: true, auditLogs: true,
     emailNotifs: true, telegramNotifs: true,
-    appName: 'GlobalVisas Portal', supportEmail: 'soporte@globalvisas.com',
+    appName: 'AdelantaVisa Portal', supportEmail: 'soporte@adelantavisa.com',
   });
   const [saved, setSaved] = useState(false);
 

@@ -87,31 +87,154 @@ const OverviewPage = () => {
     const total = appointments.length;
     const aprobadas = appointments.filter(a => ['Adelantada', 'agendado'].includes(a.status)).length;
     const buscando = appointments.filter(a => ['pending', 'Buscando'].includes(a.status)).length;
+    
+    // Get the most recent appointment for the timeline
+    const latestApt = appointments.length > 0 ? appointments[0] : null;
+    const isSearching = latestApt && ['pending', 'Buscando'].includes(latestApt.status);
+    const isSecured = latestApt && ['Adelantada', 'agendado'].includes(latestApt.status);
 
     return (
       <div className="animate-in" style={{ paddingBottom: '2rem' }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '1.75rem', fontFamily: 'var(--font-heading)', fontWeight: 700, margin: '0 0 0.25rem 0', color: 'var(--text-1)' }}>Hola, {userName || 'Cliente'} 👋</h1>
-          <p style={{ margin: 0, color: 'var(--text-2)', fontSize: '0.95rem' }}>Bienvenido a tu panel de control de GlobalVisas.</p>
+        <style>{`
+          @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(204, 255, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0); }
+          }
+          .glass-card {
+            background: linear-gradient(145deg, rgba(30, 30, 30, 0.6), rgba(20, 20, 20, 0.8));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+          }
+          .glass-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+          }
+          .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+            border-color: rgba(204, 255, 0, 0.15);
+          }
+          .timeline-step {
+            position: relative;
+            padding-left: 2.5rem;
+            padding-bottom: 2rem;
+            border-left: 2px solid var(--border);
+          }
+          .timeline-step:last-child {
+            border-left-color: transparent;
+            padding-bottom: 0;
+          }
+          .timeline-step::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 0;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--bg);
+            border: 2px solid var(--text-3);
+            transition: all 0.3s ease;
+          }
+          .timeline-step.active::before {
+            background: var(--lime);
+            border-color: var(--lime);
+            box-shadow: 0 0 15px var(--lime);
+            animation: pulseGlow 2s infinite;
+          }
+          .timeline-step.completed::before {
+            background: var(--lime);
+            border-color: var(--lime);
+          }
+          .timeline-step.completed {
+            border-left-color: var(--lime);
+          }
+        `}</style>
+
+        <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <div>
+            <h1 style={{ fontSize: '2rem', fontFamily: 'var(--font-heading)', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'var(--text-1)', letterSpacing: '-0.02em' }}>
+              Hola, {userName || 'Cliente'} <span style={{ display: 'inline-block', animation: 'wave 2s infinite transform-origin-bottom-right' }}>👋</span>
+            </h1>
+            <p style={{ margin: 0, color: 'var(--text-2)', fontSize: '1.05rem' }}>Bienvenido a tu panel de control de AdelantaVisa.</p>
+          </div>
+          {isSearching && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(204, 255, 0, 0.1)', padding: '0.75rem 1.25rem', borderRadius: '50px', border: '1px solid rgba(204, 255, 0, 0.2)' }}>
+              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--lime)', animation: 'pulseGlow 1.5s infinite' }} />
+              <span style={{ color: 'var(--lime)', fontWeight: 600, fontSize: '0.9rem', letterSpacing: '0.05em' }}>BOT ACTIVO 24/7</span>
+            </div>
+          )}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-          <StatCard label="Total de Trámites" value={total} icon={FileText} />
-          <StatCard label="Citas Aseguradas" value={aprobadas} icon={CheckCircle} />
-          <StatCard label="En Búsqueda Continua" value={buscando} icon={Search} />
-        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+          <div className="glass-card" style={{ padding: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <FileText size={24} color="var(--text-1)" />
+              </div>
+            </div>
+            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-1)', fontFamily: 'var(--font-heading)', lineHeight: 1 }}>{total}</div>
+            <div style={{ color: 'var(--text-2)', fontSize: '0.95rem', marginTop: '0.5rem', fontWeight: 500 }}>Total de Trámites</div>
+          </div>
 
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.5rem' }}>
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', color: 'var(--text-1)', fontWeight: 700 }}>Información Importante</h3>
-          <p style={{ color: 'var(--text-2)', fontSize: '0.9rem', lineHeight: '1.6', margin: '0 0 1rem 0' }}>
-            Puedes ver el progreso detallado y fechas de tus trámites en la pestaña de <strong>Citas</strong> en el menú lateral.
-          </p>
-          <div style={{ padding: '1rem', background: 'var(--surface-2)', borderRadius: '8px', borderLeft: '3px solid var(--lime)' }}>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-1)', lineHeight: '1.5' }}>
-              ℹ️ Si el estado de tu trámite es <strong>En Búsqueda Continua</strong>, nuestro sistema automatizado está intentando adelantar tu cita 24/7 en el consulado. Recibirás una notificación por WhatsApp cuando logremos reprogramarla con éxito hacia la fecha deseada.
-            </p>
+          <div className="glass-card" style={{ padding: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(204, 255, 0, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckCircle size={24} color="var(--lime)" />
+              </div>
+            </div>
+            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-1)', fontFamily: 'var(--font-heading)', lineHeight: 1 }}>{aprobadas}</div>
+            <div style={{ color: 'var(--text-2)', fontSize: '0.95rem', marginTop: '0.5rem', fontWeight: 500 }}>Citas Aseguradas</div>
+          </div>
+
+          <div className="glass-card" style={{ padding: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(168, 85, 247, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Search size={24} color="#a855f7" />
+              </div>
+            </div>
+            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-1)', fontFamily: 'var(--font-heading)', lineHeight: 1 }}>{buscando}</div>
+            <div style={{ color: 'var(--text-2)', fontSize: '0.95rem', marginTop: '0.5rem', fontWeight: 500 }}>En Búsqueda Continua</div>
           </div>
         </div>
+
+        {latestApt && (
+          <div className="glass-card" style={{ padding: '2rem' }}>
+            <h3 style={{ margin: '0 0 2rem 0', fontSize: '1.25rem', color: 'var(--text-1)', fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
+              Estado del Trámite Reciente
+            </h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="timeline-step completed">
+                <h4 style={{ margin: '0 0 0.25rem 0', color: 'var(--text-1)', fontSize: '1rem', fontWeight: 600 }}>Expediente Creado</h4>
+                <p style={{ margin: 0, color: 'var(--text-3)', fontSize: '0.85rem' }}>Tu trámite ha sido registrado en AdelantaVisa.</p>
+              </div>
+              <div className={`timeline-step ${isSecured || isSearching ? 'completed' : 'active'}`}>
+                <h4 style={{ margin: '0 0 0.25rem 0', color: 'var(--text-1)', fontSize: '1rem', fontWeight: 600 }}>Cita Original Programada</h4>
+                <p style={{ margin: 0, color: 'var(--text-3)', fontSize: '0.85rem' }}>Fecha base establecida en el consulado.</p>
+              </div>
+              <div className={`timeline-step ${isSecured ? 'completed' : (isSearching ? 'active' : '')}`}>
+                <h4 style={{ margin: '0 0 0.25rem 0', color: 'var(--text-1)', fontSize: '1rem', fontWeight: 600 }}>Búsqueda Inteligente (Bot)</h4>
+                <p style={{ margin: 0, color: 'var(--text-3)', fontSize: '0.85rem' }}>
+                  {isSecured ? 'Búsqueda finalizada con éxito.' : 'Monitoreando fechas canceladas 24/7 de forma automática.'}
+                </p>
+              </div>
+              <div className={`timeline-step ${isSecured ? 'active' : ''}`}>
+                <h4 style={{ margin: '0 0 0.25rem 0', color: 'var(--text-1)', fontSize: '1rem', fontWeight: 600 }}>Cita Adelantada 🎉</h4>
+                <p style={{ margin: 0, color: 'var(--text-3)', fontSize: '0.85rem' }}>
+                  {isSecured ? '¡Hemos logrado adelantar tu cita satisfactoriamente!' : 'A la espera de encontrar el espacio ideal.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

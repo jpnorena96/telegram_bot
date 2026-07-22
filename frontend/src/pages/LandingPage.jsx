@@ -407,7 +407,7 @@ const LandingPage = () => {
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "1.1rem", fontWeight: 800, marginBottom: "1rem", color: "var(--text-1)" }}>
                 <Globe size={20} color="var(--lime)" strokeWidth={2.5} />
-                GlobalVisas
+                AdelantaVisa
               </div>
               <p style={{ color: "var(--text-3)", fontSize: "0.9rem", lineHeight: 1.7 }}>
                 {t('footer.desc')}
@@ -427,9 +427,10 @@ const LandingPage = () => {
             </div>
             <div>
               <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>{t('footer.contact')}</div>
-              <div style={{ color: "var(--text-2)", fontSize: "0.9rem", lineHeight: 1.8 }}>
-                <div>Business Center</div>
-                <div>corp@globalvisas.com</div>
+              <div style={{ color: "var(--text-2)", fontSize: "0.95rem", lineHeight: "1.8" }}>
+                <div>+1 (555) 123-4567</div>
+                <div>contacto@adelantavisa.com</div>
+                <div>Lunes - Viernes, 9:00 - 18:00 EST</div>
                 <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", gap: "0.4rem", color: "var(--lime)", fontWeight: 600 }}>
                   <MessageCircle size={16} /> {t('footer.c_portal')}
                 </div>

@@ -64,6 +64,6 @@ async def notify_appointment_scheduled(phone_number: str, client_name: str, date
         f"✅ *CITA AGENDADA EXITOSAMENTE*\n\n"
         f"👤 *Solicitante:* {client_name}\n"
         f"📅 *Nueva Fecha:* {date}\n\n"
-        f"El sistema automático de GlobalVisas ha logrado adelantar esta cita. ¡Felicidades!"
+        f"El sistema automático de AdelantaVisa ha logrado adelantar esta cita. ¡Felicidades!"
     )
     return await send_whatsapp_message(phone_number, msg)

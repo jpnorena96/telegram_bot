@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { Globe, ArrowRight, ShieldCheck } from 'lucide-react';
@@ -36,7 +36,7 @@ const LoginPage = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }} onClick={() => navigate('/')}>
           <Globe size={28} color="var(--lime)" strokeWidth={2.5} />
           <span style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--text-1)' }}>
-            GlobalVisas
+            AdelantaVisa
           </span>
         </div>
 

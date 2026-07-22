@@ -22,12 +22,10 @@ const Navbar = () => {
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '72px' }}>
 
         {/* Logo */}
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
-          <div style={{ width: '28px', height: '28px', background: 'var(--text-1)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(255,255,255,0.2)' }}>
-            <div style={{ width: '12px', height: '12px', background: 'var(--bg)', borderRadius: '3px' }} />
-          </div>
-          <span style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.02em' }}>
-            GlobalVisas
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', zIndex: 100 }}>
+          <Globe size={24} color="var(--lime)" strokeWidth={2.5} />
+          <span style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--text-1)' }}>
+            AdelantaVisa
           </span>
         </Link>
 
