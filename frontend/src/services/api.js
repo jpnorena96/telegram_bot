@@ -59,6 +59,15 @@ export const api = {
     return handleResponse(response);
   },
 
+  async createUser(data) {
+    const response = await fetch(`${API_URL}/users/`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
   async updateUser(id, data) {
     const response = await fetch(`${API_URL}/users/${id}`, {
       method: 'PUT',

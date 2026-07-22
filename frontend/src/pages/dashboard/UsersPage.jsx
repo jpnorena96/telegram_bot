@@ -13,6 +13,8 @@ const ROLE_TAG = {
   NATURAL_PERSON:{ cls: 'tag-lime',   short: 'CLI' },
 };
 
+import UserModal from './UserModal';
+
 const UsersPage = () => {
   const { t } = useTranslation();
   const { role } = useOutletContext();
@@ -24,6 +26,8 @@ const UsersPage = () => {
   const [statusF, setStatusF] = useState('ALL');
   const [sortF, setSortF] = useState('id');
   const [sortD, setSortD] = useState('desc');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
 
   const isAdmin = role === 'ADMINISTRATOR';
 
@@ -102,7 +106,7 @@ const UsersPage = () => {
           <button className="btn btn-sm" onClick={load} style={{ gap: '0.4rem' }}>
             <RefreshCw size={11} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />SYNC
           </button>
-          {isAdmin && <button className="btn btn-sm btn-lime"><UserPlus size={11} /> NUEVO</button>}
+          {isAdmin && <button className="btn btn-sm btn-lime" onClick={() => { setEditingUser(null); setModalOpen(true); }}><UserPlus size={11} /> NUEVO</button>}
         </div>
       </div>
 
@@ -208,6 +212,9 @@ const UsersPage = () => {
                                   <CheckCircle size={11} />
                                 </button>
                               )}
+                              <button className="btn btn-sm" onClick={() => { setEditingUser(u); setModalOpen(true); }} title="Editar">
+                                <Edit size={11} />
+                              </button>
                               <button className="btn btn-sm" onClick={() => handleDelete(u.id)} style={{ color: '#F87171' }} title="Eliminar">
                                 <Trash2 size={11} />
                               </button>
@@ -232,7 +239,15 @@ const UsersPage = () => {
             </div>
           </div>
         )}
+        )}
       </div>
+
+      <UserModal 
+        isOpen={modalOpen} 
+        onClose={() => setModalOpen(false)} 
+        user={editingUser} 
+        onSuccess={load} 
+      />
     </div>
   );
 };

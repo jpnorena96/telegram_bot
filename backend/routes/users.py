@@ -20,7 +20,7 @@ def get_users(current_user: dict = Depends(get_current_user), db = Depends(get_d
         
     cursor = db.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT id, email, role, full_name, is_authorized FROM users ORDER BY id DESC")
+        cursor.execute("SELECT id, email, role, full_name, is_authorized, plan, whatsapp_number FROM users ORDER BY id DESC")
     except mysql.connector.Error:
         # Fallback if DB not migrated yet
         cursor.execute("SELECT id, email, is_authorized FROM users ORDER BY id DESC")
@@ -36,10 +36,36 @@ def get_users(current_user: dict = Depends(get_current_user), db = Depends(get_d
             "name": u.get("full_name", u["email"].split('@')[0]),
             "email": u["email"],
             "role": u.get("role", "NATURAL_PERSON"),
-            "status": "Activo" if u["is_authorized"] else "Pendiente"
+            "status": "Activo" if u["is_authorized"] else "Pendiente",
+            "plan": u.get("plan", "platino"),
+            "whatsapp_number": u.get("whatsapp_number", "")
         })
         
     return formatted_users
+
+@router.post("/")
+def create_user(data: dict, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    role = current_user["roles"][0]
+    if role != "ADMINISTRATOR":
+        raise HTTPException(status_code=403, detail="Only administrators can create users")
+    
+    from backend.routes.auth import get_password_hash
+    hashed_password = get_password_hash(data.get("password", ""))
+    
+    cursor = db.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO users (full_name, email, password, role, is_authorized, plan, country, whatsapp_number) VALUES (%s, %s, %s, %s, %s, %s, 'co', %s)",
+            (data.get("full_name"), data.get("email"), hashed_password, data.get("role", "NATURAL_PERSON"), 1 if data.get("is_authorized") else 0, data.get("plan", "platino"), data.get("whatsapp_number"))
+        )
+        db.commit()
+        new_id = cursor.lastrowid
+    except mysql.connector.Error as err:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Error creating user: {err}")
+    finally:
+        cursor.close()
+    return {"status": "ok", "id": new_id}
 
 @router.put("/{user_id}")
 def update_user(user_id: int, data: dict, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
@@ -48,11 +74,37 @@ def update_user(user_id: int, data: dict, current_user: dict = Depends(get_curre
         raise HTTPException(status_code=403, detail="Only administrators can update users")
         
     cursor = db.cursor()
-    if "is_authorized" in data:
-        auth_val = 1 if data["is_authorized"] else 0
-        cursor.execute("UPDATE users SET is_authorized = %s WHERE id = %s", (auth_val, user_id))
+    fields = []
+    vals = []
     
-    db.commit()
+    if "is_authorized" in data:
+        fields.append("is_authorized = %s")
+        vals.append(1 if data["is_authorized"] else 0)
+    if "full_name" in data:
+        fields.append("full_name = %s")
+        vals.append(data["full_name"])
+    if "email" in data:
+        fields.append("email = %s")
+        vals.append(data["email"])
+    if "role" in data:
+        fields.append("role = %s")
+        vals.append(data["role"])
+    if "plan" in data:
+        fields.append("plan = %s")
+        vals.append(data["plan"])
+    if "whatsapp_number" in data:
+        fields.append("whatsapp_number = %s")
+        vals.append(data["whatsapp_number"])
+    if "password" in data and data["password"].strip():
+        from backend.routes.auth import get_password_hash
+        fields.append("password = %s")
+        vals.append(get_password_hash(data["password"]))
+        
+    if fields:
+        vals.append(user_id)
+        cursor.execute(f"UPDATE users SET {', '.join(fields)} WHERE id = %s", vals)
+        db.commit()
+    
     cursor.close()
     return {"status": "ok"}
 
