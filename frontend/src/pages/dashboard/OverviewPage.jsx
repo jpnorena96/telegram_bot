@@ -83,7 +83,7 @@ const OverviewPage = () => {
   }, [role]);
 
   if (!isAdmin) {
-    if (loading) return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-3)' }}>Cargando resumen...</div>;
+    if (loading) return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-3)' }}>Cargando panel...</div>;
     const total = appointments.length;
     const aprobadas = appointments.filter(a => ['Adelantada', 'agendado'].includes(a.status)).length;
     const buscando = appointments.filter(a => ['pending', 'Buscando'].includes(a.status)).length;
@@ -94,147 +94,196 @@ const OverviewPage = () => {
     const isSecured = latestApt && ['Adelantada', 'agendado'].includes(latestApt.status);
 
     return (
-      <div className="animate-in" style={{ paddingBottom: '2rem' }}>
+      <div className="animate-in" style={{ paddingBottom: '3rem', maxWidth: '1000px', margin: '0 auto' }}>
         <style>{`
-          @keyframes pulseGlow {
-            0% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(204, 255, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0); }
+          .corp-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
           }
-          .glass-card {
-            background: linear-gradient(145deg, rgba(30, 30, 30, 0.6), rgba(20, 20, 20, 0.8));
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          .corp-stat {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+          .corp-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-2);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+          .corp-stat-value {
+            font-size: 2rem;
+            color: var(--text-1);
+            font-weight: 600;
+            font-family: var(--font-heading);
+            line-height: 1;
+          }
+          
+          /* Formal Timeline */
+          .corp-timeline {
+            display: flex;
+            flex-direction: column;
+            margin-top: 1.5rem;
+          }
+          .corp-timeline-item {
             position: relative;
-            overflow: hidden;
-          }
-          .glass-card::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-          }
-          .glass-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
-            border-color: rgba(204, 255, 0, 0.15);
-          }
-          .timeline-step {
-            position: relative;
-            padding-left: 2.5rem;
+            padding-left: 2rem;
             padding-bottom: 2rem;
-            border-left: 2px solid var(--border);
+            border-left: 1px solid var(--border-2);
           }
-          .timeline-step:last-child {
+          .corp-timeline-item:last-child {
             border-left-color: transparent;
             padding-bottom: 0;
           }
-          .timeline-step::before {
+          .corp-timeline-item::before {
             content: '';
             position: absolute;
-            left: -8px;
-            top: 0;
-            width: 14px;
-            height: 14px;
+            left: -5px;
+            top: 2px;
+            width: 9px;
+            height: 9px;
             border-radius: 50%;
-            background: var(--bg);
-            border: 2px solid var(--text-3);
-            transition: all 0.3s ease;
+            background: var(--surface);
+            border: 2px solid var(--border-2);
           }
-          .timeline-step.active::before {
-            background: var(--lime);
-            border-color: var(--lime);
-            box-shadow: 0 0 15px var(--lime);
-            animation: pulseGlow 2s infinite;
-          }
-          .timeline-step.completed::before {
+          .corp-timeline-item.completed::before {
             background: var(--lime);
             border-color: var(--lime);
           }
-          .timeline-step.completed {
+          .corp-timeline-item.active::before {
+            background: var(--surface);
+            border-color: var(--lime);
+            border-width: 3px;
+          }
+          .corp-timeline-item.completed {
             border-left-color: var(--lime);
+          }
+          .corp-timeline-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-1);
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
+          }
+          .corp-timeline-desc {
+            font-size: 0.85rem;
+            color: var(--text-2);
+            line-height: 1.5;
           }
         `}</style>
 
-        <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-          <div>
-            <h1 style={{ fontSize: '2rem', fontFamily: 'var(--font-heading)', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'var(--text-1)', letterSpacing: '-0.02em' }}>
-              Hola, {userName || 'Cliente'} <span style={{ display: 'inline-block', animation: 'wave 2s infinite transform-origin-bottom-right' }}>👋</span>
-            </h1>
-            <p style={{ margin: 0, color: 'var(--text-2)', fontSize: '1.05rem' }}>Bienvenido a tu panel de control de AdelantaVisa.</p>
-          </div>
-          {isSearching && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(204, 255, 0, 0.1)', padding: '0.75rem 1.25rem', borderRadius: '50px', border: '1px solid rgba(204, 255, 0, 0.2)' }}>
-              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--lime)', animation: 'pulseGlow 1.5s infinite' }} />
-              <span style={{ color: 'var(--lime)', fontWeight: 600, fontSize: '0.9rem', letterSpacing: '0.05em' }}>BOT ACTIVO 24/7</span>
-            </div>
-          )}
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-          <div className="glass-card" style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <FileText size={24} color="var(--text-1)" />
-              </div>
-            </div>
-            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-1)', fontFamily: 'var(--font-heading)', lineHeight: 1 }}>{total}</div>
-            <div style={{ color: 'var(--text-2)', fontSize: '0.95rem', marginTop: '0.5rem', fontWeight: 500 }}>Total de Trámites</div>
-          </div>
-
-          <div className="glass-card" style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(204, 255, 0, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CheckCircle size={24} color="var(--lime)" />
-              </div>
-            </div>
-            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-1)', fontFamily: 'var(--font-heading)', lineHeight: 1 }}>{aprobadas}</div>
-            <div style={{ color: 'var(--text-2)', fontSize: '0.95rem', marginTop: '0.5rem', fontWeight: 500 }}>Citas Aseguradas</div>
-          </div>
-
-          <div className="glass-card" style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(168, 85, 247, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Search size={24} color="#a855f7" />
-              </div>
-            </div>
-            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-1)', fontFamily: 'var(--font-heading)', lineHeight: 1 }}>{buscando}</div>
-            <div style={{ color: 'var(--text-2)', fontSize: '0.95rem', marginTop: '0.5rem', fontWeight: 500 }}>En Búsqueda Continua</div>
-          </div>
-        </div>
-
-        {latestApt && (
-          <div className="glass-card" style={{ padding: '2rem' }}>
-            <h3 style={{ margin: '0 0 2rem 0', fontSize: '1.25rem', color: 'var(--text-1)', fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
-              Estado del Trámite Reciente
-            </h3>
-            
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div className="timeline-step completed">
-                <h4 style={{ margin: '0 0 0.25rem 0', color: 'var(--text-1)', fontSize: '1rem', fontWeight: 600 }}>Expediente Creado</h4>
-                <p style={{ margin: 0, color: 'var(--text-3)', fontSize: '0.85rem' }}>Tu trámite ha sido registrado en AdelantaVisa.</p>
-              </div>
-              <div className={`timeline-step ${isSecured || isSearching ? 'completed' : 'active'}`}>
-                <h4 style={{ margin: '0 0 0.25rem 0', color: 'var(--text-1)', fontSize: '1rem', fontWeight: 600 }}>Cita Original Programada</h4>
-                <p style={{ margin: 0, color: 'var(--text-3)', fontSize: '0.85rem' }}>Fecha base establecida en el consulado.</p>
-              </div>
-              <div className={`timeline-step ${isSecured ? 'completed' : (isSearching ? 'active' : '')}`}>
-                <h4 style={{ margin: '0 0 0.25rem 0', color: 'var(--text-1)', fontSize: '1rem', fontWeight: 600 }}>Búsqueda Inteligente (Bot)</h4>
-                <p style={{ margin: 0, color: 'var(--text-3)', fontSize: '0.85rem' }}>
-                  {isSecured ? 'Búsqueda finalizada con éxito.' : 'Monitoreando fechas canceladas 24/7 de forma automática.'}
-                </p>
-              </div>
-              <div className={`timeline-step ${isSecured ? 'active' : ''}`}>
-                <h4 style={{ margin: '0 0 0.25rem 0', color: 'var(--text-1)', fontSize: '1rem', fontWeight: 600 }}>Cita Adelantada 🎉</h4>
-                <p style={{ margin: 0, color: 'var(--text-3)', fontSize: '0.85rem' }}>
-                  {isSecured ? '¡Hemos logrado adelantar tu cita satisfactoriamente!' : 'A la espera de encontrar el espacio ideal.'}
-                </p>
-              </div>
-            </div>
+        {/* Global Status Banner (Minimalist) */}
+        {isSearching && (
+          <div style={{ background: 'rgba(79, 70, 229, 0.05)', border: '1px solid var(--lime-glow)', borderRadius: '6px', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--lime)' }} />
+            <span style={{ fontSize: '0.9rem', color: 'var(--text-1)', fontWeight: 500 }}>
+              El sistema automatizado está operando activamente en la búsqueda de espacios consulares para su trámite.
+            </span>
           </div>
         )}
+
+        {/* Header */}
+        <div style={{ marginBottom: '2.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '1.5rem' }}>
+          <h1 style={{ fontSize: '1.75rem', fontFamily: 'var(--font-heading)', fontWeight: 600, margin: '0 0 0.25rem 0', color: 'var(--text-1)', letterSpacing: '-0.01em' }}>
+            Resumen de Cuenta
+          </h1>
+          <p style={{ margin: 0, color: 'var(--text-2)', fontSize: '0.95rem' }}>
+            Bienvenido, {userName || 'Cliente'}. Revise el estado general de sus procesos migratorios.
+          </p>
+        </div>
+
+        {/* KPIs Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+          <div className="corp-card corp-stat">
+            <span className="corp-stat-label">Trámites Activos</span>
+            <span className="corp-stat-value">{total}</span>
+          </div>
+          <div className="corp-card corp-stat">
+            <span className="corp-stat-label">Citas Aseguradas</span>
+            <span className="corp-stat-value">{aprobadas}</span>
+          </div>
+          <div className="corp-card corp-stat">
+            <span className="corp-stat-label">En Progreso</span>
+            <span className="corp-stat-value">{buscando}</span>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
+          
+          {/* Tracking Panel */}
+          {latestApt ? (
+            <div className="corp-card" style={{ padding: '2rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-1)', marginBottom: '0.5rem', fontFamily: 'var(--font-ui)' }}>
+                Seguimiento de Trámite
+              </h3>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-2)', margin: 0 }}>
+                Expediente: <span style={{ fontFamily: 'var(--font-mono)' }}>#{latestApt.id || '0000'}</span>
+              </p>
+              
+              <div className="corp-timeline">
+                <div className="corp-timeline-item completed">
+                  <div className="corp-timeline-title">Apertura de Expediente</div>
+                  <div className="corp-timeline-desc">Documentación inicial recibida y validada.</div>
+                </div>
+                
+                <div className={`corp-timeline-item ${isSecured || isSearching ? 'completed' : 'active'}`}>
+                  <div className="corp-timeline-title">Programación Consular Base</div>
+                  <div className="corp-timeline-desc">Asignación de fecha original en el sistema.</div>
+                </div>
+                
+                <div className={`corp-timeline-item ${isSecured ? 'completed' : (isSearching ? 'active' : '')}`}>
+                  <div className="corp-timeline-title">Ejecución Automatizada</div>
+                  <div className="corp-timeline-desc">
+                    {isSecured 
+                      ? 'Algoritmo finalizó la búsqueda exitosamente.' 
+                      : 'Nuestros servidores monitorean la disponibilidad consular de manera ininterrumpida.'}
+                  </div>
+                </div>
+                
+                <div className={`corp-timeline-item ${isSecured ? 'completed' : ''}`}>
+                  <div className="corp-timeline-title">Reprogramación Exitosa</div>
+                  <div className="corp-timeline-desc">
+                    {isSecured 
+                      ? 'Cita adelantada y asegurada firmemente.' 
+                      : 'Esperando asignación de espacio óptimo.'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="corp-card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '300px' }}>
+              <FileText size={32} color="var(--border-2)" style={{ marginBottom: '1rem' }} />
+              <p style={{ color: 'var(--text-2)', fontSize: '0.95rem' }}>No hay trámites registrados en su cuenta.</p>
+            </div>
+          )}
+
+          {/* Info Panel */}
+          <div>
+            <div className="corp-card" style={{ padding: '2rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-1)', marginBottom: '1rem', fontFamily: 'var(--font-ui)' }}>
+                Directrices Operativas
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-2)', lineHeight: 1.6, margin: 0 }}>
+                  La plataforma AdelantaVisa automatiza el monitoreo de citas consulares mediante infraestructura dedicada. 
+                  Para consultar el desglose preciso de fechas y horas asignadas, diríjase al módulo de <strong>Citas</strong> en el panel de navegación izquierdo.
+                </p>
+                <div style={{ padding: '1rem', background: 'var(--surface-2)', borderRadius: '6px', borderLeft: '3px solid var(--border-2)' }}>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-2)', lineHeight: 1.5, margin: 0 }}>
+                    <strong>Aviso de Notificaciones:</strong><br />
+                    Toda actualización crítica respecto al estatus de su cita será notificada de inmediato a través del canal oficial de WhatsApp registrado en su expediente.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
     );
   }
