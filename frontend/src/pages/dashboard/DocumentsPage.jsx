@@ -33,6 +33,7 @@ const DocumentsPage = () => {
   const isAgency = role === 'TRAVEL_AGENCY';
   const isClient = role === 'NATURAL_PERSON' || role === 'TRAVEL_AGENCY';
   const canEdit = role !== 'AUDITOR';
+  const canCreate = (role === 'NATURAL_PERSON' && processes.length === 0) || role !== 'NATURAL_PERSON';
 
   // State variables
   const [processes, setProcesses] = useState([]);
@@ -320,7 +321,7 @@ const DocumentsPage = () => {
           <button className="btn btn-sm" onClick={loadProcesses}>
             <RefreshCw size={11} style={{ animation: loading ? 'spin 1.5s linear infinite' : 'none' }} /> SYNC
           </button>
-          {canEdit && !showCreator && !selectedProcess && (
+          {canEdit && canCreate && !showCreator && !selectedProcess && (
             <button className="btn btn-sm btn-lime" onClick={() => setShowCreator(true)}>
               <Plus size={11} /> NUEVO TRÁMITE
             </button>
