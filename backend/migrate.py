@@ -36,12 +36,13 @@ def migrate():
                 
         # Create visa_processes table
         print("Creating 'visa_processes' table...")
-        cursor.execute("""
             CREATE TABLE IF NOT EXISTS visa_processes (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
-                client_email VARCHAR(255) NOT NULL,
+                client_email VARCHAR(255) NULL,
                 type VARCHAR(50) NOT NULL,
+                target_country VARCHAR(100) NOT NULL DEFAULT 'Estados Unidos',
+                visa_category VARCHAR(100) NOT NULL DEFAULT 'B1/B2',
                 status VARCHAR(50) NOT NULL DEFAULT 'En Progreso',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

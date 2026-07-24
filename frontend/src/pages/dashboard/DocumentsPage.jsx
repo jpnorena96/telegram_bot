@@ -33,18 +33,22 @@ const DocumentsPage = () => {
   const isAgency = role === 'TRAVEL_AGENCY';
   const isClient = role === 'NATURAL_PERSON' || role === 'TRAVEL_AGENCY';
   const canEdit = role !== 'AUDITOR';
-  const canCreate = (role === 'NATURAL_PERSON' && processes.length === 0) || role !== 'NATURAL_PERSON';
 
   // State variables
   const [processes, setProcesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProcess, setSelectedProcess] = useState(null);
   const [activeApplicantId, setActiveApplicantId] = useState(null);
+
+  const canCreate = (role === 'NATURAL_PERSON' && processes.length === 0) || role !== 'NATURAL_PERSON';
   
   // Creator states
   const [showCreator, setShowCreator] = useState(false);
   const [newProcessType, setNewProcessType] = useState('individual'); // 'individual' | 'familiar'
   const [newClientEmail, setNewClientEmail] = useState('');
+  const [newTargetCountry, setNewTargetCountry] = useState('Estados Unidos');
+  const [newVisaCategory, setNewVisaCategory] = useState('B1/B2');
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [newApplicants, setNewApplicants] = useState([{ full_name: '', relationship: 'primary', passport_number: '', ds160_confirmation: '' }]);
   const [creating, setCreating] = useState(false);
   
@@ -111,22 +115,28 @@ const DocumentsPage = () => {
     if (e) e.preventDefault();
     
     // Validations
-    if ((isAgency || isAdmin) && !newClientEmail) {
+    if ((isAgency || isAdmin) && !isAnonymous && !newClientEmail) {
       toast.error('Por favor escribe el email del cliente');
       return;
     }
     
     const primaryName = newApplicants[0].full_name;
-    if (!primaryName) {
+    if (!isAnonymous && !primaryName) {
       toast.error('Por favor ingresa el nombre del solicitante principal');
+      return;
+    }
+    if (isAnonymous && !newApplicants[0].full_name) {
+      toast.error('Por favor ingresa un código o alias para el cliente');
       return;
     }
 
     setCreating(true);
     try {
       const payload = {
-        client_email: newClientEmail,
+        client_email: isAnonymous ? null : newClientEmail,
         type: newProcessType,
+        target_country: newTargetCountry,
+        visa_category: newVisaCategory,
         applicants: newApplicants.map(a => ({
           ...a,
           relationship: a.relationship || 'primary'
@@ -139,6 +149,9 @@ const DocumentsPage = () => {
         setShowCreator(false);
         // Reset state
         setNewClientEmail('');
+        setNewTargetCountry('Estados Unidos');
+        setNewVisaCategory('B1/B2');
+        setIsAnonymous(false);
         setNewProcessType('individual');
         setNewApplicants([{ full_name: '', relationship: 'primary', passport_number: '', ds160_confirmation: '' }]);
         // Reload list
@@ -357,27 +370,50 @@ const DocumentsPage = () => {
 
               {/* Email del Cliente (Solo Agencias / Admin) */}
               {(isAgency || isAdmin) && (
-                <div className="input-group" style={{ marginBottom: 0 }}>
-                  <label className="input-label">EMAIL DEL CLIENTE</label>
-                  <input className="input-field" type="email" placeholder="cliente@correo.com" value={newClientEmail} onChange={e => setNewClientEmail(e.target.value)} required />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {isAgency && (
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.8rem', color: 'var(--lime)', fontWeight: 600 }}>
+                      <input type="checkbox" checked={isAnonymous} onChange={(e) => setIsAnonymous(e.target.checked)} style={{ accentColor: 'var(--lime)' }} />
+                      Proteger Privacidad del Cliente (Anónimo)
+                    </label>
+                  )}
+                  {!isAnonymous && (
+                    <div className="input-group" style={{ marginBottom: 0 }}>
+                      <label className="input-label">EMAIL DEL CLIENTE</label>
+                      <input className="input-field" type="email" placeholder="cliente@correo.com" value={newClientEmail} onChange={e => setNewClientEmail(e.target.value)} required />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">PAÍS DESTINO</label>
+                <input className="input-field" type="text" placeholder="Ej. Estados Unidos, Canadá" value={newTargetCountry} onChange={e => setNewTargetCountry(e.target.value)} required />
+              </div>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">TIPO / CATEGORÍA DE VISA</label>
+                <input className="input-field" type="text" placeholder="Ej. Turismo (B1/B2), Estudiante" value={newVisaCategory} onChange={e => setNewVisaCategory(e.target.value)} required />
+              </div>
+            </div>
+
             {/* Solicitante Principal */}
             <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
-              <div style={{ fontSize: '0.78rem', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--lime)', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>SOLICITANTE PRINCIPAL (TITULAR DE LA CITA)</div>
+              <div style={{ fontSize: '0.78rem', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--lime)', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>
+                {isAnonymous ? 'ALIAS DEL CLIENTE (PARA CONTROL INTERNO)' : 'SOLICITANTE PRINCIPAL (TITULAR DE LA CITA)'}
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                 <div className="input-group" style={{ marginBottom: 0 }}>
-                  <label className="input-label">Nombre Completo</label>
-                  <input className="input-field" type="text" placeholder="Ej. Alexis Alcedo" value={newApplicants[0].full_name} onChange={e => handleApplicantFieldChange(0, 'full_name', e.target.value)} required />
+                  <label className="input-label">{isAnonymous ? 'Código o Alias' : 'Nombre Completo'}</label>
+                  <input className="input-field" type="text" placeholder={isAnonymous ? "Ej. CLI-1234" : "Ej. Alexis Alcedo"} value={newApplicants[0].full_name} onChange={e => handleApplicantFieldChange(0, 'full_name', e.target.value)} required />
                 </div>
                 <div className="input-group" style={{ marginBottom: 0 }}>
                   <label className="input-label">Nro de Pasaporte (Opcional)</label>
                   <input className="input-field" type="text" placeholder="Ej. AP123456" value={newApplicants[0].passport_number} onChange={e => handleApplicantFieldChange(0, 'passport_number', e.target.value)} />
                 </div>
                 <div className="input-group" style={{ marginBottom: 0 }}>
-                  <label className="input-label">ID Confirmación DS-160 (Opcional)</label>
+                  <label className="input-label">ID Confirmación (Opcional)</label>
                   <input className="input-field" type="text" placeholder="Ej. AA00AA00AA" value={newApplicants[0].ds160_confirmation} onChange={e => handleApplicantFieldChange(0, 'ds160_confirmation', e.target.value)} />
                 </div>
               </div>
@@ -526,9 +562,18 @@ const DocumentsPage = () => {
                   EXPEDIENTE #{String(selectedProcess.process.id).padStart(4, '0')} · {selectedProcess.process.type === 'familiar' ? 'GRUPO FAMILIAR' : 'INDIVIDUAL'}
                 </span>
               </div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginTop: '0.5rem', color: 'var(--text-1)' }}>
-                Documentos de {selectedProcess.process.client_email}
-              </h3>
+              <div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-1)' }}>
+                  {selectedProcess.process.type === 'individual' ? 'Trámite Individual' : 'Trámite Familiar'}
+                </h2>
+                <div style={{ fontSize: '0.875rem', color: 'var(--text-2)' }}>
+                  Email: {selectedProcess.process.client_email || 'Oculto (Modo Anónimo)'}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-3)', display: 'flex', gap: '1rem', marginTop: '0.25rem' }}>
+                  <span>País: <strong>{selectedProcess.process.target_country}</strong></span>
+                  <span>Visa: <strong>{selectedProcess.process.visa_category}</strong></span>
+                </div>
+              </div>
             </div>
             
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>

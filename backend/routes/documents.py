@@ -19,8 +19,10 @@ class ApplicantSchema(BaseModel):
     ds160_confirmation: Optional[str] = None
 
 class CreateProcessRequest(BaseModel):
-    client_email: str
+    client_email: Optional[str] = None
     type: str  # 'individual' or 'familiar'
+    target_country: str = 'Estados Unidos'
+    visa_category: str = 'B1/B2'
     applicants: List[ApplicantSchema]
 
 class UpdateDocumentStatusRequest(BaseModel):
@@ -130,20 +132,27 @@ def get_process_details(process_id: int, current_user: dict = Depends(get_curren
 
 @router.post("/processes")
 def create_process(req: CreateProcessRequest, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
-    cursor = db.cursor()
+    # Validations for client emails
     role = current_user["roles"][0]
-    
-    # For clients, force the client_email to be their own user email
-    client_email = req.client_email
-    if role not in ["ADMINISTRATOR", "TRAVEL_AGENCY"]:
-        client_email = current_user["email"]
+    if role == "NATURAL_PERSON" and not req.client_email:
+        req.client_email = current_user["email"]
         
+    cursor = db.cursor(dictionary=True)
+    
+    # Enforce 1 process rule for NATURAL_PERSON
+    if role == "NATURAL_PERSON":
+        cursor.execute("SELECT COUNT(*) as cnt FROM visa_processes WHERE user_id = %s", (current_user["id"],))
+        res = cursor.fetchone()
+        if res and res["cnt"] > 0:
+            cursor.close()
+            raise HTTPException(status_code=400, detail="Solo puedes tener un expediente activo como cliente.")
+
     try:
         # 1. Insert visa process
         cursor.execute("""
-            INSERT INTO visa_processes (user_id, client_email, type, status)
-            VALUES (%s, %s, %s, 'En Progreso')
-        """, (current_user["id"], client_email, req.type))
+            INSERT INTO visa_processes (user_id, client_email, type, target_country, visa_category, status)
+            VALUES (%s, %s, %s, %s, %s, 'En Progreso')
+        """, (current_user["id"], req.client_email, req.type, req.target_country, req.visa_category))
         process_id = cursor.lastrowid
         
         # 2. Insert applicants
