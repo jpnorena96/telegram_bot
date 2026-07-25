@@ -572,13 +572,13 @@ const CreateWizard = ({ onClose, onCreated }) => {
                     <CheckCircle2 size={32} />
                   </div>
                   <div>
-                    <h4 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-1)' }}>¡Agente Desplegado con Éxito!</h4>
+                    <h4 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-1)' }}>Agendamiento Creado con Éxito!</h4>
                     <p style={{ fontSize: '0.82rem', color: 'var(--text-3)', marginTop: '0.35rem', maxWidth: '460px', margin: '0.35rem auto 0' }}>El script del agendamiento ha sido creado e inicializado correctamente en el servidor mediante el gestor de procesos PM2.</p>
                   </div>
 
                   <div style={{ width: '100%', maxWidth: '420px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '0.875rem', marginTop: '0.5rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>PROCESO PM2:</span>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>PROCESO:</span>
                       <span style={{ fontSize: '0.75rem', color: 'var(--lime)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>ACTIVO (ONLINE)</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -748,6 +748,19 @@ const AppointmentsPage = () => {
 
   const statuses = ['ALL', ...new Set(apts.map(a => a.status).filter(Boolean))];
 
+  const handleDelete = async (id) => {
+    if (!window.confirm(t('dashboard.appointments.confirm_delete') || '¿Estás seguro de que deseas eliminar este agendamiento?')) return;
+    try {
+      const res = await api.deleteAppointment(id);
+      if (res.status === 'ok') {
+        toast.success(res.message || 'Agendamiento eliminado');
+        load();
+      }
+    } catch (error) {
+      toast.error(error.message || 'Error al eliminar el agendamiento');
+    }
+  };
+
   if (isCreating) {
     return (
       <CreateWizard
@@ -872,7 +885,7 @@ const AppointmentsPage = () => {
                 <th onClick={() => toggleSort('client')} style={{ cursor: 'pointer' }}>CLIENTE <SortIco f="client" /></th>
                 <th onClick={() => toggleSort('schedule_id')} style={{ cursor: 'pointer' }}>SCHEDULE_ID <SortIco f="schedule_id" /></th>
                 <th>TIPO_VISA</th>
-                <th onClick={() => toggleSort('originalDate')} style={{ cursor: 'pointer' }}>FECHA_OBJ <SortIco f="originalDate" /></th>
+                <th onClick={() => toggleSort('originalDate')} style={{ cursor: 'pointer' }}>FECHAS (OBJ / ASIGNADAS) <SortIco f="originalDate" /></th>
                 <th>{t('dashboard.appointments.status')}</th>
                 {canEdit && <th>OPS</th>}
               </tr>
@@ -924,13 +937,30 @@ const AppointmentsPage = () => {
                         </td>
                         <td className="mono" style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>{apt.schedule_id || '—'}</td>
                         <td className="mono" style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>{apt.type}</td>
-                        <td className="mono" style={{ fontSize: '0.78rem', color: 'var(--text-2)' }}>{apt.originalDate || '—'}</td>
+                        <td className="mono" style={{ fontSize: '0.78rem', color: 'var(--text-2)' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                            <span style={{ color: 'var(--text-3)' }}>Obj: {apt.originalDate || '—'}</span>
+                            {apt.assigned_consulate_date && (
+                              <span style={{ color: 'var(--lime)', fontWeight: 600 }}>C: {apt.assigned_consulate_date.substring(0, 10)}</span>
+                            )}
+                            {apt.assigned_cas_date && (
+                              <span style={{ color: 'var(--lime)', fontWeight: 600 }}>CAS: {apt.assigned_cas_date.substring(0, 10)}</span>
+                            )}
+                          </div>
+                        </td>
                         <td><span className={`tag ${tag}`}>{label}</span></td>
                         {canEdit && (
-                          <td>
-                            <button className="btn btn-sm" onClick={() => setSelected(apt)} style={{ gap: '0.3rem' }}>
-                              <Eye size={11} /> VER
-                            </button>
+                          <td style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'flex-end' }}>
+                              <button onClick={() => { setSelected(apt); setMode('view'); }} className="btn btn-icon btn-sm" title={t('dashboard.appointments.view_details')}>
+                                <Eye size={14} />
+                              </button>
+                              {apt.status !== 'agendado' && (
+                                <button onClick={() => handleDelete(apt.id)} className="btn btn-icon btn-sm" style={{ color: '#F87171' }} title="Eliminar agendamiento">
+                                  <Trash2 size={14} />
+                                </button>
+                              )}
+                            </div>
                           </td>
                         )}
                       </tr>

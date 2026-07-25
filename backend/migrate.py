@@ -36,6 +36,7 @@ def migrate():
                 
         # Create visa_processes table
         print("Creating 'visa_processes' table...")
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS visa_processes (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
@@ -94,6 +95,18 @@ def migrate():
             if "Unknown column" in str(err):
                 print("Adding 'schedule_names' column to 'user_appointments' table...")
                 cursor.execute("ALTER TABLE user_appointments ADD COLUMN schedule_names VARCHAR(512) NULL DEFAULT NULL")
+                conn.commit()
+
+        # Check if assigned_consulate_date exists in user_appointments
+        try:
+            cursor.execute("SELECT assigned_consulate_date FROM user_appointments LIMIT 1")
+            print("Column 'assigned_consulate_date' already exists in 'user_appointments'.")
+            cursor.fetchall()
+        except mysql.connector.Error as err:
+            if "Unknown column" in str(err):
+                print("Adding 'assigned_consulate_date' and 'assigned_cas_date' columns to 'user_appointments' table...")
+                cursor.execute("ALTER TABLE user_appointments ADD COLUMN assigned_consulate_date DATETIME NULL DEFAULT NULL")
+                cursor.execute("ALTER TABLE user_appointments ADD COLUMN assigned_cas_date DATETIME NULL DEFAULT NULL")
                 conn.commit()
                 
         print("Migration completed successfully!")

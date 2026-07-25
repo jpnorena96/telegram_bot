@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist:wght@400;500;600;700&display=swap');
 
 /* ═══════════════════════════════════
    ADELANTAVISA — EXCLUSIVE PREMIUM THEME
@@ -39,10 +39,10 @@
   --border:      #E4E4E7;
   --border-2:    #D4D4D8;
 
-  /* Typography */
-  --font-heading: 'Outfit', sans-serif;
-  --font-ui:      'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-mono:    'JetBrains Mono', monospace;
+  /* Corporate Typographic Scale */
+  --font-sans:   'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-heading:'Geist', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono:   'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   --sidebar-w: 260px;
   --radius-sm: 8px;
@@ -59,7 +59,7 @@
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: var(--font-ui);
+  font-family: var(--font-sans);
   background: var(--bg);
   color: var(--text-1);
   line-height: 1.6;
@@ -90,7 +90,7 @@ a:hover { color: var(--lime); }
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  font-family: var(--font-ui);
+  font-family: var(--font-sans);
   font-size: 0.9rem;
   font-weight: 600;
   border: 1px solid var(--border);

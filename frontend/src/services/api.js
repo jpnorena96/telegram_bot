@@ -102,6 +102,14 @@ export const api = {
     return handleResponse(response);
   },
 
+  async deleteAppointment(id) {
+    const response = await fetch(`${API_URL}/appointments/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+
   // ── Admin Methods ──────────────────────────────────────────
   async getAdminSummary() {
     const r = await fetch(`${API_URL}/admin/summary`, { headers: getHeaders() });

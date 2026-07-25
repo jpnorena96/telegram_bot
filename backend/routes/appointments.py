@@ -161,6 +161,8 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
                 a.date_booked,
                 a.schedule_id as schedule_id,
                 a.schedule_names as schedule_names,
+                a.assigned_consulate_date as assigned_consulate_date,
+                a.assigned_cas_date as assigned_cas_date,
                 u.full_name as system_user_name,
                 u.email as system_user_email
             FROM user_appointments a
@@ -182,6 +184,8 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
                 date_booked,
                 schedule_id,
                 schedule_names,
+                assigned_consulate_date,
+                assigned_cas_date,
                 NULL as system_user_name,
                 NULL as system_user_email
             FROM user_appointments 
@@ -200,6 +204,10 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
             apt["date_created"] = apt["date_created"].strftime('%Y-%m-%d %H:%M:%S')
         if apt.get("date_booked"):
             apt["date_booked"] = apt["date_booked"].strftime('%Y-%m-%d %H:%M:%S')
+        if apt.get("assigned_consulate_date"):
+            apt["assigned_consulate_date"] = apt["assigned_consulate_date"].strftime('%Y-%m-%d %H:%M:%S')
+        if apt.get("assigned_cas_date"):
+            apt["assigned_cas_date"] = apt["assigned_cas_date"].strftime('%Y-%m-%d %H:%M:%S')
         # Map statuses for frontend
         if apt["status"] == "pending":
             apt["newDate"] = "Pendiente"
@@ -343,7 +351,7 @@ def discover_direct(req: DiscoverDirectRequest, current_user: dict = Depends(get
         # 4. Crear archivos en el VPS
         vps_success = vps.create_vps_config(user_data)
         if not vps_success:
-            raise Exception("No se pudo desplegar la configuración en el servidor VPS")
+            raise Exception("No se pudo iniciar la configuración en nuestro sistema")
 
         # 5. Ejecutar descubrimiento de Schedule IDs en el VPS
         schedule_ids, error_detail = vps.discover_schedule_ids(req.email, new_id)
@@ -395,12 +403,49 @@ def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest,
             # Insertar notificación
             cursor.execute(
                 "INSERT INTO notifications (user_id, message, status) VALUES (%s, %s, 'success')",
-                (apt["user_id"], f"Búsqueda automática iniciada en el servidor (PM2) para {apt['email']} con Schedule ID {req.schedule_id}.",)
+                (apt["user_id"], f"Búsqueda iniciada para {apt['email']} con IDENTIFICADOR {req.schedule_id}.",)
             )
             db.commit()
-            return {"status": "ok", "message": "Schedule ID configurado y búsqueda iniciada en PM2."}
+            return {"status": "ok", "message": "IDENTIFICADOR configurado y búsqueda iniciada en nuestro sistema."}
         else:
-            raise HTTPException(status_code=500, detail="Error al configurar el Schedule ID en el servidor VPS.")
+            raise HTTPException(status_code=500, detail="Error al configurar el IDENTIFICADOR en nuestro sistema.")
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+
+@router.delete("/{appointment_id}")
+def delete_appointment(appointment_id: int, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    try:
+        # Check if exists and belongs to user
+        cursor.execute("SELECT * FROM user_appointments WHERE id = %s", (appointment_id,))
+        apt = cursor.fetchone()
+        if not apt:
+            raise HTTPException(status_code=404, detail="Agendamiento no encontrado")
+            
+        role = current_user["roles"][0]
+        if role not in ["ADMINISTRATOR", "AUDITOR"] and apt["user_id"] != current_user["id"]:
+            raise HTTPException(status_code=403, detail="No autorizado para eliminar este agendamiento")
+            
+        # Prevent deletion if 'agendado'
+        if apt["status"] == "agendado":
+            raise HTTPException(status_code=400, detail="No se puede eliminar un agendamiento que ya ha sido procesado (agendado).")
+            
+        # Delete from VPS first if schedule_id exists
+        if apt["schedule_id"] and apt["email"]:
+            try:
+                vps.delete_vps_appointment(apt["email"], apt["schedule_id"])
+            except Exception as e:
+                print(f"Error borrando en VPS: {e}")
+                
+        # Delete from DB
+        cursor.execute("DELETE FROM user_appointments WHERE id = %s", (appointment_id,))
+        db.commit()
+        return {"status": "ok", "message": "Agendamiento eliminado correctamente"}
     except HTTPException:
         raise
     except Exception as e:
