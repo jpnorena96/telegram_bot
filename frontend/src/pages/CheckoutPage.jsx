@@ -15,8 +15,8 @@ const CheckoutPage = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   
-  // Fake or sandbox Wompi Public Key
-  const WOMPI_PUB_KEY = 'pub_test_Q5yDA9xoKdePzhSGeZaQS1mNNqAMxcgw';
+  // Use Production Key from env if available, otherwise sandbox
+  const WOMPI_PUB_KEY = import.meta.env.VITE_WOMPI_PUB_KEY || 'pub_test_Q5yDA9xoKdePzhSGeZaQS1mNNqAMxcgw';
 
   useEffect(() => {
     if (!userId || !role) {
@@ -27,6 +27,58 @@ const CheckoutPage = () => {
   const planName = role === 'TRAVEL_AGENCY' ? 'Plan Start (B2B)' : 'Plan Estándar (B2C)';
   const planPrice = role === 'TRAVEL_AGENCY' ? 6900 : 8900; 
   const priceCOP = role === 'TRAVEL_AGENCY' ? 27600000 : 35600000; // in cents (COP) -> 276,000 COP
+
+  const handleWompiPayment = () => {
+    // Wompi Widget Integration
+    const checkout = new window.WidgetCheckout({
+      currency: 'COP',
+      amountInCents: priceCOP,
+      reference: `ADELANTAVISA_${userId}_${Date.now()}`,
+      publicKey: WOMPI_PUB_KEY,
+      redirectUrl: `${window.location.origin}/checkout?user_id=${userId}&role=${role}&email=${email}`,
+      customerData: {
+        email: email,
+        fullName: 'Cliente AdelantaVisa'
+      }
+    });
+
+    checkout.open((result) => {
+      const transaction = result.transaction;
+      if (transaction.status === 'APPROVED') {
+        // Send to backend
+        handleRealPaymentVerify(transaction.id);
+      } else {
+        toast.error('El pago no fue aprobado.');
+      }
+    });
+  };
+
+  const handleRealPaymentVerify = async (transactionId) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${api.url}/payments/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          transaction_id: transactionId,
+          plan_name: planName
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Error verificando pago');
+      
+      toast.success('Pago completado con éxito. Redirigiendo...');
+      setSuccess(true);
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);
+    } catch (e) {
+      toast.error(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFakePayment = async () => {
     setLoading(true);
@@ -116,14 +168,14 @@ const CheckoutPage = () => {
           </div>
 
           <button 
-            onClick={handleFakePayment} 
+            onClick={WOMPI_PUB_KEY.includes('test') ? handleFakePayment : handleWompiPayment} 
             disabled={loading}
             className="btn btn-lime" 
             style={{ width: '100%', padding: '1rem', fontSize: '1rem', display: 'flex', justifyContent: 'center' }}
           >
             {loading ? 'Procesando...' : (
               <>
-                <CreditCard size={18} /> Pagar con Wompi (Simulación Sandbox)
+                <CreditCard size={18} /> Pagar con Wompi {WOMPI_PUB_KEY.includes('test') && '(Simulación)'}
               </>
             )}
           </button>

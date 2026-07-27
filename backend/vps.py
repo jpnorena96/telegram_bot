@@ -367,3 +367,27 @@ def start_pm2_process(email: str, appointment_id: int = None) -> bool:
     except Exception as e:
         logger.error(f"Failed to start PM2 process {pm2_name or email}: {e}")
         return False
+
+def get_pm2_logs(email: str, appointment_id: int = None, lines: int = 100) -> str:
+    """Fetches the last N lines of PM2 logs for the given appointment's process."""
+    try:
+        base_path, folder_name = _get_base_path(email, appointment_id)
+        pm2_name = f"visa_{folder_name}"
+        logger.info(f"Connecting to VPS to fetch logs for: {pm2_name}")
+        
+        ssh = _connect_ssh()
+        # use --nostream to just get the output and exit
+        cmd = f"pm2 logs {pm2_name} --lines {lines} --nostream"
+        stdin, stdout, stderr = ssh.exec_command(cmd)
+        
+        out = stdout.read().decode('utf-8')
+        err = stderr.read().decode('utf-8')
+        ssh.close()
+        
+        if not out and not err:
+            return "No se encontraron logs o el proceso no existe."
+            
+        return out + "\n" + err
+    except Exception as e:
+        logger.error(f"Failed to fetch PM2 logs for {email}: {e}")
+        return f"Error al conectar con el servidor: {e}"

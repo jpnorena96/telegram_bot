@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 import mysql.connector
+import os
+import requests
 from .auth import get_db
 
 router = APIRouter()
@@ -12,13 +14,35 @@ class PaymentVerificationRequest(BaseModel):
 
 @router.post("/verify")
 def verify_payment(req: PaymentVerificationRequest, db = Depends(get_db)):
-    # En un ambiente real, aquí haríamos una petición HTTP al API de Wompi 
-    # usando la llave privada (Prv Key) para verificar que el transaction_id
-    # realmente existe y su estado es "APPROVED".
-    # Por ahora simulamos la verificación exitosa para la integración de Sandbox.
-    
     if not req.transaction_id:
         raise HTTPException(status_code=400, detail="Falta el transaction_id de Wompi")
+
+    wompi_prv_key = os.getenv("WOMPI_PRV_KEY")
+    
+    # Si tenemos la llave configurada, verificamos con Wompi directamente
+    if wompi_prv_key:
+        is_sandbox = "test" in wompi_prv_key
+        wompi_url = "https://sandbox.wompi.co/v1" if is_sandbox else "https://production.wompi.co/v1"
+        
+        try:
+            res = requests.get(
+                f"{wompi_url}/transactions/{req.transaction_id}",
+                headers={"Authorization": f"Bearer {wompi_prv_key}"},
+                timeout=10
+            )
+            if res.status_code != 200:
+                raise HTTPException(status_code=400, detail="Transacción no encontrada en Wompi")
+                
+            tx_data = res.json().get("data", {})
+            if tx_data.get("status") != "APPROVED":
+                raise HTTPException(status_code=400, detail=f"Pago no aprobado. Estado actual: {tx_data.get('status')}")
+                
+        except requests.RequestException:
+            raise HTTPException(status_code=500, detail="Error de comunicación con Wompi")
+    else:
+        # Modo de simulación si no hay llaves (Sandbox Local Frontend)
+        if not req.transaction_id.startswith("sandbox_"):
+            raise HTTPException(status_code=400, detail="Llave privada de Wompi no configurada en el servidor.")
 
     cursor = db.cursor(dictionary=True)
     try:

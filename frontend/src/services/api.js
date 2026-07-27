@@ -119,6 +119,12 @@ export const api = {
   },
 
   // ── Admin Methods ──────────────────────────────────────────
+  async getAdminLogs(appointmentId) {
+    const response = await fetch(`${API_URL}/admin/logs/${appointmentId}`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
   async getAdminSummary() {
     const r = await fetch(`${API_URL}/admin/summary`, { headers: getHeaders() });
     return handleResponse(r);

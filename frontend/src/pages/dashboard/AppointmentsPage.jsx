@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { useOutletContext } from 'react-router-dom';
-import { Search, RefreshCw, Plus, X, ChevronUp, ChevronDown, Eye, ArrowLeft, ArrowRight, Lock, Globe, Calendar, CheckCircle2, AlertTriangle, User, Trash2 } from 'lucide-react';
+import { Search, RefreshCw, Plus, X, ChevronUp, ChevronDown, Eye, ArrowLeft, ArrowRight, Lock, Globe, Calendar, CheckCircle2, AlertTriangle, User, Trash2, Terminal } from 'lucide-react';
 import { api } from '../../services/api';
 
 const STATUS_MAP = {
@@ -685,6 +685,7 @@ const AppointmentsPage = () => {
   const [sortD, setSortD] = useState('desc');
   const [selected, setSelected] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [logsModal, setLogsModal] = useState({ open: false, data: '', loading: false, aptId: null });
 
   // Filtros de fecha para administrador
   const [startDate, setStartDate] = useState('');
@@ -758,6 +759,16 @@ const AppointmentsPage = () => {
       }
     } catch (error) {
       toast.error(error.message || 'Error al eliminar el agendamiento');
+    }
+  };
+
+  const openLogs = async (id) => {
+    setLogsModal({ open: true, data: '', loading: true, aptId: id });
+    try {
+      const res = await api.getAdminLogs(id);
+      setLogsModal({ open: true, data: res.logs || 'Sin logs', loading: false, aptId: id });
+    } catch (err) {
+      setLogsModal({ open: true, data: err.message || 'Error fetching logs', loading: false, aptId: id });
     }
   };
 
@@ -952,6 +963,11 @@ const AppointmentsPage = () => {
                         {canEdit && (
                           <td style={{ textAlign: 'right' }}>
                             <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'flex-end' }}>
+                              {(userRole === 'ADMINISTRATOR' || userRole === 'AUDITOR') && (
+                                <button onClick={() => openLogs(apt.id)} className="btn btn-icon btn-sm" title="Ver Logs de Consola">
+                                  <Terminal size={14} />
+                                </button>
+                              )}
                               <button onClick={() => { setSelected(apt); setMode('view'); }} className="btn btn-icon btn-sm" title={t('dashboard.appointments.view_details')}>
                                 <Eye size={14} />
                               </button>
@@ -986,6 +1002,27 @@ const AppointmentsPage = () => {
       </div>
 
       <Modal apt={selected} onClose={() => setSelected(null)} t={t} />
+
+      {/* Logs Modal */}
+      {logsModal.open && createPortal(
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem', backdropFilter: 'blur(4px)' }}>
+          <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+            <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Terminal size={18} color="var(--lime)" /> Logs del Sistema PM2 (ID: {logsModal.aptId})
+              </h2>
+              <button onClick={() => setLogsModal({ ...logsModal, open: false })} className="btn btn-icon btn-sm"><X size={16} /></button>
+            </div>
+            <div style={{ padding: '1rem', flex: 1, overflowY: 'auto', background: '#1e1e1e', color: '#00ff00', fontFamily: 'monospace', fontSize: '0.8rem', whiteSpace: 'pre-wrap', minHeight: '300px' }}>
+              {logsModal.loading ? 'Cargando logs desde el servidor...' : logsModal.data}
+            </div>
+            <div style={{ padding: '1rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end' }}>
+              <button onClick={() => openLogs(logsModal.aptId)} className="btn btn-outline btn-sm">Actualizar</button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

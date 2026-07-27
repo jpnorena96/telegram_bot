@@ -10,6 +10,7 @@ import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import DB_CONFIG
 from .auth import get_current_user, get_db, get_password_hash
+from backend.vps import get_pm2_logs
 
 PRICE_PER_APPT = 10.0
 
@@ -91,6 +92,28 @@ def get_admin_users(current_user: dict = Depends(require_admin), db=Depends(get_
         r["name"] = r.get("full_name") or r["email"].split("@")[0]
         result.append(r)
     return result
+
+
+# ── GET /admin/logs/{appointment_id} ───────────────────────────────────────
+@router.get("/logs/{appointment_id}")
+def view_pm2_logs(appointment_id: int, current_user: dict = Depends(require_admin), db=Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    try:
+        # Get the email associated with the appointment
+        cursor.execute("SELECT user_id FROM user_appointments WHERE id = %s", (appointment_id,))
+        appt = cursor.fetchone()
+        if not appt:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+            
+        cursor.execute("SELECT email FROM users WHERE id = %s", (appt["user_id"],))
+        user = cursor.fetchone()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found for this appointment")
+            
+        logs = get_pm2_logs(user["email"], appointment_id)
+        return {"status": "ok", "logs": logs}
+    finally:
+        cursor.close()
 
 
 # ── GET /admin/users/{user_id}/appointments ───────────────────────────────
