@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, X, Search, CheckCircle2, AlertCircle, Info, ShieldAlert } from 'lucide-react';
+import { Bell, X, Search, CheckCircle2, AlertCircle, Info, ShieldAlert, Menu } from 'lucide-react';
 import { api } from '../../services/api';
 
 const PAGE_LABELS = {
@@ -9,9 +9,11 @@ const PAGE_LABELS = {
   '/dashboard/documentos':    'Documentos de Visa',
   '/dashboard/usuarios':      'Usuarios',
   '/dashboard/configuracion': 'Configuración',
+  '/dashboard/agencia-perfil': 'Mi Agencia',
+  '/dashboard/admin-agencias': 'Aprobación de Agencias',
 };
 
-const Header = () => {
+const Header = ({ role, userName, onMenuClick }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
@@ -127,10 +129,20 @@ const Header = () => {
       
       <div style={{ padding: '0 2rem', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 
-        {/* Title */}
-        <h1 style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.02em', margin: 0 }}>
-          {label}
-        </h1>
+        {/* Title & Mobile Menu Button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button 
+            className="btn btn-icon btn-sm hide-on-mobile block-on-mobile" 
+            style={{ display: 'none', background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+            onClick={onMenuClick}
+            type="button"
+          >
+            <Menu size={18} />
+          </button>
+          <h1 style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.02em', margin: 0 }}>
+            {label}
+          </h1>
+        </div>
 
         {/* Right */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>

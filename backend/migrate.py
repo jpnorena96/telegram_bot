@@ -108,7 +108,43 @@ def migrate():
                 cursor.execute("ALTER TABLE user_appointments ADD COLUMN assigned_consulate_date DATETIME NULL DEFAULT NULL")
                 cursor.execute("ALTER TABLE user_appointments ADD COLUMN assigned_cas_date DATETIME NULL DEFAULT NULL")
                 conn.commit()
+
+        # Create agency_profiles table
+        print("Creating 'agency_profiles' table...")
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS agency_profiles (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                alias VARCHAR(100) NOT NULL UNIQUE,
+                company_name VARCHAR(255) NOT NULL,
+                logo_url VARCHAR(512) NULL,
+                brand_color VARCHAR(50) DEFAULT '#4F46E5',
+                status VARCHAR(50) DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        """)
+        conn.commit()
                 
+        # Check if token exists in visa_processes
+        try:
+            cursor.execute("SELECT token FROM visa_processes LIMIT 1")
+            print("Column 'token' already exists in 'visa_processes'.")
+            cursor.fetchall()
+        except mysql.connector.Error as err:
+            if "Unknown column" in str(err):
+                import uuid
+                print("Adding 'token' column to 'visa_processes' table...")
+                cursor.execute("ALTER TABLE visa_processes ADD COLUMN token VARCHAR(64) NULL UNIQUE")
+                
+                # Generate token for existing processes
+                cursor.execute("SELECT id FROM visa_processes WHERE token IS NULL")
+                rows = cursor.fetchall()
+                for row in rows:
+                    cursor.execute("UPDATE visa_processes SET token = %s WHERE id = %s", (str(uuid.uuid4()), row['id']))
+                conn.commit()
+
         print("Migration completed successfully!")
         
     except mysql.connector.Error as err:

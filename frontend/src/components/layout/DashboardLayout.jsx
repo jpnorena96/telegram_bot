@@ -9,6 +9,7 @@ const DashboardLayout = () => {
   const navigate = useNavigate();
   const [role, setRole] = useState(null);
   const [userName, setUserName] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!api.isAuthenticated()) { navigate('/login'); return; }
@@ -60,15 +61,22 @@ const DashboardLayout = () => {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
-      <Sidebar role={role} userName={userName} />
+      {/* Mobile Overlay */}
+      <div 
+        className={`sidebar-overlay ${mobileMenuOpen ? 'open' : ''}`}
+        onClick={() => setMobileMenuOpen(false)}
+      />
+      
+      <Sidebar role={role} userName={userName} isMobileOpen={mobileMenuOpen} closeMobile={() => setMobileMenuOpen(false)} />
+      
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0, background: 'var(--surface-2)', position: 'relative' }}>
         
         {/* Subtle background glow */}
         <div style={{ position: 'absolute', top: 0, left: '20%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 60%)', pointerEvents: 'none', zIndex: 0 }} />
 
-        <Header role={role} userName={userName} />
+        <Header role={role} userName={userName} onMenuClick={() => setMobileMenuOpen(true)} />
         
-        <main style={{ flex: 1, overflowY: 'auto', padding: '2rem', position: 'relative', zIndex: 1 }}>
+        <main className="mobile-main-content" style={{ flex: 1, overflowY: 'auto', padding: '2rem', position: 'relative', zIndex: 1 }}>
           <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
             <Outlet context={{ role, userName }} />
           </div>

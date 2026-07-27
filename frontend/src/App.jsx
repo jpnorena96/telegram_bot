@@ -12,8 +12,10 @@ import DocumentsPage from './pages/dashboard/DocumentsPage';
 import UsersPage from './pages/dashboard/UsersPage';
 import SettingsPage from './pages/dashboard/SettingsPage';
 import AdminPage from './pages/dashboard/AdminPage';
+import AdminAgenciesPage from './pages/dashboard/AdminAgenciesPage';
 import SearchPage from './pages/dashboard/SearchPage';
 import NotificationsHistory from './pages/dashboard/NotificationsHistory';
+import AgencyProfilePage from './pages/dashboard/AgencyProfilePage';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -52,8 +54,10 @@ function App() {
           <Route path="usuarios" element={<UsersPage />} />
           <Route path="configuracion" element={<SettingsPage />} />
           <Route path="auditoria" element={<AdminPage />} />
+          <Route path="admin-agencias" element={<AdminAgenciesPage />} />
           <Route path="buscar" element={<SearchPage />} />
           <Route path="notificaciones" element={<NotificationsHistory />} />
+          <Route path="agencia-perfil" element={<AgencyProfilePage />} />
         </Route>
       </Routes>
     </Router>

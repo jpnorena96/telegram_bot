@@ -876,7 +876,7 @@ const AppointmentsPage = () => {
 
       {/* ── TABLE ── */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
+        <div className="table-responsive-wrapper">
           <table className="data-table">
             <thead>
               <tr>
@@ -968,7 +968,8 @@ const AppointmentsPage = () => {
                   })
               }
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
 
         {/* footer */}

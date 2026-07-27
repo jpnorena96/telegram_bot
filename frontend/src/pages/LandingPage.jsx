@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   ArrowRight, Shield, Calendar, Bell, Star,
-  Globe, FileText, MessageCircle, Building2, CheckCircle2
+  Globe, FileText, MessageCircle, Building2, CheckCircle2, Menu, X
 } from "lucide-react";
 
 /* ─── Intersection Observer Hook ─── */
@@ -44,6 +44,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [agencyTab, setAgencyTab] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [heroRef, heroInView] = useInView(0.1);
   const [statsRef, statsInView] = useInView(0.2);
@@ -150,7 +151,7 @@ const LandingPage = () => {
           <Globe size={24} style={S.logoIcon} strokeWidth={2.5} />
           <span>GlobalVisas</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "2.5rem" }} className="hide-mobile">
+        <div style={{ display: "flex", alignItems: "center", gap: "2.5rem" }} className="hide-on-mobile">
           {NAV_LINKS.map(l => (
             <a key={l.href} href={l.href}
               style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--text-2)", transition: "color 0.2s" }}
@@ -159,7 +160,7 @@ const LandingPage = () => {
             >{l.label}</a>
           ))}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }} className="hide-on-mobile">
           <div style={{ display: "flex", gap: "0.5rem", marginRight: "1rem" }}>
             <button onClick={() => changeLanguage('en')} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: i18n.language === 'en' ? 'bold' : 'normal', color: i18n.language === 'en' ? 'var(--lime)' : 'var(--text-3)' }}>EN</button>
             <span style={{ color: 'var(--border)' }}>|</span>
@@ -170,7 +171,38 @@ const LandingPage = () => {
           <button onClick={() => navigate("/login")} className="btn btn-outline" style={{ fontSize: "0.875rem" }}>{t('nav.login')}</button>
           <button onClick={() => navigate("/register")} className="btn btn-lime" style={{ fontSize: "0.875rem" }}>{t('nav.start')} <ArrowRight size={16} /></button>
         </div>
+        
+        {/* Mobile Menu Toggle */}
+        <button 
+          className="btn btn-icon btn-sm hide-on-mobile block-on-mobile" 
+          style={{ display: 'none', background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
       </nav>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div style={{ position: 'fixed', top: '70px', left: 0, right: 0, bottom: 0, background: 'var(--bg)', zIndex: 99, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {NAV_LINKS.map(l => (
+              <a key={l.href} href={l.href} onClick={() => setMobileMenuOpen(false)} style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-1)' }}>
+                {l.label}
+              </a>
+            ))}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: 'auto' }}>
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "center", marginBottom: '1rem' }}>
+              <button onClick={() => changeLanguage('en')} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1rem', fontWeight: i18n.language === 'en' ? 'bold' : 'normal', color: i18n.language === 'en' ? 'var(--lime)' : 'var(--text-3)' }}>EN</button>
+              <button onClick={() => changeLanguage('es')} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1rem', fontWeight: i18n.language === 'es' ? 'bold' : 'normal', color: i18n.language === 'es' ? 'var(--lime)' : 'var(--text-3)' }}>ES</button>
+              <button onClick={() => changeLanguage('pt')} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1rem', fontWeight: i18n.language === 'pt' ? 'bold' : 'normal', color: i18n.language === 'pt' ? 'var(--lime)' : 'var(--text-3)' }}>PT</button>
+            </div>
+            <button onClick={() => navigate("/login")} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center' }}>{t('nav.login')}</button>
+            <button onClick={() => navigate("/register")} className="btn btn-lime" style={{ width: '100%', justifyContent: 'center' }}>{t('nav.start')} <ArrowRight size={16} /></button>
+          </div>
+        </div>
+      )}
 
       {/* ── HERO (SPLIT LAYOUT) ── */}
       <section ref={heroRef} style={{ position: "relative", zIndex: 1, padding: "10rem 2rem 5rem", background: "var(--surface)" }}>

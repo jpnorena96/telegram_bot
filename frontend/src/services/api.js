@@ -265,4 +265,38 @@ export const api = {
     if (!response.ok) throw new Error('Error al descargar archivo');
     return response.blob();
   },
+
+  // ── Agency Methods ──────────────────────────────────────────
+  async getMyAgencyProfile() {
+    const r = await fetch(`${API_URL}/agency/profile`, { headers: getHeaders() });
+    return handleResponse(r);
+  },
+  async updateMyAgencyProfile(data) {
+    const r = await fetch(`${API_URL}/agency/profile`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return handleResponse(r);
+  },
+  async getPublicAgencyProfile(alias) {
+    const r = await fetch(`${API_URL}/agency/public/${alias}`);
+    if (!r.ok) {
+      const error = await r.json().catch(() => ({}));
+      throw new Error(error.detail || 'Ocurrió un error');
+    }
+    return r.json();
+  },
+  async getAdminAgencies() {
+    const r = await fetch(`${API_URL}/agency/admin/list`, { headers: getHeaders() });
+    return handleResponse(r);
+  },
+  async updateAdminAgencyStatus(id, status) {
+    const r = await fetch(`${API_URL}/agency/admin/${id}/status`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ status })
+    });
+    return handleResponse(r);
+  },
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutGrid, CalendarCheck, Users, Settings, LogOut, ChevronLeft, ChevronRight, Shield, FolderOpen } from 'lucide-react';
+import { LayoutGrid, CalendarCheck, Users, Settings, LogOut, ChevronLeft, ChevronRight, Shield, FolderOpen, Store } from 'lucide-react';
 import { api } from '../../services/api';
 
 const ROLE_LABELS = {
@@ -13,26 +13,31 @@ const NAV = [
   { to: '/dashboard', label: 'Resumen', icon: LayoutGrid, roles: ['ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER', 'TRAVEL_AGENCY', 'NATURAL_PERSON'] },
   { to: '/dashboard/documentos', label: 'Trámite de Visa', icon: FolderOpen, roles: ['ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER', 'TRAVEL_AGENCY', 'NATURAL_PERSON'] },
   { to: '/dashboard/citas', label: 'Adelantar Cita', icon: CalendarCheck, roles: ['ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER', 'TRAVEL_AGENCY', 'NATURAL_PERSON'] },
+  { to: '/dashboard/agencia-perfil', label: 'Mi Agencia', icon: Store, roles: ['TRAVEL_AGENCY'] },
   { to: '/dashboard/usuarios', label: 'Usuarios', icon: Users, roles: ['ADMINISTRATOR', 'AUDITOR'] },
+  { to: '/dashboard/admin-agencias', label: 'Agencias (Admin)', icon: Store, roles: ['ADMINISTRATOR', 'AUDITOR'] },
   { to: '/dashboard/auditoria', label: 'Auditoría', icon: Shield, roles: ['ADMINISTRATOR', 'AUDITOR'] },
   { to: '/dashboard/configuracion', label: 'Configuración', icon: Settings, roles: ['ADMINISTRATOR'] },
 ];
 
-const Sidebar = ({ role, userName }) => {
+const Sidebar = ({ role, userName, isMobileOpen, closeMobile }) => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const links = NAV.filter(n => n.roles.includes(role));
 
   return (
-    <aside style={{
-      width: collapsed ? '80px' : 'var(--sidebar-w)',
-      background: 'var(--bg)',
-      borderRight: '1px solid var(--border)',
-      display: 'flex', flexDirection: 'column',
-      height: '100vh', position: 'sticky', top: 0,
-      flexShrink: 0, transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-      overflow: 'hidden', zIndex: 100,
-    }}>
+    <aside 
+      className={`sidebar-mobile ${isMobileOpen ? 'open' : ''}`}
+      style={{
+        width: collapsed ? '80px' : 'var(--sidebar-w)',
+        background: 'var(--bg)',
+        borderRight: '1px solid var(--border)',
+        display: 'flex', flexDirection: 'column',
+        height: '100vh', position: 'sticky', top: 0,
+        flexShrink: 0, transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        overflow: 'hidden', zIndex: 100,
+      }}
+    >
 
       {/* Brand */}
       <div style={{ padding: collapsed ? '1.5rem 0' : '1.5rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'flex-start', minHeight: '80px' }}>
@@ -55,6 +60,7 @@ const Sidebar = ({ role, userName }) => {
             key={link.to}
             to={link.to}
             end={link.to === '/dashboard'}
+            onClick={() => { if (isMobileOpen && closeMobile) closeMobile(); }}
             className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
             style={{
               display: 'flex', alignItems: 'center', gap: '0.875rem',

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from .routes import auth, appointments, users, admin, notifications, documents, webhooks
+from .routes import auth, appointments, users, admin, notifications, documents, webhooks, agency
 
 app = FastAPI(title="AdelantaVisa API")
 
@@ -39,6 +39,7 @@ app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
 app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])
 app.include_router(webhooks.router, prefix="/api/webhooks", tags=["Webhooks"])
+app.include_router(agency.router, prefix="/api/agency", tags=["Agency"])
 
 @app.get("/api/health")
 def health_check():
