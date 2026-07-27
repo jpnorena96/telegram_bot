@@ -124,10 +124,10 @@ def login(request: LoginRequest, db = Depends(get_db)):
     cursor = db.cursor(dictionary=True)
     # Include role and full_name once added to DB schema
     try:
-        cursor.execute("SELECT id, email, password, role, full_name FROM users WHERE email = %s", (request.email,))
+        cursor.execute("SELECT id, email, password, role, full_name, subscription_status FROM users WHERE email = %s", (request.email,))
     except mysql.connector.Error:
         # Fallback if DB not migrated yet
-        cursor.execute("SELECT id, email, password FROM users WHERE email = %s", (request.email,))
+        cursor.execute("SELECT id, email, password, role, full_name FROM users WHERE email = %s", (request.email,))
         
     user = cursor.fetchone()
     cursor.close()
@@ -141,6 +141,20 @@ def login(request: LoginRequest, db = Depends(get_db)):
     
     # Check authorization for non-admin/natural person roles
     role = user.get('role') or 'NATURAL_PERSON'
+    
+    # Check subscription status for non-admin roles
+    if role not in ['ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER']:
+        sub_status = user.get('subscription_status', 'active')
+        if sub_status in ['pending', 'expired', 'canceled']:
+            raise HTTPException(
+                status_code=402,
+                detail={
+                    "message": "Suscripción requerida",
+                    "user_id": user['id'],
+                    "role": role,
+                    "email": user['email']
+                }
+            )
     
     # Check if authorized if they are a manager or agency
     if role in ['VISA_MANAGER', 'TRAVEL_AGENCY']:

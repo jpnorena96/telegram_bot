@@ -4,8 +4,16 @@ const API_URL = window.location.hostname === 'localhost' || window.location.host
 
 const handleResponse = async (response) => {
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'Error en la petición al servidor');
+    const errorData = await response.json().catch(() => ({}));
+    if (response.status === 402) {
+      // Pass the entire object for subscription errors
+      const err = new Error('Payment Required');
+      err.status = 402;
+      err.data = errorData.detail;
+      throw err;
+    }
+    const msg = typeof errorData.detail === 'string' ? errorData.detail : (errorData.detail?.message || 'Error en la petición al servidor');
+    throw new Error(msg);
   }
   return response.json();
 };

@@ -20,7 +20,17 @@ const LoginPage = () => {
       localStorage.setItem('userName', user_name);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Credenciales inválidas. Por favor, intente de nuevo.');
+      if (err.status === 402 && err.data) {
+        // Redirigir a checkout con params
+        const params = new URLSearchParams({
+          user_id: err.data.user_id,
+          role: err.data.role,
+          email: err.data.email
+        });
+        navigate(`/checkout?${params.toString()}`);
+      } else {
+        setError(err.message || 'Credenciales inválidas. Por favor, intente de nuevo.');
+      }
     } finally {
       setLoading(false);
     }

@@ -33,6 +33,21 @@ def migrate():
                 print("Adding 'role' column to 'users' table...")
                 cursor.execute("ALTER TABLE users ADD COLUMN role VARCHAR(50) DEFAULT 'NATURAL_PERSON'")
                 conn.commit()
+        # Check if subscription_status column exists
+        try:
+            cursor.execute("SELECT subscription_status FROM users LIMIT 1")
+            print("Column 'subscription_status' already exists.")
+            cursor.fetchall()
+        except mysql.connector.Error as err:
+            if "Unknown column" in str(err):
+                print("Adding subscription columns to 'users' table...")
+                cursor.execute("ALTER TABLE users ADD COLUMN subscription_status VARCHAR(50) DEFAULT 'pending'")
+                cursor.execute("ALTER TABLE users ADD COLUMN subscription_plan VARCHAR(50) NULL DEFAULT NULL")
+                cursor.execute("ALTER TABLE users ADD COLUMN wompi_transaction_id VARCHAR(100) NULL DEFAULT NULL")
+                
+                # Make existing administrators and system accounts active by default
+                cursor.execute("UPDATE users SET subscription_status = 'active' WHERE role IN ('ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER')")
+                conn.commit()
                 
         # Create visa_processes table
         print("Creating 'visa_processes' table...")
