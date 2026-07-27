@@ -149,7 +149,7 @@ const LandingPage = () => {
       <nav style={S.nav}>
         <div style={S.logo} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
           <Globe size={24} style={S.logoIcon} strokeWidth={2.5} />
-          <span>GlobalVisas</span>
+          <span>AdelantaVisa</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "2.5rem" }} className="hide-on-mobile">
           {NAV_LINKS.map(l => (
@@ -171,10 +171,10 @@ const LandingPage = () => {
           <button onClick={() => navigate("/login")} className="btn btn-outline" style={{ fontSize: "0.875rem" }}>{t('nav.login')}</button>
           <button onClick={() => navigate("/register")} className="btn btn-lime" style={{ fontSize: "0.875rem" }}>{t('nav.start')} <ArrowRight size={16} /></button>
         </div>
-        
+
         {/* Mobile Menu Toggle */}
-        <button 
-          className="btn btn-icon btn-sm hide-on-mobile block-on-mobile" 
+        <button
+          className="btn btn-icon btn-sm hide-on-mobile block-on-mobile"
           style={{ display: 'none', background: 'var(--surface-2)', border: '1px solid var(--border)' }}
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
@@ -227,12 +227,12 @@ const LandingPage = () => {
               </a>
             </div>
             <div style={{ marginTop: "2.5rem", display: "flex", gap: "2rem", alignItems: "center" }}>
-               <div style={{ display: "flex", gap: "0.2rem" }}>
-                 {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="var(--gold)" color="var(--gold)" />)}
-               </div>
-               <div style={{ fontSize: "0.85rem", color: "var(--text-3)", fontWeight: 500 }}>
-                 {t('hero.trust_text')}
-               </div>
+              <div style={{ display: "flex", gap: "0.2rem" }}>
+                {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="var(--gold)" color="var(--gold)" />)}
+              </div>
+              <div style={{ fontSize: "0.85rem", color: "var(--text-3)", fontWeight: 500 }}>
+                {t('hero.trust_text')}
+              </div>
             </div>
           </div>
           <div style={{ flex: "1 1 500px", position: "relative", ...S.reveal(heroInView, 0.2) }}>
@@ -286,23 +286,23 @@ const LandingPage = () => {
       <section id="agencias" ref={agencyRef} style={{ padding: "0", background: "var(--bg)" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))" }}>
           <div style={{ position: "relative", minHeight: 400 }}>
-             <img src="/images/business.png" alt="Corporate Team" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src="/images/business.png" alt="Corporate Team" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
           <div style={{ padding: "6rem 4rem", display: "flex", flexDirection: "column", justifyContent: "center", background: "var(--text-1)", color: "#fff" }}>
-             <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 1rem", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem", alignSelf: "flex-start" }}>
-               <Building2 size={14} /> {t('agency.badge')}
-             </div>
-             <h2 style={{ fontSize: "2.5rem", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "1.5rem", lineHeight: 1.1 }}>
-               {t('agency.title')}
-             </h2>
-             <p style={{ fontSize: "1.1rem", color: "var(--text-3)", marginBottom: "2.5rem", lineHeight: 1.7, maxWidth: 500 }}>
-               {t('agency.desc')}
-             </p>
-             <div>
-               <button onClick={() => { setAgencyTab(true); document.getElementById("planes")?.scrollIntoView(); }} className="btn" style={{ background: "#fff", color: "var(--text-1)", border: "none", padding: "1rem 2rem" }}>
-                 {t('agency.cta')}
-               </button>
-             </div>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 1rem", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem", alignSelf: "flex-start" }}>
+              <Building2 size={14} /> {t('agency.badge')}
+            </div>
+            <h2 style={{ fontSize: "2.5rem", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "1.5rem", lineHeight: 1.1 }}>
+              {t('agency.title')}
+            </h2>
+            <p style={{ fontSize: "1.1rem", color: "var(--text-3)", marginBottom: "2.5rem", lineHeight: 1.7, maxWidth: 500 }}>
+              {t('agency.desc')}
+            </p>
+            <div>
+              <button onClick={() => { setAgencyTab(true); document.getElementById("planes")?.scrollIntoView(); }} className="btn" style={{ background: "#fff", color: "var(--text-1)", border: "none", padding: "1rem 2rem" }}>
+                {t('agency.cta')}
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -316,7 +316,7 @@ const LandingPage = () => {
               {t('pricing.desc')}
             </p>
           </div>
-          
+
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "3.5rem", ...S.reveal(pricingInView, 0.2) }}>
             <div style={{ display: "inline-flex", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 99, padding: 6, gap: 4, boxShadow: "0 2px 10px rgba(0,0,0,0.02)" }}>
               {[t('pricing.tab_b2c'), t('pricing.tab_b2b')].map((label, i) => (

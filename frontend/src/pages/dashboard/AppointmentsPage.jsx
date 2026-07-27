@@ -968,8 +968,7 @@ const AppointmentsPage = () => {
                   })
               }
             </tbody>
-            </table>
-          </div>
+          </table>
         </div>
 
         {/* footer */}
