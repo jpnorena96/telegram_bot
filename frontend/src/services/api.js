@@ -125,6 +125,10 @@ export const api = {
     });
     return handleResponse(response);
   },
+  async getWompiPublicKey() {
+    const response = await fetch(`${API_URL}/payments/public-key`);
+    return response.json();
+  },
   async getAdminSummary() {
     const r = await fetch(`${API_URL}/admin/summary`, { headers: getHeaders() });
     return handleResponse(r);

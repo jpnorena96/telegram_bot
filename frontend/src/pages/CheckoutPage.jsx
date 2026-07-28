@@ -14,9 +14,7 @@ const CheckoutPage = () => {
   
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  
-  // Use Production Key from env if available, otherwise sandbox
-  const WOMPI_PUB_KEY = import.meta.env.VITE_WOMPI_PUB_KEY || 'pub_test_Q5yDA9xoKdePzhSGeZaQS1mNNqAMxcgw';
+  const [wompiPubKey, setWompiPubKey] = useState(null);
 
   useEffect(() => {
     if (!userId || !role) {
@@ -33,6 +31,13 @@ const CheckoutPage = () => {
       script.async = true;
       document.body.appendChild(script);
     }
+
+    // Fetch public key from backend
+    api.getWompiPublicKey().then(res => {
+      setWompiPubKey(res.public_key);
+    }).catch(() => {
+      setWompiPubKey('pub_test_Q5yDA9xoKdePzhSGeZaQS1mNNqAMxcgw');
+    });
   }, [userId, role, navigate]);
 
   const planName = role === 'TRAVEL_AGENCY' ? 'Plan Start (B2B)' : 'Plan Estándar (B2C)';
@@ -44,13 +49,17 @@ const CheckoutPage = () => {
       toast.error('Cargando pasarela de pagos. Por favor, intenta de nuevo en unos segundos.');
       return;
     }
+    if (!wompiPubKey) {
+      toast.error('Obteniendo llave de seguridad...');
+      return;
+    }
 
     // Wompi Widget Integration
     const checkout = new window.WidgetCheckout({
       currency: 'COP',
       amountInCents: priceCOP,
       reference: `ADELANTAVISA_${userId}_${Date.now()}`,
-      publicKey: WOMPI_PUB_KEY,
+      publicKey: wompiPubKey,
       redirectUrl: `${window.location.origin}/checkout?user_id=${userId}&role=${role}&email=${email}`,
       customerData: {
         email: email,
@@ -181,7 +190,7 @@ const CheckoutPage = () => {
           </div>
 
           <button 
-            onClick={WOMPI_PUB_KEY.includes('test') ? handleFakePayment : handleWompiPayment} 
+            onClick={wompiPubKey?.includes('test') ? handleFakePayment : handleWompiPayment} 
             disabled={loading}
             className="btn btn-lime" 
             style={{ width: '100%', padding: '1rem', fontSize: '1rem', display: 'flex', justifyContent: 'center' }}

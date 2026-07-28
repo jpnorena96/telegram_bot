@@ -7,6 +7,13 @@ from .auth import get_db
 
 router = APIRouter()
 
+@router.get("/public-key")
+async def get_public_key():
+    pub_key = os.getenv("WOMPI_PUB_KEY")
+    if not pub_key:
+        return {"public_key": "pub_test_Q5yDA9xoKdePzhSGeZaQS1mNNqAMxcgw"}
+    return {"public_key": pub_key}
+
 class PaymentVerificationRequest(BaseModel):
     user_id: int
     transaction_id: str
