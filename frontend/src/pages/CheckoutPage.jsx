@@ -40,9 +40,10 @@ const CheckoutPage = () => {
     });
   }, [userId, role, navigate]);
 
-  const planName = role === 'TRAVEL_AGENCY' ? 'Plan Start (B2B)' : 'Plan Estándar (B2C)';
-  const planPrice = role === 'TRAVEL_AGENCY' ? 6900 : 8900; 
-  const priceCOP = role === 'TRAVEL_AGENCY' ? 27600000 : 35600000; // in cents (COP) -> 276,000 COP
+  // 50% Discount applied
+  const planName = role === 'TRAVEL_AGENCY' ? 'Plan Start (B2B) - Mensual' : 'Plan Estándar (B2C) - Mensual';
+  const planPrice = role === 'TRAVEL_AGENCY' ? 3450 : 4450; 
+  const priceCOP = role === 'TRAVEL_AGENCY' ? 13800000 : 17800000; // 138k / 178k (50% off of 276k/356k)
 
   const handleWompiPayment = () => {
     if (!window.WidgetCheckout) {
@@ -165,19 +166,26 @@ const CheckoutPage = () => {
             </p>
           </div>
 
-          <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div style={{ padding: '1.5rem', border: '1px solid var(--border)', borderRadius: '12px', marginBottom: '1.5rem', background: 'var(--surface)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
               <div>
-                <span className="tag tag-lime">{planName}</span>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-3)', marginTop: '0.5rem', fontFamily: 'var(--font-mono)' }}>
-                  Usuario: {email}
-                </div>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent)', background: 'rgba(99,102,241,0.1)', padding: '0.2rem 0.6rem', borderRadius: '12px' }}>
+                  {planName}
+                </span>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-2)', marginTop: '0.5rem', fontFamily: 'monospace' }}>Usuario: {email}</p>
+                {role === 'TRAVEL_AGENCY' && (
+                  <p style={{ fontSize: '0.85rem', color: 'var(--lime)', marginTop: '0.25rem', fontWeight: '500' }}>⭐ 50% OFF por 3 meses</p>
+                )}
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-1)' }}>
-                  ${priceCOP / 100000} <span style={{ fontSize: '0.9rem', color: 'var(--text-3)', fontWeight: 500 }}>k COP</span>
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-1)' }}>
+                  ${(priceCOP / 100000).toFixed(0)}<span style={{ fontSize: '0.9rem', color: 'var(--text-2)', fontWeight: 400 }}> k COP/mes</span>
+                </div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-2)', textDecoration: 'line-through' }}>
+                  ${((priceCOP * 2) / 100000).toFixed(0)} k COP
                 </div>
               </div>
+            </div>
             </div>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-2)' }}>

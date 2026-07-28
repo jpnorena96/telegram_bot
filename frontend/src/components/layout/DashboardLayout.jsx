@@ -28,6 +28,7 @@ const DashboardLayout = () => {
 
     // Real-time SSE Connection
     const sseUrl = `${api.url.replace('/api', '')}/api/webhooks/stream`;
+    
     const sse = new EventSource(sseUrl);
     
     sse.addEventListener('session_revoked', (e) => {

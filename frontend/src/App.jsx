@@ -17,6 +17,8 @@ import AdminAgenciesPage from './pages/dashboard/AdminAgenciesPage';
 import SearchPage from './pages/dashboard/SearchPage';
 import NotificationsHistory from './pages/dashboard/NotificationsHistory';
 import AgencyProfilePage from './pages/dashboard/AgencyProfilePage';
+import VisaProcessesPage from './pages/dashboard/VisaProcessesPage';
+import ClientPortalPage from './pages/ClientPortalPage';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -47,6 +49,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/client-portal/:id" element={<ClientPortalPage />} />
 
         {/* Dashboard Routes */}
         <Route path="/dashboard" element={<DashboardLayout />}>
@@ -60,6 +63,7 @@ function App() {
           <Route path="buscar" element={<SearchPage />} />
           <Route path="notificaciones" element={<NotificationsHistory />} />
           <Route path="agencia-perfil" element={<AgencyProfilePage />} />
+          <Route path="visa-processes" element={<VisaProcessesPage />} />
         </Route>
       </Routes>
     </Router>

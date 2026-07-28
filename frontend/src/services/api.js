@@ -18,12 +18,15 @@ const handleResponse = async (response) => {
   return response.json();
 };
 
-const getHeaders = () => {
+const getHeaders = (isFormData = false) => {
   const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
+  const headers = {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
+  return headers;
 };
 
 export const api = {

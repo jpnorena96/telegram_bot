@@ -145,14 +145,38 @@ const AgencyProfilePage = () => {
           </div>
 
           <div className="input-group">
-            <label className="input-label">URL del Logotipo (Opcional)</label>
-            <input 
-              type="url" 
-              className="input-field" 
-              placeholder="https://tudominio.com/logo.png" 
-              value={formData.logo_url}
-              onChange={e => setFormData({ ...formData, logo_url: e.target.value })}
-            />
+            <label className="input-label">Logo de la Agencia (PNG/JPG)</label>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              {formData.logo_url && (
+                <img src={formData.logo_url.startsWith('http') ? formData.logo_url : `${api.API_URL.replace('/api', '')}${formData.logo_url}`} alt="Logo" style={{ height: '40px', objectFit: 'contain', borderRadius: '4px', background: 'var(--bg)' }} />
+              )}
+              <input 
+                type="file" 
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const payload = new FormData();
+                  payload.append('file', file);
+                  try {
+                    const res = await fetch(`${api.API_URL}/users/logo`, {
+                      method: 'POST',
+                      headers: api.getHeaders(true), // pass true to exclude Content-Type for FormData
+                      body: payload
+                    });
+                    if (res.ok) {
+                      const data = await res.json();
+                      setFormData({ ...formData, logo_url: data.logo_url });
+                      toast.success('Logo subido correctamente');
+                    }
+                  } catch (err) {
+                    toast.error('Error al subir el logo');
+                  }
+                }}
+                style={{ flex: 1, color: 'var(--text-2)' }}
+              />
+            </div>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Suba su logo para que aparezca en el portal de sus clientes.</span>
           </div>
 
           <div className="input-group">

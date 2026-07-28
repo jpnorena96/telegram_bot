@@ -48,6 +48,17 @@ def migrate():
                 # Make existing administrators and system accounts active by default
                 cursor.execute("UPDATE users SET subscription_status = 'active' WHERE role IN ('ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER')")
                 conn.commit()
+
+        # Check if logo_url column exists
+        try:
+            cursor.execute("SELECT logo_url FROM users LIMIT 1")
+            print("Column 'logo_url' already exists.")
+            cursor.fetchall()
+        except mysql.connector.Error as err:
+            if "Unknown column" in str(err):
+                print("Adding 'logo_url' column to 'users' table...")
+                cursor.execute("ALTER TABLE users ADD COLUMN logo_url VARCHAR(512) NULL DEFAULT NULL")
+                conn.commit()
                 
         # Create visa_processes table
         print("Creating 'visa_processes' table...")

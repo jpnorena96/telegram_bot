@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 import mysql.connector
 import sys
 import os
+import shutil
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import DB_CONFIG
@@ -10,6 +11,40 @@ from backend.sse import sse_manager
 from datetime import datetime
 
 router = APIRouter()
+
+@router.post("/logo")
+async def upload_logo(file: UploadFile = File(...), current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    if current_user["roles"][0] != "TRAVEL_AGENCY":
+        raise HTTPException(status_code=403, detail="Only travel agencies can upload logos")
+        
+    user_id = current_user["id"]
+    file_ext = os.path.splitext(file.filename)[1]
+    filename = f"agency_{user_id}{file_ext}"
+    file_path = os.path.join("uploads/logos", filename)
+    
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    logo_url = f"/uploads/logos/{filename}"
+    
+    cursor = db.cursor()
+    cursor.execute("UPDATE users SET logo_url = %s WHERE id = %s", (logo_url, user_id))
+    db.commit()
+    cursor.close()
+    
+    return {"status": "success", "logo_url": logo_url}
+
+@router.get("/me/logo")
+def get_my_logo(current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT logo_url FROM users WHERE id = %s", (current_user["id"],))
+        user = cursor.fetchone()
+        return {"logo_url": user.get("logo_url") if user else None}
+    except Exception:
+        return {"logo_url": None}
+    finally:
+        cursor.close()
 
 @router.get("/")
 def get_users(current_user: dict = Depends(get_current_user), db = Depends(get_db)):
