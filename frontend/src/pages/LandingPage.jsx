@@ -79,17 +79,17 @@ const LandingPage = () => {
 
   const PLANS_CLIENT = [
     {
-      name: t('pricing.b2c_basic_name'), price: "$39", period: "pago único", desc: t('pricing.b2c_basic_desc'), highlight: false, badge: null,
+      name: t('pricing.b2c_basic_name'), price: "$19", originalPrice: "$39", period: "mes", desc: t('pricing.b2c_basic_desc'), highlight: false, badge: "50% OFF",
       features: ["Análisis de perfil DS-160", "Revisión experta de respuestas", "Guía de entrevista consular", "Soporte vía chat"],
       cta: t('pricing.cta_b2c'),
     },
     {
-      name: t('pricing.b2c_std_name'), price: "$89", period: "pago único", desc: t('pricing.b2c_std_desc'), highlight: true, badge: t('pricing.b2c_std_badge'),
+      name: t('pricing.b2c_std_name'), price: "$44", originalPrice: "$89", period: "mes", desc: t('pricing.b2c_std_desc'), highlight: true, badge: "50% OFF 3 MESES",
       features: ["Todo del plan Básico", "Cita en menos de 3 meses", "Bot rastreador 24/7", "Alertas SMS / Email en vivo", "Prioridad en agendamiento"],
       cta: t('pricing.cta_b2c'),
     },
     {
-      name: t('pricing.b2c_pro_name'), price: "$149", period: "pago único", desc: t('pricing.b2c_pro_desc'), highlight: false, badge: t('pricing.b2c_pro_badge'),
+      name: t('pricing.b2c_pro_name'), price: "$74", originalPrice: "$149", period: "mes", desc: t('pricing.b2c_pro_desc'), highlight: false, badge: "50% OFF",
       features: ["Todo del plan Estándar", "Cita garantizada < 30 días", "Motor de rastreo VIP", "Simulacro de entrevista (1h)", "Atención telefónica dedicada"],
       cta: t('pricing.cta_b2c'),
     },
@@ -97,12 +97,12 @@ const LandingPage = () => {
 
   const PLANS_AGENCY = [
     {
-      name: t('pricing.b2b_start_name'), price: "$69", period: t('pricing.b2b_start_period'), desc: t('pricing.b2b_start_desc'),
+      name: t('pricing.b2b_start_name'), price: "$34", originalPrice: "$69", period: "mes", desc: t('pricing.b2b_start_desc'), highlight: true, badge: "50% OFF 3 MESES",
       features: ["Portal Marca Blanca (White-label)", "Hasta 50 clientes simultáneos", "Dashboard de monitoreo global", "Notificaciones B2C automáticas", "Soporte técnico estándar"],
       cta: t('pricing.cta_b2b'),
     },
     {
-      name: t('pricing.b2b_pro_name'), price: "$149", period: t('pricing.b2b_pro_period'), desc: t('pricing.b2b_pro_desc'),
+      name: t('pricing.b2b_pro_name'), price: "$74", originalPrice: "$149", period: "mes", desc: t('pricing.b2b_pro_desc'), highlight: false, badge: "50% OFF 3 MESES",
       features: ["Todo en Agencia Starter", "Clientes y perfiles ilimitados", "Adelanto VIP (máxima prioridad)", "Dominio personalizado (CNAME)", "Ejecutivo de cuenta exclusivo"],
       cta: t('pricing.cta_b2b'),
     },
@@ -337,11 +337,16 @@ const LandingPage = () => {
                     </div>
                   )}
                   <div style={{ marginBottom: "0.5rem", fontSize: "0.9rem", fontWeight: 700, color: plan.highlight ? "var(--lime)" : "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
-                  <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem", marginBottom: "0.75rem" }}>
-                    <span style={{ fontSize: "3.5rem", fontFamily: "var(--font-heading)", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1, color: "var(--text-1)" }}>{plan.price}</span>
-                    <span style={{ fontSize: "0.85rem", color: "var(--text-3)", paddingBottom: "0.6rem", fontWeight: 600, textTransform: "uppercase" }}>{plan.period}</span>
+                  <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem", marginBottom: "0.25rem" }}>
+                    <div style={{ fontSize: "2.5rem", fontWeight: 800, color: "var(--text-1)", lineHeight: 1 }}>{plan.price}</div>
+                    <div style={{ fontSize: "0.875rem", color: "var(--text-3)", marginBottom: "0.4rem", fontWeight: 500, textTransform: "uppercase" }}>/ {plan.period}</div>
                   </div>
-                  <p style={{ color: "var(--text-3)", fontSize: "0.9rem", marginBottom: "2rem", lineHeight: 1.5 }}>{plan.desc}</p>
+                  {plan.originalPrice && (
+                    <div style={{ fontSize: "0.9rem", color: "var(--text-3)", textDecoration: "line-through", marginBottom: "1rem" }}>
+                      Antes: {plan.originalPrice}
+                    </div>
+                  )}
+                  <div style={{ fontSize: "0.95rem", color: "var(--text-2)", marginBottom: "2rem", lineHeight: 1.6, minHeight: 48 }}>{plan.desc}</div>
                   <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem 0", flex: 1 }}>
                     {plan.features.map((f, j) => (
                       <li key={j} style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem", alignItems: "flex-start" }}>
@@ -359,13 +364,23 @@ const LandingPage = () => {
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "2rem", maxWidth: 900, margin: "0 auto" }}>
               {PLANS_AGENCY.map((plan, i) => (
-                <div key={i} className="panel" style={{ padding: "3rem", position: "relative", border: i === 1 ? "2px solid var(--lime)" : "1px solid var(--border)", boxShadow: i === 1 ? "0 20px 40px rgba(79, 70, 229, 0.1)" : "0 4px 10px rgba(0,0,0,0.02)", ...S.reveal(true, i * 0.1) }}>
-                  <div style={{ marginBottom: "0.5rem", fontSize: "0.9rem", fontWeight: 700, color: i === 1 ? "var(--lime)" : "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
-                  <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem", marginBottom: "0.75rem" }}>
+                <div key={i} className="panel" style={{ padding: "3rem", position: "relative", border: plan.highlight ? "2px solid var(--lime)" : "1px solid var(--border)", boxShadow: plan.highlight ? "0 20px 40px rgba(79, 70, 229, 0.1)" : "0 4px 10px rgba(0,0,0,0.02)", ...S.reveal(true, i * 0.1) }}>
+                  {plan.badge && (
+                    <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", padding: "4px 16px", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.06em", background: "var(--lime)", color: "#fff", whiteSpace: "nowrap" }}>
+                      {plan.badge}
+                    </div>
+                  )}
+                  <div style={{ marginBottom: "0.5rem", fontSize: "0.9rem", fontWeight: 700, color: plan.highlight ? "var(--lime)" : "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
+                  <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem", marginBottom: "0.25rem" }}>
                     <span style={{ fontSize: "3.5rem", fontFamily: "var(--font-heading)", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1, color: "var(--text-1)" }}>{plan.price}</span>
-                    <span style={{ fontSize: "0.85rem", color: "var(--text-3)", paddingBottom: "0.6rem", fontWeight: 600, textTransform: "uppercase" }}>{plan.period}</span>
+                    <span style={{ fontSize: "0.85rem", color: "var(--text-3)", paddingBottom: "0.6rem", fontWeight: 600, textTransform: "uppercase" }}>/ {plan.period}</span>
                   </div>
-                  <p style={{ color: "var(--text-3)", fontSize: "0.95rem", marginBottom: "2.5rem", lineHeight: 1.6 }}>{plan.desc}</p>
+                  {plan.originalPrice && (
+                    <div style={{ fontSize: "0.9rem", color: "var(--text-3)", textDecoration: "line-through", marginBottom: "1rem" }}>
+                      Antes: {plan.originalPrice}
+                    </div>
+                  )}
+                  <p style={{ color: "var(--text-3)", fontSize: "0.95rem", marginBottom: "2.5rem", lineHeight: 1.6, minHeight: 48 }}>{plan.desc}</p>
                   <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2.5rem 0", flex: 1 }}>
                     {plan.features.map((f, j) => (
                       <li key={j} style={{ display: "flex", gap: "0.85rem", marginBottom: "1.25rem", alignItems: "flex-start" }}>
