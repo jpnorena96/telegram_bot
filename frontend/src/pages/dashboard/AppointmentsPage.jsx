@@ -963,7 +963,7 @@ const AppointmentsPage = () => {
                         {canEdit && (
                           <td style={{ textAlign: 'right' }}>
                             <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'flex-end' }}>
-                              {(currentRole === 'ADMINISTRATOR' || currentRole === 'AUDITOR') && (
+                              {(role === 'ADMINISTRATOR' || role === 'AUDITOR') && (
                                 <button onClick={() => openLogs(apt.id)} className="btn btn-icon btn-sm" title="Ver Logs de Consola">
                                   <Terminal size={14} />
                                 </button>
