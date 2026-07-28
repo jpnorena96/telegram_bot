@@ -321,6 +321,7 @@ def set_schedule_id_and_start(email: str, schedule_id: str, appointment_id: int 
             f"pm2 start script.py "
             f"--name {pm2_name} "
             f"--interpreter {base_path}/venv/bin/python "
+            f"--interpreter-args \"-u\" "
             f"--cwd {base_path}"
         )
         _run_ssh_command(ssh, pm2_cmd)
