@@ -197,7 +197,7 @@ const CheckoutPage = () => {
           >
             {loading ? 'Procesando...' : (
               <>
-                <CreditCard size={18} /> Pagar con Wompi {WOMPI_PUB_KEY.includes('test') && '(Simulación)'}
+                <CreditCard size={18} /> Pagar con Wompi {wompiPubKey?.includes('test') && '(Simulación)'}
               </>
             )}
           </button>
