@@ -82,7 +82,7 @@ const AgencyProfilePage = () => {
       </div>
 
       {profile && (
-        <div className="panel" style={{ display: 'flex', alignItems: 'center', justify-content: 'space-between', padding: '1.25rem', background: profile.status === 'approved' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(245, 158, 11, 0.05)', border: `1px solid ${profile.status === 'approved' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)'}` }}>
+        <div className="panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem', background: profile.status === 'approved' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(245, 158, 11, 0.05)', border: `1px solid ${profile.status === 'approved' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)'}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             {profile.status === 'approved' ? <CheckCircle2 size={24} style={{ color: '#10B981' }} /> : <AlertCircle size={24} style={{ color: '#F59E0B' }} />}
             <div>
