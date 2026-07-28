@@ -21,6 +21,17 @@ const CheckoutPage = () => {
   useEffect(() => {
     if (!userId || !role) {
       navigate('/login');
+      return;
+    }
+    
+    // Dynamically load Wompi script if it doesn't exist
+    if (!document.getElementById('wompi-script')) {
+      const script = document.createElement('script');
+      script.id = 'wompi-script';
+      script.src = 'https://checkout.wompi.co/widget.js';
+      script.type = 'text/javascript';
+      script.async = true;
+      document.body.appendChild(script);
     }
   }, [userId, role, navigate]);
 
@@ -29,6 +40,11 @@ const CheckoutPage = () => {
   const priceCOP = role === 'TRAVEL_AGENCY' ? 27600000 : 35600000; // in cents (COP) -> 276,000 COP
 
   const handleWompiPayment = () => {
+    if (!window.WidgetCheckout) {
+      toast.error('Cargando pasarela de pagos. Por favor, intenta de nuevo en unos segundos.');
+      return;
+    }
+
     // Wompi Widget Integration
     const checkout = new window.WidgetCheckout({
       currency: 'COP',
@@ -121,9 +137,6 @@ const CheckoutPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', background: 'var(--surface-2)' }}>
-      {/* ── Add Wompi Script ── */}
-      <script src="https://checkout.wompi.co/widget.js" type="text/javascript"></script>
-      
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', marginBottom: '2rem' }} onClick={() => navigate('/')}>
