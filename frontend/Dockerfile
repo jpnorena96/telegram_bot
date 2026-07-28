@@ -16,6 +16,8 @@ COPY . .
 
 # Compilar la aplicación para producción (esto genera la carpeta /dist)
 # Puedes pasar variables de entorno aquí si Vite las necesita en build-time
+ARG VITE_WOMPI_PUB_KEY
+ENV VITE_WOMPI_PUB_KEY=$VITE_WOMPI_PUB_KEY
 RUN npm run build
 
 # ==========================================
