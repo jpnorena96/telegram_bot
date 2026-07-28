@@ -8,6 +8,7 @@ const LoginPage = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [paywallData, setPaywallData] = useState(null); // Modal state for 402
 
   const submit = async (e) => {
     e.preventDefault();
@@ -21,13 +22,8 @@ const LoginPage = () => {
       navigate('/dashboard');
     } catch (err) {
       if (err.status === 402 && err.data) {
-        // Redirigir a checkout con params
-        const params = new URLSearchParams({
-          user_id: err.data.user_id,
-          role: err.data.role,
-          email: err.data.email
-        });
-        navigate(`/checkout?${params.toString()}`);
+        // Show Paywall Modal instead of an abrupt redirect
+        setPaywallData(err.data);
       } else {
         setError(err.message || 'Credenciales inválidas. Por favor, intente de nuevo.');
       }
@@ -146,6 +142,54 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
+
+      {/* ── PAYWALL MODAL ── */}
+      {paywallData && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem' }}>
+          <div className="panel" style={{ width: '100%', maxWidth: '450px', padding: '2.5rem', textAlign: 'center', position: 'relative' }}>
+            <div style={{ background: 'rgba(239, 68, 68, 0.1)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+              <ShieldCheck size={32} color="#ef4444" />
+            </div>
+            
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.75rem', fontFamily: 'var(--font-heading)' }}>
+              Suscripción Requerida
+            </h2>
+            <p style={{ color: 'var(--text-2)', fontSize: '0.95rem', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+              Tu cuenta ha sido creada exitosamente, pero no detectamos una membresía activa. Para acceder a las herramientas profesionales y la gestión de visas, debes activar tu plan.
+            </p>
+
+            <div style={{ background: 'var(--bg)', border: '1px solid var(--border-2)', borderRadius: '12px', padding: '1.25rem', marginBottom: '2rem', textAlign: 'left' }}>
+              <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.5rem' }}>Pasos a seguir:</div>
+              <ul style={{ margin: 0, paddingLeft: '1.5rem', color: 'var(--text-2)', fontSize: '0.85rem', lineHeight: 1.7 }}>
+                <li>Selecciona tu plan según tu rol ({paywallData.role}).</li>
+                <li>Completa el pago seguro mediante Wompi.</li>
+                <li>Obtén acceso inmediato al Dashboard y herramientas.</li>
+              </ul>
+            </div>
+
+            <button 
+              onClick={() => {
+                const params = new URLSearchParams({
+                  user_id: paywallData.user_id,
+                  role: paywallData.role,
+                  email: paywallData.email
+                });
+                navigate(`/checkout?${params.toString()}`);
+              }}
+              className="btn btn-lime"
+              style={{ width: '100%', padding: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', fontSize: '1rem' }}
+            >
+              Comprar Suscripción <ArrowRight size={18} />
+            </button>
+            <button 
+              onClick={() => setPaywallData(null)}
+              style={{ marginTop: '1rem', background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', fontSize: '0.85rem' }}
+            >
+              Cancelar y volver
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── RIGHT: Visual / Branding Section ── */}
       <div style={{ flex: '1 1 50%', display: 'none', '@media (min-width: 900px)': { display: 'block' }, position: 'relative', background: 'var(--lime)', overflow: 'hidden' }} className="hide-mobile">
