@@ -672,7 +672,10 @@ const CreateWizard = ({ onClose, onCreated }) => {
   );
 };
 
-/* ── MAIN ── */
+/* ── */
+import Modal from '../../components/Modal';
+import BotStatusViewer from '../../components/BotStatusViewer';
+
 const AppointmentsPage = () => {
   const { t } = useTranslation();
   const { role } = useOutletContext();
@@ -1005,22 +1008,13 @@ const AppointmentsPage = () => {
 
       {/* Logs Modal */}
       {logsModal.open && createPortal(
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem', backdropFilter: 'blur(4px)' }}>
-          <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
-            <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Terminal size={18} color="var(--lime)" /> Logs del Sistema PM2 (ID: {logsModal.aptId})
-              </h2>
-              <button onClick={() => setLogsModal({ ...logsModal, open: false })} className="btn btn-icon btn-sm"><X size={16} /></button>
-            </div>
-            <div style={{ padding: '1rem', flex: 1, overflowY: 'auto', background: '#1e1e1e', color: '#00ff00', fontFamily: 'monospace', fontSize: '0.8rem', whiteSpace: 'pre-wrap', minHeight: '300px' }}>
-              {logsModal.loading ? 'Cargando logs desde el servidor...' : logsModal.data}
-            </div>
-            <div style={{ padding: '1rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end' }}>
-              <button onClick={() => openLogs(logsModal.aptId)} className="btn btn-outline btn-sm">Actualizar</button>
-            </div>
-          </div>
-        </div>,
+        <BotStatusViewer 
+          aptId={logsModal.aptId} 
+          rawLogs={logsModal.data} 
+          loading={logsModal.loading} 
+          onClose={() => setLogsModal({ ...logsModal, open: false })} 
+          onRefresh={openLogs} 
+        />,
         document.body
       )}
     </div>
