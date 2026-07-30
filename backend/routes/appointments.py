@@ -231,6 +231,24 @@ def get_appointment(appointment_id: int, current_user: dict = Depends(get_curren
         
     return apt
 
+@router.get("/{appointment_id}/logs")
+def get_appointment_logs(appointment_id: int, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT email, user_id FROM user_appointments WHERE id = %s", (appointment_id,))
+        apt = cursor.fetchone()
+        
+        if not apt:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+            
+        role = current_user["roles"][0]
+        if role not in ["ADMINISTRATOR", "AUDITOR"] and apt["user_id"] != current_user["id"]:
+            raise HTTPException(status_code=403, detail="Not authorized")
+            
+        logs = vps.get_pm2_logs(apt["email"], appointment_id)
+        return {"status": "ok", "logs": logs}
+    finally:
+        cursor.close()
 
 @router.post("/{appointment_id}/start")
 def start_appointment(appointment_id: int, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
@@ -387,6 +405,13 @@ def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest,
         if role not in ["ADMINISTRATOR", "AUDITOR"] and apt["user_id"] != current_user["id"]:
             raise HTTPException(status_code=403, detail="Not authorized")
             
+        # 0. Check Balance for Natural Person
+        if role == "NATURAL_PERSON":
+            cursor.execute("SELECT balance FROM users WHERE id = %s", (current_user["id"],))
+            u_row = cursor.fetchone()
+            if not u_row or u_row["balance"] < 50000:
+                raise HTTPException(status_code=402, detail="Saldo insuficiente. Por favor recarga tu balance.")
+            
         # 1. Validar que no esté duplicado
         cursor.execute("SELECT id FROM user_appointments WHERE schedule_id = %s", (req.schedule_id,))
         existing = cursor.fetchone()
@@ -400,6 +425,9 @@ def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest,
                 "UPDATE user_appointments SET schedule_id = %s, schedule_names = %s, status = 'pending' WHERE id = %s",
                 (req.schedule_id, req.schedule_names, appointment_id)
             )
+            # Deduct balance
+            if role == "NATURAL_PERSON":
+                cursor.execute("UPDATE users SET balance = balance - 50000 WHERE id = %s", (current_user["id"],))
             # Insertar notificación
             cursor.execute(
                 "INSERT INTO notifications (user_id, message, status) VALUES (%s, %s, 'success')",

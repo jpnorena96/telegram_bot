@@ -59,6 +59,18 @@ def migrate():
                 print("Adding 'logo_url' column to 'users' table...")
                 cursor.execute("ALTER TABLE users ADD COLUMN logo_url VARCHAR(512) NULL DEFAULT NULL")
                 conn.commit()
+
+        # Check if balance column exists
+        try:
+            cursor.execute("SELECT balance FROM users LIMIT 1")
+            print("Column 'balance' already exists.")
+            cursor.fetchall()
+        except mysql.connector.Error as err:
+            if "Unknown column" in str(err):
+                print("Adding 'balance' column to 'users' table...")
+                cursor.execute("ALTER TABLE users ADD COLUMN balance INT DEFAULT 0")
+                conn.commit()
+                conn.commit()
                 
         # Create visa_processes table
         print("Creating 'visa_processes' table...")

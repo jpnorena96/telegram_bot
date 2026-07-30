@@ -3,7 +3,7 @@ from pydantic import BaseModel
 import mysql.connector
 import os
 import requests
-from .auth import get_db
+from .auth import get_db, get_current_user
 
 router = APIRouter()
 
@@ -71,6 +71,79 @@ def verify_payment(req: PaymentVerificationRequest, db = Depends(get_db)):
         db.commit()
         
         return {"status": "success", "message": "Pago verificado exitosamente. Suscripción activada."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+
+class TopUpVerificationRequest(BaseModel):
+    transaction_id: str
+    amount: int
+
+@router.post("/topup-verify")
+def verify_topup_payment(req: TopUpVerificationRequest, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    if not req.transaction_id:
+        raise HTTPException(status_code=400, detail="Falta el transaction_id de Wompi")
+
+    wompi_prv_key = os.getenv("WOMPI_PRV_KEY")
+    
+    if wompi_prv_key:
+        is_sandbox = "test" in wompi_prv_key
+        wompi_url = "https://sandbox.wompi.co/v1" if is_sandbox else "https://production.wompi.co/v1"
+        
+        try:
+            res = requests.get(
+                f"{wompi_url}/transactions/{req.transaction_id}",
+                headers={"Authorization": f"Bearer {wompi_prv_key}"},
+                timeout=10
+            )
+            if res.status_code != 200:
+                raise HTTPException(status_code=400, detail="Transacción no encontrada en Wompi")
+                
+            tx_data = res.json().get("data", {})
+            if tx_data.get("status") != "APPROVED":
+                raise HTTPException(status_code=400, detail=f"Pago no aprobado. Estado actual: {tx_data.get('status')}")
+                
+        except requests.RequestException:
+            raise HTTPException(status_code=500, detail="Error de comunicación con Wompi")
+    else:
+        if not req.transaction_id.startswith("sandbox_"):
+            raise HTTPException(status_code=400, detail="Llave privada de Wompi no configurada en el servidor.")
+
+    cursor = db.cursor(dictionary=True)
+    try:
+        # Create transactions table if it doesn't exist
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS processed_transactions (
+                transaction_id VARCHAR(100) PRIMARY KEY,
+                user_id INT NOT NULL,
+                amount INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        
+        # Check if transaction already processed
+        cursor.execute("SELECT transaction_id FROM processed_transactions WHERE transaction_id = %s", (req.transaction_id,))
+        if cursor.fetchone():
+            raise HTTPException(status_code=400, detail="Esta transacción ya fue procesada.")
+            
+        real_amount = req.amount
+        if wompi_prv_key:
+            # Prevent amount spoofing by using the real amount from Wompi
+            try:
+                real_amount = tx_data.get("amount_in_cents", req.amount * 100) // 100
+            except:
+                pass
+                
+        # Record transaction and update balance atomically
+        cursor.execute("INSERT INTO processed_transactions (transaction_id, user_id, amount) VALUES (%s, %s, %s)", 
+                      (req.transaction_id, current_user["id"], real_amount))
+        
+        cursor.execute("UPDATE users SET balance = balance + %s WHERE id = %s", (real_amount, current_user["id"]))
+        db.commit()
+        
+        return {"status": "success", "message": f"Recarga verificada exitosamente. Se abonaron ${real_amount} COP."}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

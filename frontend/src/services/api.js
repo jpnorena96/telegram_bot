@@ -34,11 +34,27 @@ export const api = {
   url: API_URL,
 
   // Auth Methods
+  async getMe() {
+    const response = await fetch(`${API_URL}/users/me`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  
   async login(email, password) {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
+    });
+    return handleResponse(response);
+  },
+
+  async verifyTopUpPayment(data) {
+    const response = await fetch(`${API_URL}/payments/topup-verify`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
     });
     return handleResponse(response);
   },
@@ -104,6 +120,19 @@ export const api = {
     return handleResponse(response);
   },
 
+  async getAppointment(id) {
+    const response = await fetch(`${API_URL}/appointments/${id}`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  async getLogs(id) {
+    const response = await fetch(`${API_URL}/appointments/${id}/logs`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+
   async createAppointment(data) {
     const response = await fetch(`${API_URL}/appointments/`, {
       method: 'POST',
@@ -116,6 +145,20 @@ export const api = {
   async deleteAppointment(id) {
     const response = await fetch(`${API_URL}/appointments/${id}`, {
       method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  async getProcessDetails(id) {
+    const response = await fetch(`${API_URL}/documents/processes/${id}`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  async markProcessReady(id) {
+    const response = await fetch(`${API_URL}/visa-processes/${id}/mark-ready`, {
+      method: 'POST',
       headers: getHeaders(),
     });
     return handleResponse(response);

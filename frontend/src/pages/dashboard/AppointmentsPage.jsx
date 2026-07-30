@@ -768,7 +768,7 @@ const AppointmentsPage = () => {
   const openLogs = async (id) => {
     setLogsModal({ open: true, data: '', loading: true, aptId: id });
     try {
-      const res = await api.getAdminLogs(id);
+      const res = await api.getLogs(id);
       setLogsModal({ open: true, data: res.logs || 'Sin logs', loading: false, aptId: id });
     } catch (err) {
       setLogsModal({ open: true, data: err.message || 'Error fetching logs', loading: false, aptId: id });

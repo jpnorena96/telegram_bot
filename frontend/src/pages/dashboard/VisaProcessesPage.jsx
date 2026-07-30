@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { FileText, Plus, Link as LinkIcon, Eye, CheckCircle2 } from 'lucide-react';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
+import AgencyDocumentModal from '../../components/AgencyDocumentModal';
 
 const VisaProcessesPage = () => {
   const { t } = useTranslation();
@@ -10,6 +11,9 @@ const VisaProcessesPage = () => {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [newEmail, setNewEmail] = useState('');
+  
+  const [selectedProcessId, setSelectedProcessId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const load = async () => {
     try {
@@ -113,8 +117,24 @@ const VisaProcessesPage = () => {
                   </span>
                 </td>
                 <td style={{ textAlign: 'right' }}>
-                  <button onClick={() => copyLink(p.id)} className="btn btn-icon btn-sm" title="Copiar Link para Cliente" style={{ marginRight: '0.5rem' }}>
-                    <LinkIcon size={16} />
+                  <button 
+                    onClick={() => {
+                      setSelectedProcessId(p.id);
+                      setIsModalOpen(true);
+                    }} 
+                    className="btn btn-icon btn-sm" 
+                    title="Ver Documentos y Dar de Alta" 
+                    style={{ marginRight: '0.5rem', background: 'rgba(255,255,255,0.05)', color: 'var(--text-1)' }}
+                  >
+                    <Eye size={16} />
+                  </button>
+                  <button 
+                    onClick={() => copyLink(p.id)} 
+                    className="btn btn-sm" 
+                    title="Copiar Link para Cliente" 
+                    style={{ background: 'var(--lime)', color: '#000', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.4rem 0.75rem', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
+                  >
+                    <LinkIcon size={14} /> Link
                   </button>
                 </td>
               </tr>
@@ -129,6 +149,13 @@ const VisaProcessesPage = () => {
           </tbody>
         </table>
       </div>
+
+      <AgencyDocumentModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        processId={selectedProcessId}
+        onStatusUpdate={load}
+      />
     </div>
   );
 };

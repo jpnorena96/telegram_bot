@@ -186,7 +186,6 @@ const CheckoutPage = () => {
                 </div>
               </div>
             </div>
-            </div>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-2)' }}>
                 <ShieldCheck size={16} color="var(--lime)" /> Acceso completo al Dashboard

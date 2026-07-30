@@ -46,6 +46,28 @@ def get_my_logo(current_user: dict = Depends(get_current_user), db = Depends(get
     finally:
         cursor.close()
 
+@router.get("/me")
+def get_my_profile(current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    try:
+        # If balance column doesn't exist yet, this might throw an error on old DBs,
+        # but we already ran the migration. We'll select common fields.
+        cursor.execute("SELECT id, email, full_name, role, is_authorized, plan, balance, whatsapp_number, logo_url FROM users WHERE id = %s", (current_user["id"],))
+        user = cursor.fetchone()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
+    except mysql.connector.Error as err:
+        if "Unknown column 'balance'" in str(err):
+             cursor.execute("SELECT id, email, full_name, role, is_authorized, plan, whatsapp_number, logo_url FROM users WHERE id = %s", (current_user["id"],))
+             user = cursor.fetchone()
+             if user:
+                 user["balance"] = 0
+             return user
+        raise HTTPException(status_code=500, detail=str(err))
+    finally:
+        cursor.close()
+
 @router.get("/")
 def get_users(current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     role = current_user["roles"][0]

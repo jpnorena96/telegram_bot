@@ -63,6 +63,20 @@ def get_public_process(process_id: int, db = Depends(get_db)):
         "visa_category": process["visa_category"]
     }
 
+@router.post("/{process_id}/mark-ready")
+def mark_process_ready(process_id: int, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    # Ensure they own it
+    cursor.execute("SELECT id FROM visa_processes WHERE id = %s AND user_id = %s", (process_id, current_user["id"]))
+    if not cursor.fetchone():
+        cursor.close()
+        raise HTTPException(status_code=403, detail="Not authorized")
+        
+    cursor.execute("UPDATE visa_processes SET status = 'Listo para Alta' WHERE id = %s", (process_id,))
+    db.commit()
+    cursor.close()
+    return {"status": "ok", "message": "Expediente marcado como Listo para Alta"}
+
 @router.post("/public/{process_id}/submit")
 async def submit_public_process(
     process_id: int,

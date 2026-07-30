@@ -10,6 +10,8 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
+import Modal from '../../components/Modal';
+import TopUpModal from '../../components/TopUpModal';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -61,6 +63,9 @@ const OverviewPage = () => {
   const [timeFilter, setTimeFilter] = useState('Semana');
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(null);
+  const [isTopUpOpen, setIsTopUpOpen] = useState(false);
+  const [wompiKey, setWompiKey] = useState('');
 
   const isAdmin = role === 'ADMINISTRATOR' || role === 'AUDITOR';
 
@@ -68,10 +73,16 @@ const OverviewPage = () => {
     if (!isAdmin) {
       const fetchApts = async () => {
         try {
-          const data = await api.getAppointments();
+          const [data, meData, wompiData] = await Promise.all([
+            api.getAppointments(),
+            api.getMe(),
+            api.getWompiPublicKey()
+          ]);
           setAppointments(data);
+          setProfile(meData);
+          setWompiKey(wompiData.public_key);
         } catch (e) {
-          toast.error('Error cargando citas');
+          toast.error('Error cargando datos');
         } finally {
           setLoading(false);
         }
@@ -186,30 +197,37 @@ const OverviewPage = () => {
           </div>
         )}
 
-        {/* Header */}
-        <div style={{ marginBottom: '2.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '1.5rem' }}>
-          <h1 style={{ fontSize: '1.75rem', fontFamily: 'var(--font-heading)', fontWeight: 600, margin: '0 0 0.25rem 0', color: 'var(--text-1)', letterSpacing: '-0.01em' }}>
-            Resumen de Cuenta
-          </h1>
-          <p style={{ margin: 0, color: 'var(--text-2)', fontSize: '0.95rem' }}>
-            Bienvenido, {userName || 'Cliente'}. Revise el estado general de sus procesos migratorios.
-          </p>
+        <div className="corp-header" style={{ marginBottom: '2.5rem' }}>
+          <h1 className="corp-title" style={{ fontSize: '1.75rem', fontFamily: 'var(--font-heading)', fontWeight: 600, margin: '0 0 0.25rem 0', color: 'var(--text-1)' }}>Hola, {userName}</h1>
+          <p className="corp-subtitle" style={{ margin: 0, color: 'var(--text-2)', fontSize: '0.95rem' }}>Aquí está el resumen de tus procesos de visado.</p>
         </div>
 
-        {/* KPIs Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-          <div className="corp-card corp-stat">
-            <span className="corp-stat-label">Trámites Activos</span>
-            <span className="corp-stat-value">{total}</span>
-          </div>
-          <div className="corp-card corp-stat">
-            <span className="corp-stat-label">Citas Aseguradas</span>
-            <span className="corp-stat-value">{aprobadas}</span>
-          </div>
-          <div className="corp-card corp-stat">
-            <span className="corp-stat-label">En Progreso</span>
-            <span className="corp-stat-value">{buscando}</span>
-          </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+          <StatCard 
+            label="Citas Creadas" 
+            value={total} 
+            icon={FileText} 
+          />
+          <StatCard 
+            label="En Búsqueda Activa" 
+            value={buscando} 
+            icon={Search} 
+          />
+          {role === 'NATURAL_PERSON' && (
+            <div style={{ background: 'linear-gradient(135deg, var(--surface) 0%, rgba(163, 230, 53, 0.05) 100%)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p style={{ margin: '0 0 0.5rem 0', color: 'var(--text-3)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Balance de Citas</p>
+                  <h3 style={{ margin: 0, color: 'var(--text-1)', fontSize: '2rem', fontWeight: 800, fontFamily: 'var(--font-heading)' }}>
+                    ${((profile?.balance || 0) / 1000).toFixed(0)}k <span style={{fontSize: '0.9rem', color: 'var(--text-3)', fontWeight: 400}}>COP</span>
+                  </h3>
+                </div>
+                <button onClick={() => setIsTopUpOpen(true)} className="btn btn-lime" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', cursor: 'pointer' }}>
+                  Recargar
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Main Content Area */}
@@ -284,6 +302,16 @@ const OverviewPage = () => {
           </div>
 
         </div>
+
+        <TopUpModal 
+          isOpen={isTopUpOpen} 
+          onClose={() => setIsTopUpOpen(false)} 
+          wompiPubKey={wompiKey} 
+          email={profile?.email}
+          onTopUpSuccess={() => {
+             api.getMe().then(p => setProfile(p));
+          }}
+        />
       </div>
     );
   }
