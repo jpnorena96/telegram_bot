@@ -79,17 +79,17 @@ const LandingPage = () => {
 
   const PLANS_CLIENT = [
     {
-      name: t('pricing.b2c_basic_name'), price: "$19", originalPrice: "$39", period: "mes", desc: t('pricing.b2c_basic_desc'), highlight: false, badge: "50% OFF",
+      name: t('pricing.b2c_basic_name'), price: "$19", originalPrice: "$39", period: "persona", desc: t('pricing.b2c_basic_desc'), highlight: false, badge: "50% OFF",
       features: ["Análisis de perfil DS-160", "Revisión experta de respuestas", "Guía de entrevista consular", "Soporte vía chat"],
       cta: t('pricing.cta_b2c'),
     },
     {
-      name: t('pricing.b2c_std_name'), price: "$44", originalPrice: "$89", period: "mes", desc: t('pricing.b2c_std_desc'), highlight: true, badge: "50% OFF 3 MESES",
+      name: t('pricing.b2c_std_name'), price: "$44", originalPrice: "$89", period: "persona", desc: t('pricing.b2c_std_desc'), highlight: true, badge: "50% OFF",
       features: ["Todo del plan Básico", "Cita en menos de 3 meses", "Bot rastreador 24/7", "Alertas SMS / Email en vivo", "Prioridad en agendamiento"],
       cta: t('pricing.cta_b2c'),
     },
     {
-      name: t('pricing.b2c_pro_name'), price: "$74", originalPrice: "$149", period: "mes", desc: t('pricing.b2c_pro_desc'), highlight: false, badge: "50% OFF",
+      name: t('pricing.b2c_pro_name'), price: "$74", originalPrice: "$149", period: "persona", desc: t('pricing.b2c_pro_desc'), highlight: false, badge: "50% OFF",
       features: ["Todo del plan Estándar", "Cita garantizada < 30 días", "Motor de rastreo VIP", "Simulacro de entrevista (1h)", "Atención telefónica dedicada"],
       cta: t('pricing.cta_b2c'),
     },
@@ -332,7 +332,7 @@ const LandingPage = () => {
               {PLANS_CLIENT.map((plan, i) => (
                 <div key={i} className="panel" style={{ padding: "2.5rem", position: "relative", border: plan.highlight ? "2px solid var(--lime)" : "1px solid var(--border)", transform: plan.highlight ? "scale(1.03)" : "none", boxShadow: plan.highlight ? "0 20px 40px rgba(79, 70, 229, 0.1)" : "0 4px 10px rgba(0,0,0,0.02)", ...S.reveal(pricingInView, 0.1 + i * 0.1) }}>
                   {plan.badge && (
-                    <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", padding: "4px 16px", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.06em", background: "var(--lime)", color: "#fff", whiteSpace: "nowrap" }}>
+                    <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", padding: "4px 16px", borderRadius: 99, fontSize: "0.75rem", fontWeight: 800, letterSpacing: "0.06em", background: "var(--lime)", color: "#000", whiteSpace: "nowrap" }}>
                       {plan.badge}
                     </div>
                   )}
@@ -366,7 +366,7 @@ const LandingPage = () => {
               {PLANS_AGENCY.map((plan, i) => (
                 <div key={i} className="panel" style={{ padding: "3rem", position: "relative", border: plan.highlight ? "2px solid var(--lime)" : "1px solid var(--border)", boxShadow: plan.highlight ? "0 20px 40px rgba(79, 70, 229, 0.1)" : "0 4px 10px rgba(0,0,0,0.02)", ...S.reveal(true, i * 0.1) }}>
                   {plan.badge && (
-                    <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", padding: "4px 16px", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.06em", background: "var(--lime)", color: "#fff", whiteSpace: "nowrap" }}>
+                    <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", padding: "4px 16px", borderRadius: 99, fontSize: "0.75rem", fontWeight: 800, letterSpacing: "0.06em", background: "var(--lime)", color: "#000", whiteSpace: "nowrap" }}>
                       {plan.badge}
                     </div>
                   )}
