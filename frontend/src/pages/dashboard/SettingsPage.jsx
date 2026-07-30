@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutletContext } from 'react-router-dom';
-import { Save, Check, ShieldOff } from 'lucide-react';
+import { Save, Check, ShieldOff, CreditCard } from 'lucide-react';
+import PlanUpgradeModal from '../../components/PlanUpgradeModal';
+import { api } from '../../services/api';
 
 /* ── TOGGLE ── */
 const Toggle = ({ id, checked, onChange }) => (
@@ -48,6 +50,20 @@ const SettingsPage = () => {
 
   const save = () => { setSaved(true); setTimeout(() => setSaved(false), 3000); };
 
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [currentPlan, setCurrentPlan] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userId, setUserId] = useState('');
+
+  React.useEffect(() => {
+    // Fetch user details to get current plan
+    api.getMe().then(res => {
+      setCurrentPlan(res.user.subscription_plan || 'Plan Básico (B2C)');
+      setUserEmail(res.user.email);
+      setUserId(res.user.id);
+    }).catch(console.error);
+  }, []);
+
   if (!isAdmin && role !== 'NATURAL_PERSON' && role !== 'VISA_MANAGER' && role !== 'TRAVEL_AGENCY') {
     return (
       <div style={{ textAlign: 'center', padding: '5rem 2rem' }}>
@@ -76,6 +92,21 @@ const SettingsPage = () => {
           <span style={{ fontWeight: 700 }}>⚠ ATENCIÓN:</span>
           Los cambios afectan a TODOS los usuarios del sistema.
         </div>
+      )}
+
+      {/* Subscription */}
+      {!isAdmin && (
+        <Section label="SUSCRIPCIÓN Y PLANES">
+          <div style={{ padding: '1rem 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-1)' }}>PLAN ACTUAL</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--lime)', marginTop: '0.25rem' }}>{currentPlan}</div>
+            </div>
+            <button onClick={() => setUpgradeModalOpen(true)} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <CreditCard size={16} /> Cambiar Plan
+            </button>
+          </div>
+        </Section>
       )}
 
       {/* Profile */}
@@ -122,13 +153,22 @@ const SettingsPage = () => {
         </Section>
       )}
 
-      {/* Save */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', paddingBottom: '2rem' }}>
-        <button className="btn">CANCELAR</button>
-        <button className="btn btn-lime" onClick={save} style={{ minWidth: '160px', gap: '0.5rem' }}>
-          {saved ? <><Check size={13} /> GUARDADO</> : <><Save size={13} /> GUARDAR_CONFIG</>}
+      {/* Action */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+        <button onClick={save} className="btn btn-lime" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: saved ? 0.8 : 1 }}>
+          {saved ? <Check size={18} /> : <Save size={18} />}
+          {saved ? 'GUARDADO' : 'GUARDAR_CAMBIOS'}
         </button>
       </div>
+
+      <PlanUpgradeModal 
+        isOpen={upgradeModalOpen} 
+        onClose={() => setUpgradeModalOpen(false)} 
+        role={role} 
+        userId={userId} 
+        email={userEmail} 
+        currentPlanName={currentPlan} 
+      />
     </div>
   );
 };

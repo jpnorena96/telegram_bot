@@ -1,8 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { Globe, ArrowRight, ShieldCheck, CreditCard, CheckCircle2 } from 'lucide-react';
+import { Globe, ArrowRight, ShieldCheck, CheckCircle2, Loader2 } from 'lucide-react';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
+
+const PLANS_CLIENT = [
+  {
+    name: "Plan Básico (B2C)", price: "$19", priceCOP: 7600000, desc: "Análisis experto y guía documental.", highlight: false, badge: "50% OFF",
+    features: ["Análisis de perfil DS-160", "Revisión experta de respuestas", "Guía de entrevista consular", "Soporte vía chat"]
+  },
+  {
+    name: "Plan Estándar (B2C)", price: "$44", priceCOP: 17800000, desc: "Nuestro plan más popular para adelantar tu cita.", highlight: true, badge: "50% OFF",
+    features: ["Todo del plan Básico", "Cita en menos de 3 meses", "Bot rastreador 24/7", "Alertas SMS / Email en vivo", "Prioridad en agendamiento"]
+  },
+  {
+    name: "Plan Pro (B2C)", price: "$74", priceCOP: 29600000, desc: "Máxima prioridad y preparación.", highlight: false, badge: "50% OFF",
+    features: ["Todo del plan Estándar", "Cita garantizada < 30 días", "Motor de rastreo VIP", "Simulacro de entrevista (1h)", "Atención telefónica dedicada"]
+  }
+];
+
+const PLANS_AGENCY = [
+  {
+    name: "Plan Start (B2B)", price: "$34", priceCOP: 13800000, desc: "Ideal para agencias empezando.", highlight: true, badge: "50% OFF 3 MESES",
+    features: ["Portal Marca Blanca (White-label)", "Hasta 50 clientes simultáneos", "Dashboard de monitoreo global", "Notificaciones B2C automáticas", "Soporte técnico estándar"]
+  },
+  {
+    name: "Plan Pro (B2B)", price: "$74", priceCOP: 29600000, desc: "Para agencias establecidas.", highlight: false, badge: "50% OFF 3 MESES",
+    features: ["Todo en Agencia Starter", "Clientes y perfiles ilimitados", "Adelanto VIP (máxima prioridad)", "Dominio personalizado (CNAME)", "Ejecutivo de cuenta exclusivo"]
+  }
+];
 
 const CheckoutPage = () => {
   const [searchParams] = useSearchParams();
@@ -15,6 +41,9 @@ const CheckoutPage = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [wompiPubKey, setWompiPubKey] = useState(null);
+  
+  const availablePlans = role === 'TRAVEL_AGENCY' ? PLANS_AGENCY : PLANS_CLIENT;
+  const [selectedPlanIndex, setSelectedPlanIndex] = useState(role === 'TRAVEL_AGENCY' ? 0 : 1);
 
   useEffect(() => {
     if (!userId || !role) {
@@ -22,7 +51,7 @@ const CheckoutPage = () => {
       return;
     }
     
-    // Dynamically load Wompi script if it doesn't exist
+    // Dynamically load Wompi script
     if (!document.getElementById('wompi-script')) {
       const script = document.createElement('script');
       script.id = 'wompi-script';
@@ -32,18 +61,12 @@ const CheckoutPage = () => {
       document.body.appendChild(script);
     }
 
-    // Fetch public key from backend
     api.getWompiPublicKey().then(res => {
       setWompiPubKey(res.public_key);
     }).catch(() => {
       setWompiPubKey('pub_test_Q5yDA9xoKdePzhSGeZaQS1mNNqAMxcgw');
     });
   }, [userId, role, navigate]);
-
-  // 50% Discount applied
-  const planName = role === 'TRAVEL_AGENCY' ? 'Plan Start (B2B) - Mensual' : 'Plan Estándar (B2C) - Mensual';
-  const planPrice = role === 'TRAVEL_AGENCY' ? 3450 : 4450; 
-  const priceCOP = role === 'TRAVEL_AGENCY' ? 13800000 : 17800000; // 138k / 178k (50% off of 276k/356k)
 
   const handleWompiPayment = () => {
     if (!window.WidgetCheckout) {
@@ -55,31 +78,28 @@ const CheckoutPage = () => {
       return;
     }
 
-    // Wompi Widget Integration
+    const plan = availablePlans[selectedPlanIndex];
+
     const checkout = new window.WidgetCheckout({
       currency: 'COP',
-      amountInCents: priceCOP,
+      amountInCents: plan.priceCOP,
       reference: `ADELANTAVISA_${userId}_${Date.now()}`,
       publicKey: wompiPubKey,
       redirectUrl: `${window.location.origin}/checkout?user_id=${userId}&role=${role}&email=${email}`,
-      customerData: {
-        email: email,
-        fullName: 'Cliente AdelantaVisa'
-      }
+      customerData: { email: email, fullName: 'Cliente AdelantaVisa' }
     });
 
     checkout.open((result) => {
       const transaction = result.transaction;
       if (transaction.status === 'APPROVED') {
-        // Send to backend
-        handleRealPaymentVerify(transaction.id);
+        handleRealPaymentVerify(transaction.id, plan.name);
       } else {
         toast.error('El pago no fue aprobado.');
       }
     });
   };
 
-  const handleRealPaymentVerify = async (transactionId) => {
+  const handleRealPaymentVerify = async (transactionId, planName) => {
     setLoading(true);
     try {
       const res = await fetch(`${api.url}/payments/verify`, {
@@ -99,121 +119,99 @@ const CheckoutPage = () => {
       setTimeout(() => {
         navigate('/login');
       }, 3000);
-    } catch (e) {
-      toast.error(e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFakePayment = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${api.url}/payments/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userId,
-          transaction_id: 'sandbox_' + Math.random().toString(36).substring(7),
-          plan_name: planName
-        })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Error verificando pago');
-      
-      toast.success('Pago completado con éxito. Redirigiendo...');
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/login');
-      }, 3000);
-    } catch (e) {
-      toast.error(e.message);
-    } finally {
+    } catch (err) {
+      toast.error(err.message || 'Error en la verificación del pago');
       setLoading(false);
     }
   };
 
   if (success) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-2)' }}>
-        <div className="panel" style={{ textAlign: 'center', padding: '3rem', maxWidth: '400px' }}>
-          <CheckCircle2 size={48} style={{ color: 'var(--green)', margin: '0 auto 1.5rem' }} />
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>¡Pago Exitoso!</h2>
-          <p style={{ color: 'var(--text-2)' }}>Tu cuenta ha sido activada. Redirigiendo al inicio de sesión...</p>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', color: 'var(--text-1)' }}>
+        <div className="panel animate-in" style={{ padding: '3rem', textAlign: 'center', maxWidth: '400px' }}>
+          <CheckCircle2 size={64} style={{ color: 'var(--lime)', margin: '0 auto 1.5rem' }} />
+          <h2 style={{ marginBottom: '1rem', fontWeight: 800 }}>¡Pago Exitoso!</h2>
+          <p style={{ color: 'var(--text-3)', marginBottom: '2rem' }}>Tu suscripción ha sido activada correctamente.</p>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-2)' }}>Redirigiendo al inicio de sesión...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', background: 'var(--surface-2)' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', marginBottom: '2rem' }} onClick={() => navigate('/')}>
-          <Globe size={28} color="var(--lime)" strokeWidth={2.5} />
-          <span style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--text-1)' }}>
-            AdelantaVisa
-          </span>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text-1)', padding: '2rem' }}>
+      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '3rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.2rem', fontWeight: 800 }}>
+            <Globe size={24} style={{ color: 'var(--lime)' }} />
+            <span>AdelantaVisa</span>
+          </div>
+          <Link to="/login" style={{ color: 'var(--text-3)', textDecoration: 'none', fontSize: '0.9rem' }}>Volver al login</Link>
         </div>
 
-        <div className="panel" style={{ width: '100%', maxWidth: '450px', padding: '2.5rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <h1 style={{ fontSize: '1.75rem', fontFamily: 'var(--font-heading)', fontWeight: 700, color: 'var(--text-1)', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
-              Finalizar Suscripción
-            </h1>
-            <p style={{ color: 'var(--text-2)', fontSize: '0.95rem' }}>
-              Para acceder a tu panel y crear expedientes, necesitas activar tu plan.
-            </p>
-          </div>
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <h1 style={{ fontSize: 'clamp(2rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '1rem' }}>Selecciona tu Plan</h1>
+          <p style={{ color: 'var(--text-3)', fontSize: '1.1rem' }}>Elige el plan que mejor se adapte a tus necesidades para activar tu cuenta.</p>
+        </div>
 
-          <div style={{ padding: '1.5rem', border: '1px solid var(--border)', borderRadius: '12px', marginBottom: '1.5rem', background: 'var(--surface)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent)', background: 'rgba(99,102,241,0.1)', padding: '0.2rem 0.6rem', borderRadius: '12px' }}>
-                  {planName}
-                </span>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-2)', marginTop: '0.5rem', fontFamily: 'monospace' }}>Usuario: {email}</p>
-                {role === 'TRAVEL_AGENCY' && (
-                  <p style={{ fontSize: '0.85rem', color: 'var(--lime)', marginTop: '0.25rem', fontWeight: '500' }}>⭐ 50% OFF por 3 meses</p>
-                )}
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-1)' }}>
-                  ${(priceCOP / 100000).toFixed(0)}<span style={{ fontSize: '0.9rem', color: 'var(--text-2)', fontWeight: 400 }}> k COP/mes</span>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
+          {availablePlans.map((plan, i) => (
+            <div 
+              key={i} 
+              onClick={() => setSelectedPlanIndex(i)}
+              className="panel" 
+              style={{ 
+                padding: '2.5rem', 
+                cursor: 'pointer',
+                border: selectedPlanIndex === i ? '2px solid var(--lime)' : '1px solid var(--border)', 
+                transform: selectedPlanIndex === i ? 'scale(1.02)' : 'none', 
+                boxShadow: selectedPlanIndex === i ? '0 20px 40px rgba(79, 70, 229, 0.15)' : 'none',
+                position: 'relative',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              {plan.badge && (
+                <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", padding: "4px 16px", borderRadius: 99, fontSize: "0.75rem", fontWeight: 800, letterSpacing: "0.06em", background: "var(--lime)", color: "#000", whiteSpace: "nowrap" }}>
+                  {plan.badge}
                 </div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-2)', textDecoration: 'line-through' }}>
-                  ${((priceCOP * 2) / 100000).toFixed(0)} k COP
-                </div>
+              )}
+              <div style={{ marginBottom: "0.5rem", fontSize: "0.9rem", fontWeight: 700, color: selectedPlanIndex === i ? "var(--lime)" : "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem", marginBottom: "1.5rem" }}>
+                <div style={{ fontSize: "2.5rem", fontWeight: 800, color: "var(--text-1)", lineHeight: 1 }}>{plan.price}</div>
+                <div style={{ fontSize: "0.875rem", color: "var(--text-3)", marginBottom: "0.4rem", fontWeight: 500, textTransform: "uppercase" }}>/ {role === 'TRAVEL_AGENCY' ? 'mes' : 'persona'}</div>
               </div>
+              <p style={{ fontSize: "0.95rem", color: "var(--text-2)", marginBottom: "2rem", minHeight: 48 }}>{plan.desc}</p>
+              
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, flex: 1 }}>
+                {plan.features.map((f, j) => (
+                  <li key={j} style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem", alignItems: "flex-start" }}>
+                    <CheckCircle2 size={18} color={selectedPlanIndex === i ? "var(--lime)" : "var(--text-3)"} style={{ flexShrink: 0, marginTop: 2 }} />
+                    <span style={{ color: "var(--text-2)", fontSize: "0.9rem" }}>{f}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-2)' }}>
-                <ShieldCheck size={16} color="var(--lime)" /> Acceso completo al Dashboard
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-2)' }}>
-                <ShieldCheck size={16} color="var(--lime)" /> Gestión de documentos
-              </li>
-            </ul>
-          </div>
+          ))}
+        </div>
 
+        <div style={{ textAlign: 'center', padding: '2rem', background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', maxWidth: '600px', margin: '0 auto' }}>
+          <ShieldCheck size={32} style={{ color: 'var(--lime)', margin: '0 auto 1rem' }} />
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem' }}>Pago Seguro con Wompi</h3>
+          <p style={{ color: 'var(--text-3)', fontSize: '0.9rem', marginBottom: '2rem' }}>
+            Tu pago será procesado de forma 100% segura. Total a pagar hoy: 
+            <strong style={{ color: 'var(--text-1)', marginLeft: '0.5rem', fontSize: '1.1rem' }}>
+              ${(availablePlans[selectedPlanIndex].priceCOP / 100).toLocaleString()} COP
+            </strong>
+          </p>
           <button 
-            onClick={wompiPubKey?.includes('test') ? handleFakePayment : handleWompiPayment} 
+            onClick={handleWompiPayment} 
             disabled={loading}
             className="btn btn-lime" 
-            style={{ width: '100%', padding: '1rem', fontSize: '1rem', display: 'flex', justifyContent: 'center' }}
+            style={{ width: '100%', padding: '1.25rem', fontSize: '1.1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem' }}
           >
-            {loading ? 'Procesando...' : (
-              <>
-                <CreditCard size={18} /> Pagar con Wompi {wompiPubKey?.includes('test') && '(Simulación)'}
-              </>
-            )}
+            {loading ? <Loader2 className="animate-spin" size={20} /> : <ArrowRight size={20} />}
+            {loading ? 'Verificando pago...' : 'Pagar Suscripción Ahora'}
           </button>
-          
-          <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-            <Link to="/login" style={{ fontSize: '0.85rem', color: 'var(--text-3)', fontWeight: 500 }}>
-              ← Volver al Login
-            </Link>
-          </div>
         </div>
       </div>
     </div>

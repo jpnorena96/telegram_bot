@@ -53,12 +53,31 @@ def verify_payment(req: PaymentVerificationRequest, db = Depends(get_db)):
 
     cursor = db.cursor(dictionary=True)
     try:
+        # Create transactions table if it doesn't exist
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS processed_transactions (
+                transaction_id VARCHAR(100) PRIMARY KEY,
+                user_id INT NOT NULL,
+                amount INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        
+        # Check if transaction already processed
+        cursor.execute("SELECT transaction_id FROM processed_transactions WHERE transaction_id = %s", (req.transaction_id,))
+        if cursor.fetchone():
+            raise HTTPException(status_code=400, detail="Esta transacción ya fue procesada.")
+
         cursor.execute("SELECT id, subscription_status FROM users WHERE id = %s", (req.user_id,))
         user = cursor.fetchone()
         
         if not user:
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
             
+        # Record transaction (amount 0 since it's a subscription upgrade, not balance)
+        cursor.execute("INSERT INTO processed_transactions (transaction_id, user_id, amount) VALUES (%s, %s, %s)", 
+                      (req.transaction_id, req.user_id, 0))
+                      
         # Update user subscription
         cursor.execute("""
             UPDATE users 
@@ -70,7 +89,7 @@ def verify_payment(req: PaymentVerificationRequest, db = Depends(get_db)):
         
         db.commit()
         
-        return {"status": "success", "message": "Pago verificado exitosamente. Suscripción activada."}
+        return {"status": "success", "message": "Pago verificado exitosamente. Suscripción activada/actualizada."}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
