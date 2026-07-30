@@ -176,9 +176,14 @@ const CheckoutPage = () => {
                 </div>
               )}
               <div style={{ marginBottom: "0.5rem", fontSize: "0.9rem", fontWeight: 700, color: selectedPlanIndex === i ? "var(--lime)" : "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
-              <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem", marginBottom: "1.5rem" }}>
-                <div style={{ fontSize: "2.5rem", fontWeight: 800, color: "var(--text-1)", lineHeight: 1 }}>{plan.price}</div>
-                <div style={{ fontSize: "0.875rem", color: "var(--text-3)", marginBottom: "0.4rem", fontWeight: 500, textTransform: "uppercase" }}>/ {role === 'TRAVEL_AGENCY' ? 'mes' : 'persona'}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
+                <span style={{ fontSize: "1.1rem", color: "var(--text-3)", textDecoration: "line-through", fontWeight: 600 }}>
+                  ${parseInt(plan.price.replace('$', '')) * 2}
+                </span>
+                <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem" }}>
+                  <div style={{ fontSize: "2.5rem", fontWeight: 800, color: "var(--text-1)", lineHeight: 1 }}>{plan.price}</div>
+                  <div style={{ fontSize: "0.875rem", color: "var(--text-3)", marginBottom: "0.4rem", fontWeight: 500, textTransform: "uppercase" }}>/ {role === 'TRAVEL_AGENCY' ? 'mes' : 'persona'}</div>
+                </div>
               </div>
               <p style={{ fontSize: "0.95rem", color: "var(--text-2)", marginBottom: "2rem", minHeight: 48 }}>{plan.desc}</p>
               
@@ -199,7 +204,10 @@ const CheckoutPage = () => {
           <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem' }}>Pago Seguro con Wompi</h3>
           <p style={{ color: 'var(--text-3)', fontSize: '0.9rem', marginBottom: '2rem' }}>
             Tu pago será procesado de forma 100% segura. Total a pagar hoy: 
-            <strong style={{ color: 'var(--text-1)', marginLeft: '0.5rem', fontSize: '1.1rem' }}>
+            <span style={{ marginLeft: '0.5rem', fontSize: '1rem', color: 'var(--text-3)', textDecoration: 'line-through' }}>
+              ${(availablePlans[selectedPlanIndex].priceCOP * 2 / 100).toLocaleString()} COP
+            </span>
+            <strong style={{ color: 'var(--text-1)', marginLeft: '0.5rem', fontSize: '1.2rem' }}>
               ${(availablePlans[selectedPlanIndex].priceCOP / 100).toLocaleString()} COP
             </strong>
           </p>

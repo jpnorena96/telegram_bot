@@ -128,7 +128,12 @@ const PlanUpgradeModal = ({ isOpen, onClose, role, userId, email, currentPlanNam
                 </div>
               )}
               <div style={{ marginBottom: "0.25rem", fontSize: "0.85rem", fontWeight: 700, color: selectedPlanIndex === i ? "var(--lime)" : "var(--text-1)", textTransform: "uppercase" }}>{plan.name}</div>
-              <div style={{ fontSize: "2rem", fontWeight: 800, color: "var(--text-1)", lineHeight: 1, marginBottom: '0.5rem' }}>{plan.price}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
+                <span style={{ fontSize: "1rem", color: "var(--text-3)", textDecoration: "line-through", fontWeight: 600 }}>
+                  ${parseInt(plan.price.replace('$', '')) * 2}
+                </span>
+                <div style={{ fontSize: "2rem", fontWeight: 800, color: "var(--text-1)", lineHeight: 1 }}>{plan.price}</div>
+              </div>
               <p style={{ fontSize: "0.8rem", color: "var(--text-3)", minHeight: 40 }}>{plan.desc}</p>
             </div>
           ))}

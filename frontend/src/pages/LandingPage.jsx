@@ -337,15 +337,15 @@ const LandingPage = () => {
                     </div>
                   )}
                   <div style={{ marginBottom: "0.5rem", fontSize: "0.9rem", fontWeight: 700, color: plan.highlight ? "var(--lime)" : "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
-                  <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem", marginBottom: "0.25rem" }}>
-                    <div style={{ fontSize: "2.5rem", fontWeight: 800, color: "var(--text-1)", lineHeight: 1 }}>{plan.price}</div>
-                    <div style={{ fontSize: "0.875rem", color: "var(--text-3)", marginBottom: "0.4rem", fontWeight: 500, textTransform: "uppercase" }}>/ {plan.period}</div>
-                  </div>
-                  {plan.originalPrice && (
-                    <div style={{ fontSize: "0.9rem", color: "var(--text-3)", textDecoration: "line-through", marginBottom: "1rem" }}>
-                      Antes: {plan.originalPrice}
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
+                    <span style={{ fontSize: "1.2rem", color: "var(--text-3)", textDecoration: "line-through", fontWeight: 600 }}>
+                      ${parseInt(plan.price.replace('$', '')) * 2}
+                    </span>
+                    <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem" }}>
+                      <div style={{ fontSize: "3rem", fontWeight: 800, color: "var(--text-1)", lineHeight: 1 }}>{plan.price}</div>
+                      <div style={{ fontSize: "0.875rem", color: "var(--text-3)", marginBottom: "0.5rem", fontWeight: 500, textTransform: "uppercase" }}>/ {plan.period}</div>
                     </div>
-                  )}
+                  </div>
                   <div style={{ fontSize: "0.95rem", color: "var(--text-2)", marginBottom: "2rem", lineHeight: 1.6, minHeight: 48 }}>{plan.desc}</div>
                   <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem 0", flex: 1 }}>
                     {plan.features.map((f, j) => (
@@ -371,15 +371,15 @@ const LandingPage = () => {
                     </div>
                   )}
                   <div style={{ marginBottom: "0.5rem", fontSize: "0.9rem", fontWeight: 700, color: plan.highlight ? "var(--lime)" : "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
-                  <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem", marginBottom: "0.25rem" }}>
-                    <span style={{ fontSize: "3.5rem", fontFamily: "var(--font-heading)", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1, color: "var(--text-1)" }}>{plan.price}</span>
-                    <span style={{ fontSize: "0.85rem", color: "var(--text-3)", paddingBottom: "0.6rem", fontWeight: 600, textTransform: "uppercase" }}>/ {plan.period}</span>
-                  </div>
-                  {plan.originalPrice && (
-                    <div style={{ fontSize: "0.9rem", color: "var(--text-3)", textDecoration: "line-through", marginBottom: "1rem" }}>
-                      Antes: {plan.originalPrice}
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
+                    <span style={{ fontSize: "1.5rem", color: "var(--text-3)", textDecoration: "line-through", fontWeight: 600 }}>
+                      ${parseInt(plan.price.replace('$', '')) * 2}
+                    </span>
+                    <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem", marginBottom: "0.25rem" }}>
+                      <span style={{ fontSize: "3.5rem", fontFamily: "var(--font-heading)", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1, color: "var(--text-1)" }}>{plan.price}</span>
+                      <span style={{ fontSize: "0.85rem", color: "var(--text-3)", paddingBottom: "0.6rem", fontWeight: 600, textTransform: "uppercase" }}>/ {plan.period}</span>
                     </div>
-                  )}
+                  </div>
                   <p style={{ color: "var(--text-3)", fontSize: "0.95rem", marginBottom: "2.5rem", lineHeight: 1.6, minHeight: 48 }}>{plan.desc}</p>
                   <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2.5rem 0", flex: 1 }}>
                     {plan.features.map((f, j) => (
