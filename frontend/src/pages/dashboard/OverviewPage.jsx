@@ -10,7 +10,6 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
-import Modal from '../../components/Modal';
 import TopUpModal from '../../components/TopUpModal';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';

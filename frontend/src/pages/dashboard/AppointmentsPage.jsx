@@ -673,7 +673,6 @@ const CreateWizard = ({ onClose, onCreated }) => {
 };
 
 /* ── */
-import Modal from '../../components/Modal';
 import BotStatusViewer from '../../components/BotStatusViewer';
 
 const AppointmentsPage = () => {
