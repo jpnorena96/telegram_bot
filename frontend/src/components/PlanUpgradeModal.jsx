@@ -41,21 +41,44 @@ const PlanUpgradeModal = ({ isOpen, onClose, role, userId, email, currentPlanNam
 
   if (!isOpen) return null;
 
-  const handleWompiPayment = () => {
+  const handleWompiPayment = async () => {
     if (!window.WidgetCheckout) return toast.error('Cargando pasarela de pagos...');
     if (!wompiPubKey) return toast.error('Obteniendo llave de seguridad...');
 
     const plan = availablePlans[selectedPlanIndex];
     if (plan.name === currentPlanName) return toast.error('Ya posees este plan activo.');
 
-    const checkout = new window.WidgetCheckout({
+    const ref = `UPGRADE_${userId}_${Date.now()}`;
+    const amountInCents = plan.priceCOP;
+
+    let signatureData = null;
+    try {
+      const sigRes = await api.getWompiSignature({
+        reference: ref,
+        amountInCents: amountInCents,
+        currency: 'COP'
+      });
+      if (sigRes && sigRes.signature) {
+        signatureData = { integrity: sigRes.signature };
+      }
+    } catch (e) {
+      console.error("Signature fetch failed", e);
+    }
+    
+    const config = {
       currency: 'COP',
-      amountInCents: plan.priceCOP,
-      reference: `UPGRADE_${userId}_${Date.now()}`,
+      amountInCents: amountInCents,
+      reference: ref,
       publicKey: wompiPubKey,
       redirectUrl: `${window.location.origin}/dashboard/configuracion`,
       customerData: { email: email, fullName: 'Upgrade AdelantaVisa' }
-    });
+    };
+
+    if (signatureData) {
+      config.signature = signatureData;
+    }
+
+    const checkout = new window.WidgetCheckout(config);
 
     checkout.open((result) => {
       if (result.transaction.status === 'APPROVED') {

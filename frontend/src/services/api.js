@@ -59,6 +59,15 @@ export const api = {
     return handleResponse(response);
   },
 
+  async getWompiSignature(data) {
+    const response = await fetch(`${API_URL}/payments/signature`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
   async register(data) {
     const response = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',

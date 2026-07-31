@@ -6,11 +6,11 @@ import toast from 'react-hot-toast';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ 
-    full_name: '', 
-    email: '', 
-    password: '', 
-    role: 'NATURAL_PERSON', 
+  const [form, setForm] = useState({
+    full_name: '',
+    email: '',
+    password: '',
+    role: 'NATURAL_PERSON',
     whatsapp_number: '',
     module_visa_enabled: true,
     module_appointments_enabled: true
@@ -39,10 +39,10 @@ const RegisterPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', background: 'var(--surface)' }}>
-      
+
       {/* ── LEFT: Form Section ── */}
       <div style={{ flex: '1 1 50%', display: 'flex', flexDirection: 'column', padding: '2rem' }}>
-        
+
         {/* Header / Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }} onClick={() => navigate('/')}>
           <Globe size={28} color="var(--lime)" strokeWidth={2.5} />
@@ -54,18 +54,18 @@ const RegisterPage = () => {
         {/* Form Container */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '1rem 0' }}>
           <div style={{ width: '100%', maxWidth: '480px', margin: '2rem 0' }}>
-            
+
             <div style={{ marginBottom: '2.5rem', textAlign: 'center' }}>
               <h1 style={{ fontSize: '2.2rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--text-1)', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
                 Crea tu cuenta
               </h1>
               <p style={{ color: 'var(--text-2)', fontSize: '0.95rem' }}>
-                Únete a la plataforma líder en gestión de visas B1/B2.
+                Únete a la plataforma líder en gestión de visas.
               </p>
             </div>
 
             <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              
+
               <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
                 {/* Tipo de Cuenta */}
                 <div style={{ flex: 1 }}>
@@ -97,21 +97,21 @@ const RegisterPage = () => {
                   ¿Qué servicio necesitas principalmente?
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-                  <div 
+                  <div
                     onClick={() => setModulePreference(true, false)}
-                    style={{ 
+                    style={{
                       padding: '1rem 0.5rem', borderRadius: '10px', textAlign: 'center', cursor: 'pointer',
                       border: form.module_visa_enabled && !form.module_appointments_enabled ? '2px solid var(--lime)' : '1px solid var(--border-2)',
                       background: form.module_visa_enabled && !form.module_appointments_enabled ? 'var(--lime-subtle)' : 'var(--bg)',
                       transition: 'all 0.2s'
                     }}>
                     <FileText size={24} color={form.module_visa_enabled && !form.module_appointments_enabled ? 'var(--lime)' : 'var(--text-3)'} style={{ margin: '0 auto 0.5rem auto' }} />
-                    <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-1)' }}>Solo Trámite DS-160</div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-1)' }}>Solo Trámite de formulario</div>
                   </div>
-                  
-                  <div 
+
+                  <div
                     onClick={() => setModulePreference(false, true)}
-                    style={{ 
+                    style={{
                       padding: '1rem 0.5rem', borderRadius: '10px', textAlign: 'center', cursor: 'pointer',
                       border: !form.module_visa_enabled && form.module_appointments_enabled ? '2px solid var(--lime)' : '1px solid var(--border-2)',
                       background: !form.module_visa_enabled && form.module_appointments_enabled ? 'var(--lime-subtle)' : 'var(--bg)',
@@ -121,9 +121,9 @@ const RegisterPage = () => {
                     <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-1)' }}>Solo Adelantar Cita</div>
                   </div>
 
-                  <div 
+                  <div
                     onClick={() => setModulePreference(true, true)}
-                    style={{ 
+                    style={{
                       padding: '1rem 0.5rem', borderRadius: '10px', textAlign: 'center', cursor: 'pointer',
                       border: form.module_visa_enabled && form.module_appointments_enabled ? '2px solid var(--lime)' : '1px solid var(--border-2)',
                       background: form.module_visa_enabled && form.module_appointments_enabled ? 'var(--lime-subtle)' : 'var(--bg)',
@@ -233,9 +233,9 @@ const RegisterPage = () => {
                 </div>
               )}
 
-              <button 
-                type="submit" 
-                disabled={loading} 
+              <button
+                type="submit"
+                disabled={loading}
                 style={{
                   width: '100%', padding: '1rem', borderRadius: '10px',
                   background: 'var(--lime)', color: '#000', fontSize: '1.05rem',
@@ -265,7 +265,7 @@ const RegisterPage = () => {
 
       {/* ── RIGHT: Visual / Branding Section ── */}
       <div style={{ flex: '1 1 50%', display: 'none', '@media (min-width: 900px)': { display: 'block' }, position: 'relative', background: '#0F172A', overflow: 'hidden' }} className="hide-mobile">
-        
+
         {/* Modern glowing background blobs */}
         <div style={{ position: 'absolute', top: '10%', left: '20%', width: '400px', height: '400px', borderRadius: '50%', background: 'var(--lime)', filter: 'blur(120px)', opacity: 0.15, animation: 'pulse 8s infinite alternate' }} />
         <div style={{ position: 'absolute', bottom: '10%', right: '10%', width: '500px', height: '500px', borderRadius: '50%', background: '#3B82F6', filter: 'blur(120px)', opacity: 0.15, animation: 'pulse 10s infinite alternate-reverse' }} />
@@ -294,12 +294,12 @@ const RegisterPage = () => {
         <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '4rem', color: '#fff' }}>
           <Globe size={48} color="var(--lime)" style={{ marginBottom: '2rem' }} />
           <h2 style={{ fontSize: '4rem', fontFamily: 'var(--font-heading)', fontWeight: 800, lineHeight: 1.1, marginBottom: '1.5rem', letterSpacing: '-0.03em' }}>
-            Acelera<br/><span style={{ color: 'var(--lime)' }}>tu futuro.</span>
+            Acelera<br /><span style={{ color: 'var(--lime)' }}>tu futuro.</span>
           </h2>
           <p style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.7)', maxWidth: '420px', lineHeight: 1.7, fontWeight: 300 }}>
             Plataforma premium para agencias y particulares. Automatiza tus citas B1/B2 y gestiona trámites en un solo lugar.
           </p>
-          
+
           <div style={{ display: 'flex', gap: '3rem', marginTop: '4rem' }}>
             <div>
               <div style={{ fontSize: '2.5rem', fontWeight: 800, fontFamily: 'var(--font-heading)', color: '#fff' }}>+5k</div>

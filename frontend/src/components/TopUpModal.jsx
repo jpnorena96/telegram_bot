@@ -65,14 +65,35 @@ const TopUpModal = ({ isOpen, onClose, wompiPubKey, email, onTopUpSuccess }) => 
       }
 
       const ref = `topup_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      const amountInCents = Math.floor(finalAmount * 100);
       
-      const checkout = new window.WidgetCheckout({
+      let signatureData = null;
+      try {
+        const sigRes = await api.getWompiSignature({
+          reference: ref,
+          amountInCents: amountInCents,
+          currency: 'COP'
+        });
+        if (sigRes && sigRes.signature) {
+          signatureData = { integrity: sigRes.signature };
+        }
+      } catch (e) {
+        console.error("Signature fetch failed", e);
+      }
+      
+      const config = {
         currency: 'COP',
-        amountInCents: Math.floor(finalAmount * 100), // Wompi requires integer cents
+        amountInCents: amountInCents,
         reference: ref,
         publicKey: wompiPubKey,
         customerData: { email }
-      });
+      };
+      
+      if (signatureData) {
+        config.signature = signatureData;
+      }
+      
+      const checkout = new window.WidgetCheckout(config);
 
       checkout.open((result) => {
         const tx = result.transaction;

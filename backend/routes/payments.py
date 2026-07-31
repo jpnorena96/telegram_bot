@@ -14,6 +14,24 @@ async def get_public_key():
         return {"public_key": "pub_test_Q5yDA9xoKdePzhSGeZaQS1mNNqAMxcgw"}
     return {"public_key": pub_key}
 
+class SignatureRequest(BaseModel):
+    reference: str
+    amountInCents: int
+    currency: str
+
+import hashlib
+
+@router.post("/signature")
+async def generate_signature(req: SignatureRequest, current_user: dict = Depends(get_current_user)):
+    secret = os.getenv("WOMPI_INTEGRITY_SECRET")
+    if not secret:
+        # If no secret configured, return empty to let the frontend proceed without signature
+        return {"signature": None}
+        
+    raw_str = f"{req.reference}{req.amountInCents}{req.currency}{secret}"
+    hash_hex = hashlib.sha256(raw_str.encode('utf-8')).hexdigest()
+    return {"signature": hash_hex}
+
 class PaymentVerificationRequest(BaseModel):
     user_id: int
     transaction_id: str

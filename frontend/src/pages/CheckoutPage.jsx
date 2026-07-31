@@ -68,7 +68,7 @@ const CheckoutPage = () => {
     });
   }, [userId, role, navigate]);
 
-  const handleWompiPayment = () => {
+  const handleWompiPayment = async () => {
     if (!window.WidgetCheckout) {
       toast.error('Cargando pasarela de pagos. Por favor, intenta de nuevo en unos segundos.');
       return;
@@ -79,15 +79,37 @@ const CheckoutPage = () => {
     }
 
     const plan = availablePlans[selectedPlanIndex];
+    const ref = `ADELANTAVISA_${userId}_${Date.now()}`;
+    const amountInCents = plan.priceCOP;
 
-    const checkout = new window.WidgetCheckout({
+    let signatureData = null;
+    try {
+      const sigRes = await api.getWompiSignature({
+        reference: ref,
+        amountInCents: amountInCents,
+        currency: 'COP'
+      });
+      if (sigRes && sigRes.signature) {
+        signatureData = { integrity: sigRes.signature };
+      }
+    } catch (e) {
+      console.error("Signature fetch failed", e);
+    }
+
+    const config = {
       currency: 'COP',
-      amountInCents: plan.priceCOP,
-      reference: `ADELANTAVISA_${userId}_${Date.now()}`,
+      amountInCents: amountInCents,
+      reference: ref,
       publicKey: wompiPubKey,
       redirectUrl: `${window.location.origin}/checkout?user_id=${userId}&role=${role}&email=${email}`,
       customerData: { email: email, fullName: 'Cliente AdelantaVisa' }
-    });
+    };
+
+    if (signatureData) {
+      config.signature = signatureData;
+    }
+
+    const checkout = new window.WidgetCheckout(config);
 
     checkout.open((result) => {
       const transaction = result.transaction;
