@@ -51,8 +51,7 @@ def get_my_profile(current_user: dict = Depends(get_current_user), db = Depends(
     cursor = db.cursor(dictionary=True)
     try:
         # If balance column doesn't exist yet, this might throw an error on old DBs,
-        # but we already ran the migration. We'll select common fields.
-        cursor.execute("SELECT id, email, full_name, role, is_authorized, plan, balance, whatsapp_number, logo_url FROM users WHERE id = %s", (current_user["id"],))
+        cursor.execute("SELECT id, email, full_name, role, is_authorized, plan, balance, whatsapp_number, logo_url, module_visa_enabled, module_appointments_enabled FROM users WHERE id = %s", (current_user["id"],))
         user = cursor.fetchone()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -190,3 +189,39 @@ async def revoke_user_session(user_id: int, current_user: dict = Depends(get_cur
     await sse_manager.broadcast("session_revoked", {"user_id": user_id})
     
     return {"status": "success", "message": "Session revoked successfully"}
+
+@router.get("/me/balance-history")
+def get_balance_history(current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT id, amount, type, description, created_at FROM balance_history WHERE user_id = %s ORDER BY id DESC", (current_user["id"],))
+        history = cursor.fetchall()
+        return history
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+
+from pydantic import BaseModel
+
+class UpdateModulesRequest(BaseModel):
+    module_visa_enabled: bool
+    module_appointments_enabled: bool
+
+@router.patch("/me/modules")
+def update_modules(req: UpdateModulesRequest, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    cursor = db.cursor()
+    try:
+        cursor.execute("""
+            UPDATE users 
+            SET module_visa_enabled = %s, module_appointments_enabled = %s 
+            WHERE id = %s
+        """, (req.module_visa_enabled, req.module_appointments_enabled, current_user["id"]))
+        db.commit()
+        return {"status": "success"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+

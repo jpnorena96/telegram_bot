@@ -38,6 +38,8 @@ class RegisterRequest(BaseModel):
     password: str
     role: str
     whatsapp_number: Optional[str] = None
+    module_visa_enabled: Optional[bool] = True
+    module_appointments_enabled: Optional[bool] = True
 
 # --- Security Utilities ---
 def verify_password(plain_password, hashed_password):
@@ -194,16 +196,21 @@ def register(request: RegisterRequest, db = Depends(get_db)):
     
     try:
         # Natural persons are authorized by default, managers and agencies need approval
-        is_authorized = 1 if request.role == 'NATURAL_PERSON' else 0
-        cursor.execute(
-            "INSERT INTO users (email, password, role, full_name, country, is_authorized, whatsapp_number) VALUES (%s, %s, %s, %s, 'co', %s, %s)",
-            (request.email, hashed_password, request.role, request.full_name, is_authorized, request.whatsapp_number)
-        )
+        is_authorized = 1 if request.role == "NATURAL_PERSON" else 0
+        plan = "estandar"
+        if request.role == "TRAVEL_AGENCY":
+            plan = "platino"
+
+        cursor.execute("""
+            INSERT INTO users (email, password, full_name, role, whatsapp_number, is_authorized, plan, module_visa_enabled, module_appointments_enabled)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (request.email, hashed_password, request.full_name, request.role, request.whatsapp_number, is_authorized, plan, request.module_visa_enabled, request.module_appointments_enabled))
+        
+        db.commit()
     except mysql.connector.Error as err:
         cursor.close()
         raise HTTPException(status_code=500, detail=f"Database error: {err}")
         
-    db.commit()
     user_id = cursor.lastrowid
     cursor.close()
     

@@ -54,6 +54,18 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 def create_appointment(apt: AppointmentCreate, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     cursor = db.cursor(dictionary=True)
     try:
+        # 0. Check and deduct balance
+        cursor.execute("SELECT balance FROM users WHERE id = %s", (current_user["id"],))
+        user_balance = cursor.fetchone()
+        if not user_balance or user_balance["balance"] <= 0:
+            raise HTTPException(status_code=402, detail="No tienes saldo suficiente (citas). Por favor recarga tu balance.")
+            
+        cursor.execute("UPDATE users SET balance = balance - 1 WHERE id = %s", (current_user["id"],))
+        cursor.execute("""
+            INSERT INTO balance_history (user_id, amount, type, description)
+            VALUES (%s, 1, 'spend', %s)
+        """, (current_user["id"], f"Agendamiento para {apt.email}"))
+        
         # 1. Insertar agendamiento en la base de datos
         cursor_insert = db.cursor()
         cursor_insert.execute("""
@@ -481,3 +493,34 @@ def delete_appointment(appointment_id: int, current_user: dict = Depends(get_cur
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()
+
+import subprocess
+
+@router.get("/{appointment_id}/logs")
+def get_appointment_logs(appointment_id: int, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    if "ADMINISTRATOR" not in current_user.get("roles", []) and "AUDITOR" not in current_user.get("roles", []):
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT email FROM user_appointments WHERE id = %s", (appointment_id,))
+    apt = cursor.fetchone()
+    cursor.close()
+    
+    if not apt:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+        
+    process_name = f"visa_{apt['email'].replace('@', '_').replace('.', '_')}_{appointment_id}"
+    
+    try:
+        result = subprocess.run(
+            f"pm2 logs {process_name} --lines 100 --nostream",
+            shell=True,
+            capture_output=True,
+            text=True
+        )
+        logs = result.stdout if result.stdout else result.stderr
+        if not logs:
+            logs = "El proceso no ha generado logs aún o no existe en PM2."
+        return {"logs": logs}
+    except Exception as e:
+        return {"logs": f"Error fetchings logs: {str(e)}"}

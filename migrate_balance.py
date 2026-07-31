@@ -1,10 +1,12 @@
 import sys
 import os
-from db import get_db
+sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
+import mysql.connector
+from config import DB_CONFIG
 
 def migrate():
-    db = next(get_db())
-    cursor = db.cursor()
+    conn = mysql.connector.connect(**DB_CONFIG)
+    cursor = conn.cursor()
     try:
         # Add columns for modules to users table
         cursor.execute("SHOW COLUMNS FROM users LIKE 'module_visa_enabled'")
@@ -31,14 +33,14 @@ def migrate():
             )
         """)
         
-        db.commit()
+        conn.commit()
         print("Migration successful.")
     except Exception as e:
-        db.rollback()
+        conn.rollback()
         print(f"Error during migration: {e}")
     finally:
         cursor.close()
-        db.close()
+        conn.close()
 
 if __name__ == "__main__":
     migrate()
