@@ -17,7 +17,12 @@ const VisaProcessesPage = () => {
 
   const load = async () => {
     try {
-      const res = await fetch(`${api.API_URL}/visa-processes`, { headers: api.getHeaders() });
+      const res = await fetch(`${api.url}/visa-processes`, { 
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (res.ok) {
         setProcesses(await res.json());
       }
@@ -33,9 +38,12 @@ const VisaProcessesPage = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${api.API_URL}/visa-processes`, {
+      const res = await fetch(`${api.url}/visa-processes`, {
         method: 'POST',
-        headers: api.getHeaders(),
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ client_email: newEmail, target_country: 'Estados Unidos', visa_category: 'B1/B2' })
       });
       if (res.ok) {

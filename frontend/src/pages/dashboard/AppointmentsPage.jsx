@@ -970,9 +970,6 @@ const AppointmentsPage = () => {
                                   <Terminal size={14} />
                                 </button>
                               )}
-                              <button onClick={() => { setSelected(apt); setMode('view'); }} className="btn btn-icon btn-sm" title={t('dashboard.appointments.view_details')}>
-                                <Eye size={14} />
-                              </button>
                               {apt.status !== 'agendado' && (
                                 <button onClick={() => handleDelete(apt.id)} className="btn btn-icon btn-sm" style={{ color: '#F87171' }} title="Eliminar agendamiento">
                                   <Trash2 size={14} />
@@ -1002,8 +999,6 @@ const AppointmentsPage = () => {
           </div>
         )}
       </div>
-
-      <Modal apt={selected} onClose={() => setSelected(null)} t={t} />
 
       {/* Logs Modal */}
       {logsModal.open && createPortal(

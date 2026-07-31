@@ -13,6 +13,19 @@ const TopUpModal = ({ isOpen, onClose, wompiPubKey, email, onTopUpSuccess }) => 
   const [loading, setLoading] = useState(false);
   const [customAmount, setCustomAmount] = useState('');
 
+  React.useEffect(() => {
+    if (isOpen) {
+      if (!document.getElementById('wompi-script')) {
+        const script = document.createElement('script');
+        script.id = 'wompi-script';
+        script.src = 'https://checkout.wompi.co/widget.js';
+        script.type = 'text/javascript';
+        script.async = true;
+        document.body.appendChild(script);
+      }
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handlePayment = async () => {
@@ -55,7 +68,7 @@ const TopUpModal = ({ isOpen, onClose, wompiPubKey, email, onTopUpSuccess }) => 
       
       const checkout = new window.WidgetCheckout({
         currency: 'COP',
-        amountInCents: finalAmount * 100, // Wompi requires cents
+        amountInCents: Math.floor(finalAmount * 100), // Wompi requires integer cents
         reference: ref,
         publicKey: wompiPubKey,
         customerData: { email }
