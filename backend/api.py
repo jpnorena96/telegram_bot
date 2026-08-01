@@ -7,6 +7,12 @@ from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(title="AdelantaVisa API")
 
+try:
+    from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+    app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
+except ImportError:
+    pass
+
 # Ensure uploads directories exist
 os.makedirs("uploads/logos", exist_ok=True)
 os.makedirs("uploads/visas", exist_ok=True)

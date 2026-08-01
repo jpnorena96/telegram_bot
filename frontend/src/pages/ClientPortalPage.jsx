@@ -20,7 +20,7 @@ const ClientPortalPage = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`${api.API_URL}/visa-processes/public/${id}`);
+        const res = await fetch(`${api.url}/visa-processes/public/${id}`);
         if (res.ok) {
           setData(await res.json());
         } else {
@@ -49,7 +49,7 @@ const ClientPortalPage = () => {
       payload.append('passport_file', passportFile);
       if (ds160File) payload.append('ds160_file', ds160File);
 
-      const res = await fetch(`${api.API_URL}/visa-processes/public/${id}/submit`, {
+      const res = await fetch(`${api.url}/visa-processes/public/${id}/submit`, {
         method: 'POST',
         body: payload
       });

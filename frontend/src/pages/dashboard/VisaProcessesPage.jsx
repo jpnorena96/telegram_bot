@@ -17,7 +17,7 @@ const VisaProcessesPage = () => {
 
   const load = async () => {
     try {
-      const res = await fetch(`${api.url}/visa-processes`, { 
+      const res = await fetch(`${api.url}/visa-processes/`, { 
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
@@ -38,7 +38,7 @@ const VisaProcessesPage = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${api.url}/visa-processes`, {
+      const res = await fetch(`${api.url}/visa-processes/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
