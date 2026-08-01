@@ -159,9 +159,9 @@ const VisaProcessesPage = () => {
                 <td style={{ padding: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)', fontSize: '0.85rem', fontWeight: 600 }}>
-                      {p.client_email.charAt(0).toUpperCase()}
+                      {(p.client_email || 'U').charAt(0).toUpperCase()}
                     </div>
-                    <span style={{ fontWeight: 500, color: 'var(--text-1)' }}>{p.client_email}</span>
+                    <span style={{ fontWeight: 500, color: 'var(--text-1)' }}>{p.client_email || 'Sin correo asignado'}</span>
                   </div>
                 </td>
                 <td style={{ padding: '1rem', color: 'var(--text-2)', fontSize: '0.95rem' }}>
