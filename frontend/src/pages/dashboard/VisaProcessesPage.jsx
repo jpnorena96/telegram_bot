@@ -11,7 +11,10 @@ const VisaProcessesPage = () => {
   const [processes, setProcesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [wizardStep, setWizardStep] = useState(1);
   const [newEmail, setNewEmail] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('Estados Unidos');
+  const [selectedCategory, setSelectedCategory] = useState('B1/B2');
   const [searchQuery, setSearchQuery] = useState('');
 
   const load = async () => {
@@ -43,11 +46,12 @@ const VisaProcessesPage = () => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ client_email: newEmail, target_country: 'Estados Unidos', visa_category: 'B1/B2' })
+        body: JSON.stringify({ client_email: newEmail, target_country: selectedCountry, visa_category: selectedCategory })
       });
       if (res.ok) {
         toast.success('Expediente creado con éxito');
         setNewEmail('');
+        setWizardStep(1);
         setCreating(false);
         load();
       } else {
@@ -102,29 +106,107 @@ const VisaProcessesPage = () => {
         </button>
       </div>
 
-      {/* ── Creation Panel ── */}
+      {/* ── Creation Wizard Panel ── */}
       {creating && (
-        <div className="panel animate-in" style={{ padding: '1.5rem', marginBottom: '2rem', border: '1px solid var(--lime)', boxShadow: '0 8px 32px rgba(163, 230, 53, 0.05)' }}>
-          <h3 style={{ marginBottom: '1rem', fontWeight: 700, fontSize: '1.1rem', color: 'var(--text-1)' }}>Nuevo Expediente (Marca Blanca)</h3>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-3)', marginBottom: '1.25rem' }}>
-            Ingresa el correo electrónico del cliente. Le proporcionaremos un portal dedicado para que cargue sus documentos (DS-160 y Pasaporte).
-          </p>
-          <form onSubmit={handleCreate} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <div style={{ flex: '1 1 300px', position: 'relative' }}>
-              <input 
-                type="email" 
-                required 
-                placeholder="ejemplo@cliente.com" 
-                value={newEmail} 
-                onChange={e => setNewEmail(e.target.value)}
-                style={{ width: '100%', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-1)', fontSize: '0.95rem', outline: 'none', transition: 'all 0.2s' }}
-                onFocus={e => e.target.style.borderColor = 'var(--lime)'}
-                onBlur={e => e.target.style.borderColor = 'var(--border)'}
-              />
+        <div className="panel animate-in" style={{ padding: '2rem', marginBottom: '2rem', border: '1px solid var(--lime)', boxShadow: '0 12px 40px rgba(163, 230, 53, 0.08)', borderRadius: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <h3 style={{ margin: 0, fontWeight: 700, fontSize: '1.25rem', color: 'var(--text-1)' }}>Nuevo Expediente de Trámite</h3>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: wizardStep >= 1 ? 'var(--lime)' : 'var(--surface-2)' }}></div>
+              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: wizardStep >= 2 ? 'var(--lime)' : 'var(--surface-2)' }}></div>
+              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: wizardStep >= 3 ? 'var(--lime)' : 'var(--surface-2)' }}></div>
             </div>
-            <button type="submit" className="btn btn-lime" style={{ padding: '0.85rem 1.5rem', fontWeight: 600 }}>Generar Expediente</button>
-            <button type="button" onClick={() => setCreating(false)} className="btn btn-outline" style={{ padding: '0.85rem 1.5rem' }}>Cancelar</button>
-          </form>
+          </div>
+
+          {wizardStep === 1 && (
+            <div className="animate-in fade-in slide-in-from-right-4">
+              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-1)' }}>Paso 1: Selecciona el País Destino</h4>
+              <p style={{ color: 'var(--text-3)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Elige el país para el cual el cliente desea solicitar el visado.</p>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+                {['Estados Unidos', 'Canadá', 'Reino Unido', 'Schengen (Europa)', 'Australia'].map(country => (
+                  <div 
+                    key={country}
+                    onClick={() => setSelectedCountry(country)}
+                    style={{ 
+                      padding: '1.5rem', borderRadius: '12px', border: `2px solid ${selectedCountry === country ? 'var(--lime)' : 'var(--border)'}`,
+                      background: selectedCountry === country ? 'rgba(163, 230, 53, 0.05)' : 'var(--surface)', cursor: 'pointer',
+                      textAlign: 'center', transition: 'all 0.2s', transform: selectedCountry === country ? 'translateY(-2px)' : 'none'
+                    }}
+                  >
+                    <div style={{ fontSize: '1.1rem', fontWeight: 600, color: selectedCountry === country ? 'var(--lime)' : 'var(--text-1)' }}>
+                      {country}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                <button type="button" onClick={() => setCreating(false)} className="btn btn-outline" style={{ padding: '0.85rem 1.5rem' }}>Cancelar</button>
+                <button type="button" onClick={() => setWizardStep(2)} className="btn btn-lime" style={{ padding: '0.85rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>Siguiente <ArrowRight size={16} /></button>
+              </div>
+            </div>
+          )}
+
+          {wizardStep === 2 && (
+            <div className="animate-in fade-in slide-in-from-right-4">
+              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-1)' }}>Paso 2: Categoría de Visa</h4>
+              <p style={{ color: 'var(--text-3)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Selecciona la categoría de visa para {selectedCountry}.</p>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+                {(selectedCountry === 'Estados Unidos' ? ['B1/B2 (Turismo/Negocios)', 'F1 (Estudiante)', 'J1 (Intercambio)', 'H1B (Trabajo)'] : 
+                  selectedCountry === 'Canadá' ? ['Visitor Visa', 'Study Permit', 'Work Permit'] :
+                  ['Turismo', 'Estudio', 'Trabajo', 'Tránsito']).map(cat => (
+                  <div 
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    style={{ 
+                      padding: '1.25rem', borderRadius: '12px', border: `2px solid ${selectedCategory === cat ? 'var(--lime)' : 'var(--border)'}`,
+                      background: selectedCategory === cat ? 'rgba(163, 230, 53, 0.05)' : 'var(--surface)', cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <div style={{ fontSize: '1rem', fontWeight: 600, color: selectedCategory === cat ? 'var(--lime)' : 'var(--text-1)' }}>
+                      {cat}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <button type="button" onClick={() => setWizardStep(1)} className="btn btn-outline" style={{ padding: '0.85rem 1.5rem' }}>Volver</button>
+                <button type="button" onClick={() => setWizardStep(3)} className="btn btn-lime" style={{ padding: '0.85rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>Siguiente <ArrowRight size={16} /></button>
+              </div>
+            </div>
+          )}
+
+          {wizardStep === 3 && (
+            <div className="animate-in fade-in slide-in-from-right-4">
+              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-1)' }}>Paso 3: Datos del Cliente</h4>
+              <p style={{ color: 'var(--text-3)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                Ingresa el correo electrónico del cliente. Le proporcionaremos un portal seguro para que cargue los requisitos específicos para <strong>{selectedCountry} ({selectedCategory})</strong>.
+              </p>
+              
+              <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-2)', fontWeight: 500 }}>Correo Electrónico</label>
+                  <input 
+                    type="email" 
+                    required 
+                    placeholder="ejemplo@cliente.com" 
+                    value={newEmail} 
+                    onChange={e => setNewEmail(e.target.value)}
+                    style={{ width: '100%', maxWidth: '400px', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-1)', fontSize: '1rem', outline: 'none', transition: 'all 0.2s' }}
+                    onFocus={e => e.target.style.borderColor = 'var(--lime)'}
+                    onBlur={e => e.target.style.borderColor = 'var(--border)'}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+                  <button type="button" onClick={() => setWizardStep(2)} className="btn btn-outline" style={{ padding: '0.85rem 1.5rem' }}>Volver</button>
+                  <button type="submit" className="btn btn-lime" style={{ padding: '0.85rem 2rem', fontWeight: 600 }}>Generar Expediente</button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       )}
 

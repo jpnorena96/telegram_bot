@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 import os
 import shutil
-
+from fastapi import BackgroundTasks
 from .auth import get_db, get_current_user
 
 router = APIRouter()
@@ -64,18 +64,29 @@ def get_public_process(process_id: int, db = Depends(get_db)):
     }
 
 @router.post("/{process_id}/mark-ready")
-def mark_process_ready(process_id: int, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+def mark_process_ready(process_id: int, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     cursor = db.cursor(dictionary=True)
     # Ensure they own it
-    cursor.execute("SELECT id FROM visa_processes WHERE id = %s AND user_id = %s", (process_id, current_user["id"]))
-    if not cursor.fetchone():
+    cursor.execute("SELECT id, target_country, visa_category, client_email FROM visa_processes WHERE id = %s AND user_id = %s", (process_id, current_user["id"]))
+    process_row = cursor.fetchone()
+    if not process_row:
         cursor.close()
         raise HTTPException(status_code=403, detail="Not authorized")
         
     cursor.execute("UPDATE visa_processes SET status = 'Listo para Alta' WHERE id = %s", (process_id,))
     db.commit()
     cursor.close()
-    return {"status": "ok", "message": "Expediente marcado como Listo para Alta"}
+
+    # Launch automation script based on country
+    if process_row["target_country"] == "Estados Unidos" and "B1" in process_row["visa_category"]:
+        try:
+            from backend.script_visas.usa.b1_b2 import USAB1B2Script
+            script = USAB1B2Script(process_id, process_row)
+            background_tasks.add_task(script.run)
+        except ImportError:
+            pass
+
+    return {"status": "ok", "message": "Expediente marcado como Listo para Alta. Automatización iniciada."}
 
 @router.post("/public/{process_id}/submit")
 async def submit_public_process(

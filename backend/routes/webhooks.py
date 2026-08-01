@@ -8,6 +8,7 @@ import asyncio
 
 from backend.sse import sse_manager
 from backend.telegram_service import notify_new_schedule
+from backend.whatsapp_service import notify_appointment_scheduled
 from .auth import get_db
 
 router = APIRouter()
@@ -39,6 +40,23 @@ async def receive_schedule_webhook(payload: SchedulePayload, background_tasks: B
         # Enviar notificación a Telegram en background para no bloquear el request
         background_tasks.add_task(notify_new_schedule, payload.schedule_id, payload.client_name, payload.date)
         
+        # Enviar WhatsApp al dueño de la cita
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT u.whatsapp_number 
+            FROM appointments a 
+            JOIN users u ON a.user_id = u.id 
+            WHERE a.schedule_id = %s
+        """, (payload.schedule_id,))
+        user_row = cursor.fetchone()
+        cursor.close()
+        
+        if user_row and user_row.get("whatsapp_number"):
+            background_tasks.add_task(notify_appointment_scheduled, user_row["whatsapp_number"], payload.client_name, payload.date)
+            logger.info(f"Scheduled WhatsApp notification for schedule {payload.schedule_id}")
+        else:
+            logger.info(f"No WhatsApp number found for schedule {payload.schedule_id}")
+            
         return {"status": "success", "message": "Schedule procesado y emitido exitosamente"}
     except Exception as e:
         logger.error(f"Error procesando webhook de schedule: {e}")

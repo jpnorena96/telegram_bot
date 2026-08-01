@@ -15,7 +15,7 @@ const ClientPortalPage = () => {
     passport_number: ''
   });
   const [passportFile, setPassportFile] = useState(null);
-  const [ds160File, setDs160File] = useState(null);
+  const [extraFiles, setExtraFiles] = useState({});
 
   useEffect(() => {
     const load = async () => {
@@ -47,7 +47,9 @@ const ClientPortalPage = () => {
       payload.append('full_name', formData.full_name);
       payload.append('passport_number', formData.passport_number);
       payload.append('passport_file', passportFile);
-      if (ds160File) payload.append('ds160_file', ds160File);
+      Object.keys(extraFiles).forEach(key => {
+        if (extraFiles[key]) payload.append(key, extraFiles[key]);
+      });
 
       const res = await fetch(`${api.url}/visa-processes/public/${id}/submit`, {
         method: 'POST',
@@ -137,15 +139,52 @@ const ClientPortalPage = () => {
             />
           </div>
 
-          <div className="form-group" style={{ padding: '1rem', background: 'var(--surface-2)', borderRadius: '12px', border: '1px dashed var(--border)' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-1)', fontWeight: 600 }}>Formulario DS-160 (Opcional)</label>
-            <input 
-              type="file" 
-              accept=".pdf" 
-              onChange={e => setDs160File(e.target.files[0])} 
-              style={{ color: 'var(--text-2)' }}
-            />
-          </div>
+          {data.target_country === 'Estados Unidos' && (
+            <div className="form-group" style={{ padding: '1rem', background: 'var(--surface-2)', borderRadius: '12px', border: '1px dashed var(--border)' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--text-2)' }}>
+                Formulario DS-160 (Opcional si ya lo llenó)
+              </label>
+              <input 
+                type="file" 
+                accept=".pdf"
+                onChange={e => setExtraFiles({...extraFiles, ds160_file: e.target.files[0]})}
+                className="file-input"
+                style={{ color: 'var(--text-2)' }}
+              />
+            </div>
+          )}
+
+          {(data.target_country === 'Canadá' || data.visa_category.includes('Estudiante') || data.visa_category.includes('F1')) && (
+            <div className="form-group" style={{ padding: '1rem', background: 'var(--surface-2)', borderRadius: '12px', border: '1px dashed var(--border)' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--text-2)' }}>
+                Carta de Aceptación Escolar / Oferta Laboral (Obligatorio)
+              </label>
+              <input 
+                type="file" 
+                accept=".pdf"
+                required
+                onChange={e => setExtraFiles({...extraFiles, support_doc: e.target.files[0]})}
+                className="file-input"
+                style={{ color: 'var(--text-2)' }}
+              />
+            </div>
+          )}
+
+          {data.target_country === 'Schengen (Europa)' && (
+            <div className="form-group" style={{ padding: '1rem', background: 'var(--surface-2)', borderRadius: '12px', border: '1px dashed var(--border)' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--text-2)' }}>
+                Itinerario de Vuelo y Reserva de Hotel (Obligatorio)
+              </label>
+              <input 
+                type="file" 
+                accept=".pdf"
+                required
+                onChange={e => setExtraFiles({...extraFiles, itinerary_doc: e.target.files[0]})}
+                className="file-input"
+                style={{ color: 'var(--text-2)' }}
+              />
+            </div>
+          )}
 
           <button type="submit" disabled={submitting} className="btn btn-lime" style={{ padding: '1rem', fontSize: '1rem', fontWeight: 600, marginTop: '1rem' }}>
             {submitting ? 'Enviando documentos...' : 'Enviar Documentos Seguros'}

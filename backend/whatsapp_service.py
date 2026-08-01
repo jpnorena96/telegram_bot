@@ -38,9 +38,7 @@ async def send_whatsapp_message(phone_number: str, text: str) -> bool:
             "presence": "composing",
             "linkPreview": False
         },
-        "textMessage": {
-            "text": text
-        }
+        "text": text
     }
     
     try:
