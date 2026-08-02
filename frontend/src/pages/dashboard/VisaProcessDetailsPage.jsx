@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, FileText, CheckCircle2, Loader2, Download, User, Globe, AlertCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, FileText, CheckCircle2, Loader2, Download, User, Globe, AlertCircle, Trash2, Paperclip } from 'lucide-react';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -61,7 +61,7 @@ const VisaProcessDetailsPage = () => {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', color: 'var(--text-3)', gap: '1rem' }}>
         <Loader2 className="animate-spin" size={36} color="var(--lime)" />
-        <span style={{ fontSize: '1.1rem', fontWeight: 500 }}>Cargando expediente #{id}...</span>
+        <span className="typewriter-text" style={{ fontSize: '1.1rem', fontWeight: 500 }}>Buscando expediente en archivo...</span>
       </div>
     );
   }
@@ -71,7 +71,7 @@ const VisaProcessDetailsPage = () => {
       <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-3)' }}>
         <AlertCircle size={48} style={{ margin: '0 auto 1rem auto', opacity: 0.5 }} />
         <h2 style={{ fontSize: '1.25rem' }}>Expediente no encontrado</h2>
-        <button onClick={() => navigate('/dashboard/visa-processes')} className="btn btn-outline" style={{ marginTop: '1rem' }}>Volver al listado</button>
+        <button onClick={() => navigate('/dashboard/visa-processes')} className="btn btn-outline" style={{ marginTop: '1rem' }}>Volver al archivador</button>
       </div>
     );
   }
@@ -79,8 +79,12 @@ const VisaProcessDetailsPage = () => {
   const { process, applicants } = data;
   const isReady = process.status === 'Listo para Alta';
 
+  let stampClass = 'stamp-blue';
+  if (isReady) stampClass = 'stamp-green';
+  if (process.status === 'En Progreso') stampClass = 'stamp-red';
+
   return (
-    <div className="animate-in" style={{ padding: '0', maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div className="animate-in" style={{ padding: '0', maxWidth: '1400px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
       {/* ── Header ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
@@ -94,157 +98,178 @@ const VisaProcessDetailsPage = () => {
             <ArrowLeft size={18} />
           </button>
           <div>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-1)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              Expediente #{process.id}
+            <h1 className="typewriter-text" style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-1)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              EXP-{process.id.toString().padStart(4, '0')}
             </h1>
-            <p style={{ color: 'var(--text-3)', margin: '0.25rem 0 0 0', fontSize: '0.9rem' }}>
-              Cliente: <span style={{ color: 'var(--text-1)', fontWeight: 500 }}>{process.client_email}</span>
-            </p>
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <span className={`tag ${isReady ? 'tag-gold' : 'tag-lime'}`} style={{ fontSize: '0.95rem', padding: '0.5rem 1rem' }}>
-            {process.status}
-          </span>
           <button 
             onClick={() => window.open(`/client-portal/${process.id}`, '_blank')}
             className="btn btn-outline"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface)' }}
             title="Abrir Portal Público"
           >
-            <Globe size={18} />
+            <Globe size={18} /> Ver Enlace
           </button>
           <button 
             onClick={handleDelete}
             className="btn btn-outline"
-            style={{ color: '#ef4444', borderColor: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            style={{ color: '#ef4444', borderColor: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface)' }}
             title="Eliminar Expediente"
           >
-            <Trash2 size={18} />
-          </button>
-          <button 
-            onClick={handleMarkReady} 
-            disabled={marking || isReady}
-            className={`btn ${isReady ? 'btn-outline' : 'btn-lime'}`}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-          >
-            {marking ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={18} />}
-            {isReady ? 'Alta Realizada' : 'Marcar Listo'}
+            <Trash2 size={18} /> Eliminar
           </button>
         </div>
       </div>
 
-      {/* ── Process Details Card ── */}
-      <div className="panel" style={{ padding: '1.5rem', background: 'var(--surface-2)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Globe size={20} color="#3B82F6" />
-            </div>
-            <div>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-3)' }}>País Destino</p>
-              <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-1)' }}>{process.target_country}</p>
-            </div>
-            <div>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-3)' }}>Propósito del Viaje</p>
-              <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-1)' }}>{process.purpose || process.visa_category}</p>
-            </div>
-            <div>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-3)' }}>Tipo de Agrupación</p>
-              <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-1)' }}>{process.group_type || 'Individual'}</p>
-            </div>
-          </div>
+      {/* ── OPEN FOLDER LAYOUT ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem', alignItems: 'start' }}>
+        
+        {/* LEFT COLUMN: FOLDER FLAP / CLIPBOARD */}
+        <div style={{ 
+          background: 'var(--surface)', 
+          border: '1px solid var(--border)', 
+          borderRadius: '12px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.05), inset -20px 0 20px rgba(0,0,0,0.01)',
+          padding: '2rem',
+          position: 'relative',
+          minHeight: '600px'
+        }}>
+          {/* Metal Clip graphic */}
+          <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', width: '100px', height: '25px', background: 'linear-gradient(to bottom, #d4d4d8, #a1a1aa)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}></div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(163, 230, 53, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <FileText size={20} color="var(--lime)" />
+          <div style={{ marginTop: '2rem' }}>
+            <div style={{ borderBottom: '2px solid var(--text-1)', paddingBottom: '1rem', marginBottom: '2rem' }}>
+              <h2 className="typewriter-text" style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>HOJA DE RUTA</h2>
+              <p className="typewriter-text" style={{ fontSize: '0.85rem', color: 'var(--text-3)', margin: '0.25rem 0 0 0' }}>Uso exclusivo interno</p>
             </div>
-            <div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-3)', fontWeight: 500 }}>Categoría de Visa</div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-1)' }}>{process.visa_category}</div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div>
+                <p className="typewriter-text" style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-3)', letterSpacing: '0.1em' }}>CLIENTE ASIGNADO</p>
+                <p style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', color: 'var(--text-1)', wordBreak: 'break-all' }}>{process.client_email}</p>
+              </div>
+
+              <div style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid var(--border)', padding: '1rem', borderRadius: '4px' }}>
+                <div style={{ marginBottom: '1rem' }}>
+                  <p className="typewriter-text" style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-3)', letterSpacing: '0.1em' }}>PAÍS DESTINO</p>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', color: 'var(--text-1)' }}>{process.target_country}</p>
+                </div>
+                
+                <div style={{ marginBottom: '1rem' }}>
+                  <p className="typewriter-text" style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-3)', letterSpacing: '0.1em' }}>CLASE DE VISA</p>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', color: 'var(--text-1)' }}>{process.visa_category}</p>
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <p className="typewriter-text" style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-3)', letterSpacing: '0.1em' }}>PROPÓSITO</p>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', color: 'var(--text-1)' }}>{process.purpose || 'No especificado'}</p>
+                </div>
+
+                <div>
+                  <p className="typewriter-text" style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-3)', letterSpacing: '0.1em' }}>GRUPO</p>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', color: 'var(--text-1)' }}>{process.group_type || 'Individual'}</p>
+                </div>
+              </div>
+
+              {/* Stamp Area */}
+              <div style={{ marginTop: '3rem', textAlign: 'center', height: '120px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed var(--border)', borderRadius: '8px' }}>
+                <p className="typewriter-text" style={{ fontSize: '0.7rem', color: 'var(--text-3)', marginBottom: '1rem', opacity: 0.5 }}>ESPACIO PARA SELLO OFICIAL</p>
+                <div className={`rubber-stamp ${stampClass}`} style={{ transform: 'rotate(-10deg)', opacity: 0.9, fontSize: '1.5rem', padding: '0.5rem 1rem' }}>
+                  {process.status}
+                </div>
+              </div>
+
+              <div style={{ marginTop: '1rem' }}>
+                <button 
+                  onClick={handleMarkReady} 
+                  disabled={marking || isReady}
+                  className="btn btn-lime"
+                  style={{ width: '100%', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '1rem', boxShadow: 'none' }}
+                >
+                  {marking ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle2 size={20} />}
+                  {isReady ? 'ALTA CONFIRMADA' : 'SELLAR COMO LISTO'}
+                </button>
+              </div>
+
             </div>
           </div>
         </div>
-      </div>
 
-      {/* ── Applicants Section ── */}
-      <div>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-1)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <User size={20} style={{ color: 'var(--lime)' }} />
-          Solicitantes y Documentos
-        </h2>
-
-        {applicants.length === 0 ? (
-           <div className="panel" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-3)' }}>
-              Aún no se han registrado solicitantes en este expediente.
-           </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {applicants.map(app => (
-              <div key={app.id} className="panel" style={{ overflow: 'hidden' }}>
-                <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {/* RIGHT COLUMN: STACKED PAPERS */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+          
+          {applicants.length === 0 ? (
+             <div className="dossier-paper" style={{ textAlign: 'center', color: 'var(--text-3)', padding: '4rem 2rem' }}>
+                <div className="typewriter-text">El cliente aún no ha adjuntado documentos al expediente.</div>
+             </div>
+          ) : (
+            applicants.map((app, index) => (
+              <div key={app.id} className="dossier-paper" style={{ transform: `rotate(${index % 2 === 0 ? '-1deg' : '1.5deg'})` }}>
+                <div className="paper-clip"></div>
+                
+                <div style={{ borderBottom: '1px solid var(--border-2)', paddingBottom: '1rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
-                    <h3 style={{ fontSize: '1.1rem', margin: '0 0 0.25rem 0', fontWeight: 600, color: 'var(--text-1)' }}>
-                      {app.full_name || 'Sin nombre'}
+                    <h3 className="typewriter-text" style={{ fontSize: '1.5rem', margin: '0 0 0.25rem 0', fontWeight: 800, color: '#18181b', textTransform: 'uppercase' }}>
+                      {app.full_name || 'SIN NOMBRE'}
                     </h3>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-3)' }}>
-                      {app.relationship === 'primary' ? 'Solicitante Principal' : 'Familiar / Acompañante'} • Pasaporte: {app.passport_number || 'N/A'}
+                    <div className="typewriter-text" style={{ fontSize: '0.85rem', color: '#52525b' }}>
+                      {app.relationship === 'primary' ? 'TITULAR PRINCIPAL' : 'DEPENDIENTE / FAMILIAR'}
                     </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div className="typewriter-text" style={{ fontSize: '0.75rem', color: '#71717a' }}>Nº PASAPORTE</div>
+                    <div className="typewriter-text" style={{ fontSize: '1.25rem', fontWeight: 700, color: '#18181b' }}>{app.passport_number || 'N/A'}</div>
                   </div>
                 </div>
                 
-                <div style={{ padding: '1.5rem' }}>
+                <div>
+                  <h4 className="typewriter-text" style={{ fontSize: '0.9rem', fontWeight: 700, color: '#27272a', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Paperclip size={16} /> ADJUNTOS
+                  </h4>
+                  
                   {app.documents && app.documents.length > 0 ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
                       {app.documents.map(doc => (
-                        <div key={doc.id} style={{ 
-                          padding: '1rem', background: 'var(--bg)', border: '1px solid var(--border)', 
-                          borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                          transition: 'border-color 0.2s'
-                        }}
-                        onMouseOver={e => e.currentTarget.style.borderColor = 'var(--lime-subtle)'}
-                        onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border)'}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <FileText size={18} color="var(--text-2)" />
+                        <div key={doc.id} style={{ border: '1px solid var(--border-2)', borderRadius: '4px', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.02)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '4px', background: '#e4e4e7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <FileText size={16} color="#52525b" />
                             </div>
-                            <div>
-                              <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-1)' }}>{doc.document_type}</div>
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {doc.file_name}
-                              </div>
+                            <div style={{ overflow: 'hidden' }}>
+                              <p className="typewriter-text" style={{ margin: 0, fontSize: '0.8rem', fontWeight: 600, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                                {doc.doc_type}
+                              </p>
+                              <p className="typewriter-text" style={{ margin: 0, fontSize: '0.7rem', color: '#71717a' }}>{doc.file_url.split('.').pop().toUpperCase()}</p>
                             </div>
                           </div>
+                          
                           <a 
-                            href={`${api.url}/documents/download/${doc.id}`} 
+                            href={doc.file_url.startsWith('http') ? doc.file_url : `${api.API_URL.replace('/api', '')}${doc.file_url}`} 
                             target="_blank" 
                             rel="noopener noreferrer" 
-                            style={{ 
-                              width: '36px', height: '36px', borderRadius: '8px', background: 'var(--lime-subtle)', 
-                              display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--lime)',
-                              textDecoration: 'none', transition: 'all 0.2s'
-                            }}
-                            onMouseOver={e => { e.currentTarget.style.background = 'var(--lime)'; e.currentTarget.style.color = '#000'; }}
-                            onMouseOut={e => { e.currentTarget.style.background = 'var(--lime-subtle)'; e.currentTarget.style.color = 'var(--lime)'; }}
+                            className="btn btn-sm" 
+                            style={{ background: '#fff', border: '1px solid #d4d4d8', padding: '0.4rem', color: '#27272a', borderRadius: '4px' }}
                             title="Descargar Documento"
                           >
-                            <Download size={18} />
+                            <Download size={14} />
                           </a>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div style={{ fontSize: '0.95rem', color: 'var(--text-3)', padding: '1rem 0' }}>
-                      El solicitante aún no ha cargado sus documentos.
+                    <div className="typewriter-text" style={{ fontSize: '0.85rem', color: '#71717a', fontStyle: 'italic' }}>
+                      -- Sin documentos adjuntos --
                     </div>
                   )}
                 </div>
+
               </div>
-            ))}
-          </div>
-        )}
+            ))
+          )}
+        </div>
       </div>
 
     </div>

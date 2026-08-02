@@ -315,10 +315,114 @@ a:hover { color: var(--lime); }
   /* App Layout Overrides */
   .mobile-main-content {
     padding: 1rem !important;
-  }
 }
 
-/* Tablet / Smaller Desktop (Max Width 1024px) */
+/* ═══════════════════════════════════
+   DOSSIER UI UTILITIES (SKEUOMORPHISM)
+═══════════════════════════════════ */
+.dossier-folder {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px 12px 12px 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03), inset 0 2px 0 rgba(255,255,255,0.8);
+  position: relative;
+  transition: transform var(--t-fast), box-shadow var(--t-fast);
+  padding: 1.5rem;
+}
+
+.dossier-folder:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.06), inset 0 2px 0 rgba(255,255,255,1);
+}
+
+.dossier-tab {
+  position: absolute;
+  top: -24px;
+  left: -1px;
+  height: 24px;
+  padding: 0 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.8);
+}
+
+.dossier-paper {
+  background: #FFFFFF;
+  border: 1px solid #E4E4E7;
+  border-radius: 2px;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.05), -1px -1px 2px rgba(0,0,0,0.02);
+  position: relative;
+  padding: 2rem;
+  color: #27272A;
+}
+
+.dossier-paper::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: repeating-linear-gradient(transparent, transparent 31px, #F4F4F5 31px, #F4F4F5 32px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.rubber-stamp {
+  font-family: 'Geist Mono', monospace;
+  font-weight: 800;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  border: 3px solid;
+  border-radius: 6px;
+  padding: 0.25rem 0.75rem;
+  display: inline-block;
+  transform: rotate(-5deg);
+  opacity: 0.85;
+  letter-spacing: 0.1em;
+}
+
+.stamp-green { color: #10B981; border-color: #10B981; }
+.stamp-red { color: #EF4444; border-color: #EF4444; transform: rotate(3deg); }
+.stamp-blue { color: #3B82F6; border-color: #3B82F6; transform: rotate(-2deg); }
+
+.paper-clip {
+  position: absolute;
+  top: -15px;
+  left: 20px;
+  width: 14px;
+  height: 45px;
+  border: 2px solid #A1A1AA;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+.paper-clip::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 2px;
+  width: 6px;
+  height: 25px;
+  border: 2px solid #A1A1AA;
+  border-radius: 10px;
+  border-top: none;
+}
+
+.typewriter-text {
+  font-family: 'Geist Mono', monospace;
+  color: #3F3F46;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+}/* Tablet / Smaller Desktop (Max Width 1024px) */
 @media (max-width: 1024px) {
   .grid-2-tablet {
     grid-template-columns: 1fr !important;

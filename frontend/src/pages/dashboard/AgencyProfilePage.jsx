@@ -75,14 +75,11 @@ const AgencyProfilePage = () => {
       {/* HEADER */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: '0.75rem', margin: 0 }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Store size={24} style={{ color: 'var(--lime)' }} />
-            </div>
-            Marca Blanca
+          <h1 className="typewriter-text" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: '0.75rem', margin: 0 }}>
+            REGISTRO OFICIAL DE AGENCIA
           </h1>
-          <p style={{ color: 'var(--text-3)', fontSize: '1rem', marginTop: '0.5rem', maxWidth: '600px' }}>
-            Personaliza el portal público que verán tus clientes con tu propio logo, nombre y colores corporativos.
+          <p className="typewriter-text" style={{ color: 'var(--text-3)', fontSize: '1rem', marginTop: '0.5rem', maxWidth: '600px' }}>
+            Documento vinculante de identidad visual para marca blanca.
           </p>
         </div>
         <button 
@@ -91,7 +88,7 @@ const AgencyProfilePage = () => {
           disabled={saving}
           style={{ padding: '0.75rem 1.5rem', fontSize: '1rem', fontWeight: 600, boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)' }}
         >
-          {saving ? 'GUARDANDO...' : 'GUARDAR CAMBIOS'}
+          {saving ? 'GUARDANDO...' : 'FIRMAR Y GUARDAR'}
         </button>
       </div>
 
@@ -124,11 +121,12 @@ const AgencyProfilePage = () => {
         {/* LEFT COLUMN: FORM */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           
-          <div className="panel" style={{ background: 'var(--surface-2)', padding: '2rem', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 8px 30px rgba(0,0,0,0.2)' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-1)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Paintbrush size={20} style={{ color: 'var(--lime)' }} />
-              Identidad Visual
-            </h2>
+          <div className="dossier-paper" style={{ padding: '3rem 2rem' }}>
+            <div style={{ borderBottom: '2px solid var(--text-1)', paddingBottom: '1rem', marginBottom: '2rem' }}>
+              <h2 className="typewriter-text" style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
+                SECCIÓN I: IDENTIDAD VISUAL
+              </h2>
+            </div>
             
             <form style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div className="input-group">
@@ -207,14 +205,15 @@ const AgencyProfilePage = () => {
             </form>
           </div>
 
-          <div className="panel" style={{ background: 'var(--surface-2)', padding: '2rem', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 8px 30px rgba(0,0,0,0.2)' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-1)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <LinkIcon size={20} style={{ color: 'var(--lime)' }} />
-              Dominio y Enlaces
-            </h2>
+          <div className="dossier-paper" style={{ padding: '3rem 2rem' }}>
+            <div style={{ borderBottom: '2px solid var(--text-1)', paddingBottom: '1rem', marginBottom: '2rem' }}>
+              <h2 className="typewriter-text" style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
+                SECCIÓN II: DOMINIO Y ENLACES
+              </h2>
+            </div>
             
             <div className="input-group">
-              <label className="input-label">Alias del Enlace (URL Amigable)</label>
+              <label className="typewriter-text" style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>ALIAS DEL ENLACE (URL AMIGABLE)</label>
               <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
                 <div style={{ padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.02)', color: 'var(--text-3)', borderRight: '1px solid var(--border)', fontSize: '0.9rem' }}>
                   adelantavisa.com/
@@ -227,8 +226,8 @@ const AgencyProfilePage = () => {
                   style={{ flex: 1, padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: 'var(--text-1)', outline: 'none' }}
                 />
               </div>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginTop: '0.5rem' }}>
-                Esta es la terminación que verán tus clientes. Ej: adelantavisa.com/{formData.alias || 'tu-agencia'}/xyz
+              <span className="typewriter-text" style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginTop: '0.5rem' }}>
+                *Esta es la terminación que verán sus clientes. Ej: adelantavisa.com/{formData.alias || 'tu-agencia'}/xyz
               </span>
             </div>
           </div>

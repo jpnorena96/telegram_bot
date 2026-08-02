@@ -293,85 +293,81 @@ const VisaProcessesPage = () => {
         />
       </div>
 
-      {/* ── Table ── */}
-      <div className="table-responsive panel" style={{ borderRadius: '12px', overflow: 'hidden' }}>
-        <table className="table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ background: 'var(--bg)' }}>
-            <tr>
-              <th style={{ padding: '1.25rem 1rem', fontSize: '0.85rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ID Expediente</th>
-              <th style={{ padding: '1.25rem 1rem', fontSize: '0.85rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cliente</th>
-              <th style={{ padding: '1.25rem 1rem', fontSize: '0.85rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Trámite</th>
-              <th style={{ padding: '1.25rem 1rem', fontSize: '0.85rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Estado Actual</th>
-              <th style={{ padding: '1.25rem 1rem', fontSize: '0.85rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProcesses.map(p => (
-              <tr key={p.id} style={{ borderTop: '1px solid var(--border)', transition: 'background 0.2s', cursor: 'default' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                <td style={{ padding: '1rem', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>#{p.id}</td>
-                <td style={{ padding: '1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)', fontSize: '0.85rem', fontWeight: 600 }}>
-                      {(p.client_email || 'U').charAt(0).toUpperCase()}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem', padding: '1rem 0' }}>
+        {filteredProcesses.map(p => {
+          let stampClass = 'stamp-blue';
+          if (p.status === 'Listo para Alta') stampClass = 'stamp-green';
+          if (p.status === 'En Progreso') stampClass = 'stamp-red';
+
+          return (
+            <div key={p.id} className="dossier-folder" style={{ marginTop: '20px' }}>
+              <div className="dossier-tab">EXP-{p.id.toString().padStart(4, '0')}</div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                    <div>
+                      <div className="typewriter-text" style={{ fontSize: '0.8rem', opacity: 0.6, marginBottom: '4px' }}>CLIENTE ASIGNADO</div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-1)', fontSize: '1.05rem', wordBreak: 'break-all' }}>{p.client_email || 'Sin correo asignado'}</div>
                     </div>
-                    <span style={{ fontWeight: 500, color: 'var(--text-1)' }}>{p.client_email || 'Sin correo asignado'}</span>
                   </div>
-                </td>
-                <td style={{ padding: '1rem', color: 'var(--text-2)', fontSize: '0.95rem' }}>
-                  {p.target_country} <span style={{ opacity: 0.5 }}>({p.visa_category})</span>
-                </td>
-                <td style={{ padding: '1rem' }}>
-                  <span className={`tag ${p.status === 'Documentos Recibidos' ? 'tag-lime' : p.status === 'Listo para Alta' ? 'tag-gold' : 'tag-neutral'}`} style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem' }}>
-                    {p.status === 'Listo para Alta' && <CheckCircle2 size={14} style={{ marginRight: '0.25rem', display: 'inline-block', verticalAlign: 'text-bottom' }} />}
-                    {p.status}
-                  </span>
-                </td>
-                <td style={{ padding: '1rem', textAlign: 'right' }}>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                    <button 
-                      onClick={() => copyLink(p.id)} 
-                      className="btn btn-sm" 
-                      title="Copiar Link Seguro para Cliente" 
-                      style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-1)', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.75rem', borderRadius: '6px', border: 'none', cursor: 'pointer', transition: 'background 0.2s' }}
-                      onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                      onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                    >
-                      <LinkIcon size={14} /> Enlace
-                    </button>
-                    <button 
-                      onClick={() => navigate(`/dashboard/visa-processes/${p.id}`)} 
-                      className="btn btn-sm btn-lime" 
-                      title="Abrir Expediente Completo" 
-                      style={{ padding: '0.4rem 0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-                    >
-                      <Eye size={14} /> Revisar
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(p.id)}
-                      className="btn btn-sm"
-                      title="Eliminar Expediente"
-                      style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '0.4rem 0.75rem', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
+
+                  <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}>Destino:</span>
+                      <span style={{ fontWeight: 600, color: 'var(--text-1)' }}>{p.target_country}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}>Clase/Visa:</span>
+                      <span style={{ fontWeight: 600, color: 'var(--text-1)' }}>{p.visa_category}</span>
+                    </div>
                   </div>
-                </td>
-              </tr>
-            ))}
-            {filteredProcesses.length === 0 && (
-              <tr>
-                <td colSpan="5" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-3)' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                    <Search size={32} style={{ opacity: 0.5 }} />
-                    <span style={{ fontSize: '1rem' }}>
-                      {searchQuery ? 'No se encontraron expedientes que coincidan con la búsqueda.' : 'No hay expedientes creados.'}
-                    </span>
+
+                  <div style={{ textAlign: 'center', marginBottom: '1.5rem', minHeight: '50px' }}>
+                    <div className={`rubber-stamp ${stampClass}`} style={{ fontSize: '0.9rem', padding: '0.2rem 0.5rem' }}>
+                      {p.status}
+                    </div>
                   </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem', borderTop: '1px dashed var(--border)', paddingTop: '1rem' }}>
+                  <button 
+                    onClick={() => copyLink(p.id)} 
+                    className="btn btn-outline" 
+                    title="Copiar Link Seguro para Cliente" 
+                    style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem' }}
+                  >
+                    <LinkIcon size={14} /> Link
+                  </button>
+                  <button 
+                    onClick={() => navigate(`/dashboard/visa-processes/${p.id}`)} 
+                    className="btn btn-lime" 
+                    title="Abrir Expediente Completo" 
+                    style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem' }}
+                  >
+                    <Eye size={14} /> Revisar
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(p.id)}
+                    className="btn btn-outline"
+                    title="Eliminar Expediente"
+                    style={{ padding: '0.5rem', color: '#ef4444', borderColor: '#ef4444' }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        {filteredProcesses.length === 0 && (
+          <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem', background: 'var(--surface)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
+            <Search size={48} style={{ opacity: 0.2, marginBottom: '1rem', display: 'inline-block' }} />
+            <div style={{ fontSize: '1.1rem', color: 'var(--text-2)' }}>
+              {searchQuery ? 'No se encontraron expedientes que coincidan con la búsqueda.' : 'El archivador está vacío. No hay expedientes creados.'}
+            </div>
+          </div>
+        )}
       </div>
 
     </div>
