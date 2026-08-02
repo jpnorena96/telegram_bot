@@ -14,6 +14,7 @@ const ClientPortalPage = () => {
     { full_name: '', passport_number: '', passportFile: null }
   ]);
   const [extraFiles, setExtraFiles] = useState({});
+  const [errorMsg, setErrorMsg] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -22,7 +23,10 @@ const ClientPortalPage = () => {
         if (res.ok) {
           setData(await res.json());
         } else {
-          toast.error('Expediente no válido o expirado');
+          const err = await res.json().catch(() => ({}));
+          const msg = err.detail || 'Expediente no válido o expirado';
+          toast.error(msg);
+          setErrorMsg(msg);
         }
       } catch (e) {
         toast.error('Error cargando el portal');
@@ -73,7 +77,16 @@ const ClientPortalPage = () => {
 
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg)' }}>Cargando portal seguro...</div>;
 
-  if (!data) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg)', color: 'var(--text-1)' }}><h2>Este enlace no es válido</h2></div>;
+  if (!data) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'var(--bg)' }}>
+        <div style={{ textAlign: 'center', padding: '3rem', background: 'var(--surface-2)', borderRadius: '16px', border: '1px solid var(--border)', maxWidth: '400px' }}>
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: 'var(--text-1)' }}>{errorMsg || 'Este enlace no es válido'}</h2>
+          <p style={{ color: 'var(--text-3)' }}>Contacte a su agencia para generar un nuevo enlace o reportar el inconveniente.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (success) {
     return (

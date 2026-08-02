@@ -4,6 +4,7 @@ from typing import List, Optional
 import os
 import shutil
 from fastapi import BackgroundTasks
+from datetime import datetime, timedelta
 from .auth import get_db, get_current_user
 
 router = APIRouter()
@@ -50,6 +51,13 @@ def get_public_process(process_id: int, db = Depends(get_db)):
     if not row:
         cursor.close()
         raise HTTPException(status_code=404, detail="Process not found")
+
+    # Check expiration (7 days limit)
+    if row["status"] == "En Progreso" and row["created_at"]:
+        expiration_date = row["created_at"] + timedelta(days=7)
+        if datetime.now() > expiration_date:
+            cursor.close()
+            raise HTTPException(status_code=410, detail="Expediente expirado por seguridad. Contacta a tu agencia para generar un nuevo enlace.")
 
     # Fetch applicants
     cursor.execute("SELECT id, full_name, passport_number, relationship FROM visa_applicants WHERE process_id = %s", (process_id,))
@@ -111,12 +119,20 @@ def mark_process_ready(process_id: int, background_tasks: BackgroundTasks, curre
 async def submit_public_process(process_id: int, request: Request, db = Depends(get_db)):
     form = await request.form()
     
-    # Check if process exists
+    # Check if process exists and is not expired
     cursor = db.cursor(dictionary=True)
-    cursor.execute("SELECT id FROM visa_processes WHERE id = %s", (process_id,))
-    if not cursor.fetchone():
+    cursor.execute("SELECT id, status, created_at FROM visa_processes WHERE id = %s", (process_id,))
+    row = cursor.fetchone()
+    if not row:
         cursor.close()
         raise HTTPException(status_code=404, detail="Process not found")
+        
+    if row["status"] == "En Progreso" and row["created_at"]:
+        expiration_date = row["created_at"] + timedelta(days=7)
+        if datetime.now() > expiration_date:
+            cursor.close()
+            raise HTTPException(status_code=410, detail="El enlace ha expirado. Contacta a tu agencia.")
+            
     # Handle dynamic applicants
     applicant_count = int(form.get('applicant_count', 1))
     
