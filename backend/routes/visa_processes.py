@@ -15,9 +15,7 @@ class VisaProcessCreate(BaseModel):
 
 @router.post("/")
 def create_process(data: VisaProcessCreate, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
-    if current_user["roles"][0] != "TRAVEL_AGENCY":
-        raise HTTPException(status_code=403, detail="Only agencies can create processes")
-    
+    # Any logged in user can create a process.
     cursor = db.cursor()
     cursor.execute(
         "INSERT INTO visa_processes (user_id, client_email, type, target_country, visa_category) VALUES (%s, %s, %s, %s, %s)",

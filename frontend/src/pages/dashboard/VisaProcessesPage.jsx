@@ -123,22 +123,37 @@ const VisaProcessesPage = () => {
               <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-1)' }}>Paso 1: Selecciona el País Destino</h4>
               <p style={{ color: 'var(--text-3)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Elige el país para el cual el cliente desea solicitar el visado.</p>
               
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-                {['Estados Unidos', 'Canadá', 'Reino Unido', 'Schengen (Europa)', 'Australia'].map(country => (
-                  <div 
-                    key={country}
-                    onClick={() => setSelectedCountry(country)}
-                    style={{ 
-                      padding: '1.5rem', borderRadius: '12px', border: `2px solid ${selectedCountry === country ? 'var(--lime)' : 'var(--border)'}`,
-                      background: selectedCountry === country ? 'rgba(163, 230, 53, 0.05)' : 'var(--surface)', cursor: 'pointer',
-                      textAlign: 'center', transition: 'all 0.2s', transform: selectedCountry === country ? 'translateY(-2px)' : 'none'
-                    }}
-                  >
-                    <div style={{ fontSize: '1.1rem', fontWeight: 600, color: selectedCountry === country ? 'var(--lime)' : 'var(--text-1)' }}>
-                      {country}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.9rem', color: 'var(--text-2)', fontWeight: 500 }}>Países Frecuentes</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                  {['Estados Unidos', 'Canadá', 'Reino Unido', 'Schengen (Europa)', 'Australia'].map(country => (
+                    <div 
+                      key={country}
+                      onClick={() => setSelectedCountry(country)}
+                      style={{ 
+                        padding: '1rem', borderRadius: '12px', border: `2px solid ${selectedCountry === country ? 'var(--lime)' : 'var(--border)'}`,
+                        background: selectedCountry === country ? 'rgba(163, 230, 53, 0.05)' : 'var(--surface)', cursor: 'pointer',
+                        textAlign: 'center', transition: 'all 0.2s', transform: selectedCountry === country ? 'translateY(-2px)' : 'none'
+                      }}
+                    >
+                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: selectedCountry === country ? 'var(--lime)' : 'var(--text-1)' }}>
+                        {country}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+
+                <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.9rem', color: 'var(--text-2)', fontWeight: 500 }}>O buscar cualquier otro país del mundo:</label>
+                <select 
+                  value={selectedCountry}
+                  onChange={(e) => setSelectedCountry(e.target.value)}
+                  style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-1)', fontSize: '1rem', outline: 'none', appearance: 'none', cursor: 'pointer' }}
+                >
+                  <option value="" disabled>Selecciona un país...</option>
+                  {[
+                    "Afganistán", "Albania", "Alemania", "Andorra", "Angola", "Antigua y Barbuda", "Arabia Saudita", "Argelia", "Argentina", "Armenia", "Australia", "Austria", "Azerbaiyán", "Bahamas", "Bangladés", "Barbados", "Baréin", "Bélgica", "Belice", "Benín", "Bielorrusia", "Birmania", "Bolivia", "Bosnia y Herzegovina", "Botsuana", "Brasil", "Brunéi", "Bulgaria", "Burkina Faso", "Burundi", "Bután", "Cabo Verde", "Camboya", "Camerún", "Canadá", "Catar", "Chad", "Chile", "China", "Chipre", "Ciudad del Vaticano", "Colombia", "Comoras", "Corea del Norte", "Corea del Sur", "Costa de Marfil", "Costa Rica", "Croacia", "Cuba", "Dinamarca", "Dominica", "Ecuador", "Egipto", "El Salvador", "Emiratos Árabes Unidos", "Eritrea", "Eslovaquia", "Eslovenia", "España", "Estados Unidos", "Estonia", "Etiopía", "Filipinas", "Finlandia", "Fiyi", "Francia", "Gabón", "Gambia", "Georgia", "Ghana", "Granada", "Grecia", "Guatemala", "Guyana", "Guinea", "Guinea ecuatorial", "Guinea-Bisáu", "Haití", "Honduras", "Hungría", "India", "Indonesia", "Irak", "Irán", "Irlanda", "Islandia", "Islas Marshall", "Islas Salomón", "Israel", "Italia", "Jamaica", "Japón", "Jordania", "Kazajistán", "Kenia", "Kirguistán", "Kiribati", "Kuwait", "Laos", "Lesoto", "Letonia", "Líbano", "Liberia", "Libia", "Liechtenstein", "Lituania", "Luxemburgo", "Madagascar", "Malasia", "Malaui", "Maldivas", "Malí", "Malta", "Marruecos", "Mauricio", "Mauritania", "México", "Micronesia", "Moldavia", "Mónaco", "Mongolia", "Montenegro", "Mozambique", "Namibia", "Nauru", "Nepal", "Nicaragua", "Níger", "Nigeria", "Noruega", "Nueva Zelanda", "Omán", "Países Bajos", "Pakistán", "Palaos", "Panamá", "Papúa Nueva Guinea", "Paraguay", "Perú", "Polonia", "Portugal", "Reino Unido", "República Centroafricana", "República Checa", "República de Macedonia", "República del Congo", "República Democrática del Congo", "República Dominicana", "República Sudafricana", "Ruanda", "Rumanía", "Rusia", "Samoa", "San Cristóbal y Nieves", "San Marino", "San Vicente y las Granadinas", "Santa Lucía", "Santo Tomé y Príncipe", "Senegal", "Serbia", "Seychelles", "Sierra Leona", "Singapur", "Siria", "Somalia", "Sri Lanka", "Suazilandia", "Sudán", "Sudán del Sur", "Suecia", "Suiza", "Surinam", "Tailandia", "Tanzania", "Tayikistán", "Timor Oriental", "Togo", "Tonga", "Trinidad y Tobago", "Túnez", "Turkmenistán", "Turquía", "Tuvalu", "Ucrania", "Uganda", "Uruguay", "Uzbekistán", "Vanuatu", "Venezuela", "Vietnam", "Yemen", "Yibuti", "Zambia", "Zimbabue"
+                  ].map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                 <button type="button" onClick={() => setCreating(false)} className="btn btn-outline" style={{ padding: '0.85rem 1.5rem' }}>Cancelar</button>
