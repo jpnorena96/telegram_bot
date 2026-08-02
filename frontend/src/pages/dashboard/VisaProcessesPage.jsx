@@ -14,7 +14,8 @@ const VisaProcessesPage = () => {
   const [wizardStep, setWizardStep] = useState(1);
   const [newEmail, setNewEmail] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('Estados Unidos');
-  const [selectedCategory, setSelectedCategory] = useState('B1/B2');
+  const [selectedGroup, setSelectedGroup] = useState('Individual');
+  const [selectedPurpose, setSelectedPurpose] = useState('Turismo / Negocios');
   const [searchQuery, setSearchQuery] = useState('');
 
   const load = async () => {
@@ -46,7 +47,12 @@ const VisaProcessesPage = () => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ client_email: newEmail, target_country: selectedCountry, visa_category: selectedCategory })
+        body: JSON.stringify({ 
+          client_email: newEmail, 
+          target_country: selectedCountry, 
+          group_type: selectedGroup,
+          purpose: selectedPurpose 
+        })
       });
       if (res.ok) {
         toast.success('Expediente creado con éxito');
@@ -115,6 +121,7 @@ const VisaProcessesPage = () => {
               <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: wizardStep >= 1 ? 'var(--lime)' : 'var(--surface-2)' }}></div>
               <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: wizardStep >= 2 ? 'var(--lime)' : 'var(--surface-2)' }}></div>
               <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: wizardStep >= 3 ? 'var(--lime)' : 'var(--surface-2)' }}></div>
+              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: wizardStep >= 4 ? 'var(--lime)' : 'var(--surface-2)' }}></div>
             </div>
           </div>
 
@@ -164,24 +171,22 @@ const VisaProcessesPage = () => {
 
           {wizardStep === 2 && (
             <div className="animate-in fade-in slide-in-from-right-4">
-              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-1)' }}>Paso 2: Categoría de Visa</h4>
-              <p style={{ color: 'var(--text-3)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Selecciona la categoría de visa para {selectedCountry}.</p>
+              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-1)' }}>Paso 2: Tipo de Agrupación</h4>
+              <p style={{ color: 'var(--text-3)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>¿El trámite es para una sola persona o para un grupo/familia?</p>
               
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-                {(selectedCountry === 'Estados Unidos' ? ['B1/B2 (Turismo/Negocios)', 'F1 (Estudiante)', 'J1 (Intercambio)', 'H1B (Trabajo)'] : 
-                  selectedCountry === 'Canadá' ? ['Visitor Visa', 'Study Permit', 'Work Permit'] :
-                  ['Turismo', 'Estudio', 'Trabajo', 'Tránsito']).map(cat => (
+                {['Individual', 'Familiar', 'Grupal', 'Corporativa / De Trabajo'].map(grp => (
                   <div 
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
+                    key={grp}
+                    onClick={() => setSelectedGroup(grp)}
                     style={{ 
-                      padding: '1.25rem', borderRadius: '12px', border: `2px solid ${selectedCategory === cat ? 'var(--lime)' : 'var(--border)'}`,
-                      background: selectedCategory === cat ? 'rgba(163, 230, 53, 0.05)' : 'var(--surface)', cursor: 'pointer',
+                      padding: '1.25rem', borderRadius: '12px', border: `2px solid ${selectedGroup === grp ? 'var(--lime)' : 'var(--border)'}`,
+                      background: selectedGroup === grp ? 'rgba(163, 230, 53, 0.05)' : 'var(--surface)', cursor: 'pointer',
                       transition: 'all 0.2s'
                     }}
                   >
-                    <div style={{ fontSize: '1rem', fontWeight: 600, color: selectedCategory === cat ? 'var(--lime)' : 'var(--text-1)' }}>
-                      {cat}
+                    <div style={{ fontSize: '1rem', fontWeight: 600, color: selectedGroup === grp ? 'var(--lime)' : 'var(--text-1)' }}>
+                      {grp}
                     </div>
                   </div>
                 ))}
@@ -195,9 +200,38 @@ const VisaProcessesPage = () => {
 
           {wizardStep === 3 && (
             <div className="animate-in fade-in slide-in-from-right-4">
+              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-1)' }}>Paso 3: Propósito del Viaje</h4>
+              <p style={{ color: 'var(--text-3)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Selecciona el propósito de la visa para {selectedCountry}.</p>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+                {['Turismo / Negocios', 'Trabajo / Empleo', 'Estudio / Intercambio', 'Tránsito', 'Residencia / Inmigración'].map(cat => (
+                  <div 
+                    key={cat}
+                    onClick={() => setSelectedPurpose(cat)}
+                    style={{ 
+                      padding: '1.25rem', borderRadius: '12px', border: `2px solid ${selectedPurpose === cat ? 'var(--lime)' : 'var(--border)'}`,
+                      background: selectedPurpose === cat ? 'rgba(163, 230, 53, 0.05)' : 'var(--surface)', cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <div style={{ fontSize: '1rem', fontWeight: 600, color: selectedPurpose === cat ? 'var(--lime)' : 'var(--text-1)' }}>
+                      {cat}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <button type="button" onClick={() => setWizardStep(2)} className="btn btn-outline" style={{ padding: '0.85rem 1.5rem' }}>Volver</button>
+                <button type="button" onClick={() => setWizardStep(4)} className="btn btn-lime" style={{ padding: '0.85rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>Siguiente <ArrowRight size={16} /></button>
+              </div>
+            </div>
+          )}
+
+          {wizardStep === 4 && (
+            <div className="animate-in fade-in slide-in-from-right-4">
               <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-1)' }}>Paso 3: Datos del Cliente</h4>
               <p style={{ color: 'var(--text-3)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-                Ingresa el correo electrónico del cliente. Le proporcionaremos un portal seguro para que cargue los requisitos específicos para <strong>{selectedCountry} ({selectedCategory})</strong>.
+                Ingresa el correo electrónico del titular del expediente. Le proporcionaremos un portal seguro para que cargue los requisitos específicos para <strong>{selectedCountry} ({selectedGroup} - {selectedPurpose})</strong>.
               </p>
               
               <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -216,7 +250,7 @@ const VisaProcessesPage = () => {
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
-                  <button type="button" onClick={() => setWizardStep(2)} className="btn btn-outline" style={{ padding: '0.85rem 1.5rem' }}>Volver</button>
+                  <button type="button" onClick={() => setWizardStep(3)} className="btn btn-outline" style={{ padding: '0.85rem 1.5rem' }}>Volver</button>
                   <button type="submit" className="btn btn-lime" style={{ padding: '0.85rem 2rem', fontWeight: 600 }}>Generar Expediente</button>
                 </div>
               </form>

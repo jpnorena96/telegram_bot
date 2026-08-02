@@ -106,8 +106,16 @@ const VisaProcessDetailsPage = () => {
               <Globe size={20} color="#3B82F6" />
             </div>
             <div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-3)', fontWeight: 500 }}>País Destino</div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-1)' }}>{process.target_country}</div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-3)' }}>País Destino</p>
+              <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-1)' }}>{process.target_country}</p>
+            </div>
+            <div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-3)' }}>Propósito del Viaje</p>
+              <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-1)' }}>{process.purpose || process.visa_category}</p>
+            </div>
+            <div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-3)' }}>Tipo de Agrupación</p>
+              <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-1)' }}>{process.group_type || 'Individual'}</p>
             </div>
           </div>
           

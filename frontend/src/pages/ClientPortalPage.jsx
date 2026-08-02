@@ -10,11 +10,9 @@ const ClientPortalPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const [formData, setFormData] = useState({
-    full_name: '',
-    passport_number: ''
-  });
-  const [passportFile, setPassportFile] = useState(null);
+  const [applicants, setApplicants] = useState([
+    { full_name: '', passport_number: '', passportFile: null }
+  ]);
   const [extraFiles, setExtraFiles] = useState({});
 
   useEffect(() => {
@@ -44,9 +42,14 @@ const ClientPortalPage = () => {
     setSubmitting(true);
     try {
       const payload = new FormData();
-      payload.append('full_name', formData.full_name);
-      payload.append('passport_number', formData.passport_number);
-      payload.append('passport_file', passportFile);
+      applicants.forEach((app, index) => {
+        payload.append(`full_name_${index}`, app.full_name);
+        payload.append(`passport_number_${index}`, app.passport_number);
+        payload.append(`passport_file_${index}`, app.passportFile);
+      });
+      
+      payload.append('applicant_count', applicants.length);
+
       Object.keys(extraFiles).forEach(key => {
         if (extraFiles[key]) payload.append(key, extraFiles[key]);
       });
@@ -101,43 +104,96 @@ const ClientPortalPage = () => {
 
         <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
           <span className="tag tag-lime" style={{ marginBottom: '1rem' }}>Trámite: {data.target_country} - {data.visa_category}</span>
-          <p style={{ color: 'var(--text-2)', fontSize: '0.9rem', marginTop: '1rem' }}>Por favor complete sus datos y adjunte los documentos requeridos para continuar con su trámite.</p>
+          <p style={{ color: 'var(--text-2)', fontSize: '0.9rem', marginTop: '1rem' }}>Por favor complete sus datos y adjunte documentos requeridos.</p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
-          <div className="form-group">
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-2)', fontSize: '0.9rem' }}>Nombre Completo</label>
-            <input 
-              type="text" 
-              required 
-              style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-1)' }}
-              value={formData.full_name}
-              onChange={e => setFormData({...formData, full_name: e.target.value})}
-            />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ margin: 0, fontWeight: 700, color: 'var(--text-1)' }}>
+              {data.group_type !== 'Individual' ? 'Solicitantes (Grupo / Familia)' : 'Datos del Solicitante'}
+            </h3>
+            {data.group_type !== 'Individual' && (
+              <button 
+                type="button" 
+                onClick={() => setApplicants([...applicants, { full_name: '', passport_number: '', passportFile: null }])}
+                className="btn btn-outline" 
+                style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+              >
+                + Agregar Acompañante
+              </button>
+            )}
           </div>
 
-          <div className="form-group">
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-2)', fontSize: '0.9rem' }}>Número de Pasaporte</label>
-            <input 
-              type="text" 
-              required 
-              style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-1)' }}
-              value={formData.passport_number}
-              onChange={e => setFormData({...formData, passport_number: e.target.value})}
-            />
-          </div>
+          {applicants.map((applicant, index) => (
+            <div key={index} style={{ padding: '1.5rem', background: 'var(--surface-2)', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '1.5rem', position: 'relative' }}>
+              
+              {data.group_type !== 'Individual' && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                  <h4 style={{ margin: 0, color: 'var(--lime)' }}>{index === 0 ? 'Titular Principal' : `Acompañante #${index}`}</h4>
+                  {index > 0 && (
+                    <button 
+                      type="button"
+                      onClick={() => setApplicants(applicants.filter((_, i) => i !== index))}
+                      style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}
+                    >
+                      Eliminar
+                    </button>
+                  )}
+                </div>
+              )}
 
-          <div className="form-group" style={{ padding: '1rem', background: 'rgba(99,102,241,0.05)', borderRadius: '12px', border: '1px dashed var(--accent)' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-1)', fontWeight: 600 }}>Copia de Pasaporte (Requerido)</label>
-            <input 
-              type="file" 
-              accept=".pdf,image/*" 
-              required 
-              onChange={e => setPassportFile(e.target.files[0])} 
-              style={{ color: 'var(--text-2)' }}
-            />
-          </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                <div className="form-group">
+                  <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-2)', fontSize: '0.9rem' }}>Nombre Completo tal cual el pasaporte</label>
+                  <input 
+                    type="text" 
+                    required 
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-1)' }}
+                    value={applicant.full_name} 
+                    onChange={e => {
+                      const newApps = [...applicants];
+                      newApps[index].full_name = e.target.value;
+                      setApplicants(newApps);
+                    }} 
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-2)', fontSize: '0.9rem' }}>Número de Pasaporte</label>
+                  <input 
+                    type="text" 
+                    required 
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-1)' }}
+                    value={applicant.passport_number} 
+                    onChange={e => {
+                      const newApps = [...applicants];
+                      newApps[index].passport_number = e.target.value;
+                      setApplicants(newApps);
+                    }} 
+                  />
+                </div>
+              </div>
+
+              <div className="form-group" style={{ padding: '1rem', background: 'var(--bg)', borderRadius: '8px', border: '1px dashed var(--border)' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-1)', fontWeight: 600 }}>Foto o PDF del Pasaporte</label>
+                <input 
+                  type="file" 
+                  accept="image/*,.pdf" 
+                  required 
+                  onChange={e => {
+                    const newApps = [...applicants];
+                    newApps[index].passportFile = e.target.files[0];
+                    setApplicants(newApps);
+                  }} 
+                  style={{ color: 'var(--text-2)' }}
+                />
+              </div>
+            </div>
+          ))}
+
+          <div style={{ margin: '2rem 0', borderTop: '1px solid var(--border)' }}></div>
+
+          <h3 style={{ marginBottom: '1.5rem', fontWeight: 700, color: 'var(--text-1)' }}>Documentos del Trámite</h3>
 
           {data.target_country === 'Estados Unidos' && (
             <div className="form-group" style={{ padding: '1rem', background: 'var(--surface-2)', borderRadius: '12px', border: '1px dashed var(--border)' }}>
@@ -154,7 +210,7 @@ const ClientPortalPage = () => {
             </div>
           )}
 
-          {(data.target_country === 'Canadá' || data.visa_category.includes('Estudiante') || data.visa_category.includes('F1')) && (
+          {(data.target_country === 'Canadá' || data.purpose === 'Estudio / Intercambio' || data.purpose === 'Trabajo / Empleo') && (
             <div className="form-group" style={{ padding: '1rem', background: 'var(--surface-2)', borderRadius: '12px', border: '1px dashed var(--border)' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--text-2)' }}>
                 Carta de Aceptación Escolar / Oferta Laboral (Obligatorio)
