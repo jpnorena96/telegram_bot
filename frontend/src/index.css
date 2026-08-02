@@ -315,6 +315,7 @@ a:hover { color: var(--lime); }
   /* App Layout Overrides */
   .mobile-main-content {
     padding: 1rem !important;
+  }
 }
 
 /* ═══════════════════════════════════
