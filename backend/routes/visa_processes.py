@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Request
+from pydantic import BaseModel
 from typing import List, Optional
 import os
 import shutil
