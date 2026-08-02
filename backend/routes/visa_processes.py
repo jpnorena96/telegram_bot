@@ -52,8 +52,16 @@ def get_public_process(process_id: int, db = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Process not found")
 
     # Fetch applicants
-    cursor.execute("SELECT id, full_name, passport_number, passport_file, is_main_applicant FROM visa_applicants WHERE process_id = %s", (process_id,))
+    cursor.execute("SELECT id, full_name, passport_number, relationship FROM visa_applicants WHERE process_id = %s", (process_id,))
     applicants = cursor.fetchall()
+    
+    # Fetch documents for each applicant (to find passport_file)
+    for app in applicants:
+        app["is_main_applicant"] = (app.get("relationship") == 'primary')
+        cursor.execute("SELECT file_path FROM visa_documents WHERE applicant_id = %s AND document_type = 'passport' LIMIT 1", (app["id"],))
+        doc = cursor.fetchone()
+        app["passport_file"] = doc["file_path"] if doc else None
+    
     
     # Get agency logo and name
     cursor.execute("SELECT full_name, logo_url FROM users WHERE id = %s", (row.get("user_id"),))
@@ -130,10 +138,18 @@ async def submit_public_process(process_id: int, request: Request, db = Depends(
             passport_url = f"/uploads/visas/{filename}"
             
         is_main = (i == 0)
+        relationship = 'primary' if is_main else 'dependent'
         cursor.execute(
-            "INSERT INTO visa_applicants (process_id, full_name, passport_number, passport_file, is_main_applicant) VALUES (%s, %s, %s, %s, %s)",
-            (process_id, full_name, passport_number, passport_url, is_main)
+            "INSERT INTO visa_applicants (process_id, full_name, passport_number, relationship) VALUES (%s, %s, %s, %s)",
+            (process_id, full_name, passport_number, relationship)
         )
+        applicant_id = cursor.lastrowid
+        
+        if passport_url:
+            cursor.execute(
+                "INSERT INTO visa_documents (applicant_id, document_type, file_path, file_name) VALUES (%s, %s, %s, %s)",
+                (applicant_id, 'passport', passport_url, passport_file.filename)
+            )
         
         # We no longer save backward compatibility fields to visa_processes
         pass
