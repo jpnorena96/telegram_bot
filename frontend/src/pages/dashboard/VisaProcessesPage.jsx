@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, Plus, Link as LinkIcon, Eye, CheckCircle2, Search, ArrowRight } from 'lucide-react';
+import { FileText, Plus, Link as LinkIcon, Eye, CheckCircle2, Search, ArrowRight, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -61,10 +61,32 @@ const VisaProcessesPage = () => {
         setCreating(false);
         load();
       } else {
-        toast.error('Error al crear expediente');
+        const error = await res.json();
+        toast.error(error.detail || 'Error al crear expediente');
       }
     } catch (e) {
-      toast.error('Error de conexión');
+      toast.error('Error de red');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar este expediente? Esta acción no se puede deshacer.')) return;
+    try {
+      const res = await fetch(`${api.url}/visa-processes/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (res.ok) {
+        toast.success('Expediente eliminado');
+        load();
+      } else {
+        const error = await res.json();
+        toast.error(error.detail || 'Error al eliminar');
+      }
+    } catch (e) {
+      toast.error('Error de red');
     }
   };
 
@@ -323,6 +345,14 @@ const VisaProcessesPage = () => {
                       style={{ padding: '0.4rem 0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
                     >
                       <Eye size={14} /> Revisar
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(p.id)}
+                      className="btn btn-sm"
+                      title="Eliminar Expediente"
+                      style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '0.4rem 0.75rem', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
+                    >
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </td>

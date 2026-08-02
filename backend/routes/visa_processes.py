@@ -164,3 +164,25 @@ async def submit_public_process(process_id: int, request: Request, db = Depends(
     cursor.close()
     
     return {"status": "success"}
+
+@router.delete("/{process_id}")
+def delete_process(process_id: int, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT user_id FROM visa_processes WHERE id = %s", (process_id,))
+    row = cursor.fetchone()
+    
+    if not row:
+        cursor.close()
+        raise HTTPException(status_code=404, detail="Expediente no encontrado")
+        
+    role = current_user["roles"][0]
+    if role not in ["ADMINISTRATOR", "AGENCY"] or (role == "AGENCY" and row["user_id"] != current_user["id"]):
+        cursor.close()
+        raise HTTPException(status_code=403, detail="No tienes autorización para eliminar este expediente")
+        
+    cursor.execute("DELETE FROM visa_processes WHERE id = %s", (process_id,))
+    db.commit()
+    cursor.close()
+    
+    return {"status": "success", "message": "Expediente eliminado correctamente"}
+

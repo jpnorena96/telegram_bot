@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, FileText, CheckCircle2, Loader2, Download, User, Globe, AlertCircle } from 'lucide-react';
+import { ArrowLeft, FileText, CheckCircle2, Loader2, Download, User, Globe, AlertCircle, Trash2 } from 'lucide-react';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -33,6 +33,27 @@ const VisaProcessDetailsPage = () => {
       toast.error('Error al actualizar estado');
     } finally {
       setMarking(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar este expediente? Esta acción no se puede deshacer.')) return;
+    try {
+      const res = await fetch(`${api.url}/visa-processes/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (res.ok) {
+        toast.success('Expediente eliminado');
+        navigate('/dashboard/visa-processes');
+      } else {
+        const error = await res.json();
+        toast.error(error.detail || 'Error al eliminar');
+      }
+    } catch (e) {
+      toast.error('Error de red');
     }
   };
 
@@ -87,13 +108,29 @@ const VisaProcessDetailsPage = () => {
             {process.status}
           </span>
           <button 
+            onClick={() => window.open(`/client-portal/${process.id}`, '_blank')}
+            className="btn btn-outline"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            title="Abrir Portal Público"
+          >
+            <Globe size={18} />
+          </button>
+          <button 
+            onClick={handleDelete}
+            className="btn btn-outline"
+            style={{ color: '#ef4444', borderColor: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            title="Eliminar Expediente"
+          >
+            <Trash2 size={18} />
+          </button>
+          <button 
             onClick={handleMarkReady} 
             disabled={marking || isReady}
             className={`btn ${isReady ? 'btn-outline' : 'btn-lime'}`}
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
             {marking ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={18} />}
-            {isReady ? 'Alta Realizada' : 'Marcar Listo para Alta'}
+            {isReady ? 'Alta Realizada' : 'Marcar Listo'}
           </button>
         </div>
       </div>
