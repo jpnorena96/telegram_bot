@@ -44,7 +44,7 @@ def get_public_process(process_id: int, db = Depends(get_db)):
     cursor = db.cursor(dictionary=True)
     
     # Get process
-    cursor.execute("SELECT id, user_id, client_email, target_country, visa_category, group_type, purpose, status, full_name, passport_number, passport_file, ds160_file, created_at FROM visa_processes WHERE id = %s", (process_id,))
+    cursor.execute("SELECT id, user_id, client_email, target_country, visa_category, group_type, purpose, status, created_at FROM visa_processes WHERE id = %s", (process_id,))
     row = cursor.fetchone()
     
     if not row:
@@ -68,10 +68,6 @@ def get_public_process(process_id: int, db = Depends(get_db)):
         "group_type": row["group_type"],
         "purpose": row["purpose"],
         "status": row["status"],
-        "full_name": row["full_name"],
-        "passport_number": row["passport_number"],
-        "passport_file": row["passport_file"],
-        "ds160_file": row["ds160_file"],
         "created_at": row["created_at"],
         "applicants": applicants,
         "agency_name": agency.get("full_name", "Agencia"),
@@ -139,35 +135,14 @@ async def submit_public_process(process_id: int, request: Request, db = Depends(
             (process_id, full_name, passport_number, passport_url, is_main)
         )
         
-        # Backward compatibility: save first applicant to main process table
-        if is_main:
-            cursor.execute(
-                "UPDATE visa_processes SET full_name = %s, passport_number = %s, passport_file = %s WHERE id = %s",
-                (full_name, passport_number, passport_url, process_id)
-            )
+        # We no longer save backward compatibility fields to visa_processes
+        pass
 
     # Handle extra files (DS-160, acceptance letter, etc.)
-    # In a real app we'd store these in a process_documents table, but for now we can store the first extra file in ds160_file
-    ds160_file = form.get('ds160_file')
-    acceptance_file = form.get('acceptance_letter')
+    # For now, we will store extra files in visa_applicants or documents table if needed.
+    # Since we removed ds160_file from visa_processes, we won't store it there.
+    # Ideally, we should insert it into visa_documents.
     
-    extra_url = None
-    if ds160_file and hasattr(ds160_file, 'filename'):
-        filename = f"ds160_{process_id}{os.path.splitext(ds160_file.filename)[1]}"
-        filepath = f"uploads/visas/{filename}"
-        with open(filepath, "wb") as buffer:
-            shutil.copyfileobj(ds160_file.file, buffer)
-        extra_url = f"/uploads/visas/{filename}"
-    elif acceptance_file and hasattr(acceptance_file, 'filename'):
-        filename = f"extra_{process_id}{os.path.splitext(acceptance_file.filename)[1]}"
-        filepath = f"uploads/visas/{filename}"
-        with open(filepath, "wb") as buffer:
-            shutil.copyfileobj(acceptance_file.file, buffer)
-        extra_url = f"/uploads/visas/{filename}"
-
-    if extra_url:
-        cursor.execute("UPDATE visa_processes SET ds160_file = %s WHERE id = %s", (extra_url, process_id))
-        
     cursor.execute("UPDATE visa_processes SET status = 'Pendiente Revisión' WHERE id = %s", (process_id,))
     db.commit()
     cursor.close()
