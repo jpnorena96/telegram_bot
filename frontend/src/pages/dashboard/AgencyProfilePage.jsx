@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Store, Paintbrush, Link as LinkIcon, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Store, Paintbrush, Link as LinkIcon, CheckCircle2, AlertCircle, Eye, Globe, Image as ImageIcon } from 'lucide-react';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -46,7 +46,7 @@ const AgencyProfilePage = () => {
     try {
       const payload = {
         ...formData,
-        alias: formData.alias.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase() // sanitize
+        alias: formData.alias.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase()
       };
       const res = await api.updateMyAgencyProfile(payload);
       toast.success(res.message || 'Perfil actualizado con éxito');
@@ -61,145 +61,264 @@ const AgencyProfilePage = () => {
   if (loading) {
     return (
       <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center' }}>
-        <div className="skeleton" style={{ width: '400px', height: '300px', borderRadius: 'var(--radius-lg)' }} />
+        <div className="skeleton" style={{ width: '100%', height: '500px', borderRadius: 'var(--radius-lg)' }} />
       </div>
     );
   }
 
-  const publicLink = profile ? `${window.location.origin}/agencia/${profile.alias}` : '';
+  const publicLink = profile ? `${window.location.origin}/client-portal/DEMO` : '';
+  const fullLogoUrl = formData.logo_url ? (formData.logo_url.startsWith('http') ? formData.logo_url : `${api.API_URL.replace('/api', '')}${formData.logo_url}`) : null;
 
   return (
-    <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '800px', margin: '0 auto' }}>
+    <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
       
-      <div>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Store size={24} style={{ color: 'var(--lime)' }} />
-          Perfil de Agencia (Marca Blanca)
-        </h1>
-        <p style={{ color: 'var(--text-3)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
-          Configura la identidad de tu agencia. Esta información se usará para generar un enlace público y anónimo para que tus clientes suban sus documentos sin ver la marca "AdelantaVisa".
-        </p>
+      {/* HEADER */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: '0.75rem', margin: 0 }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Store size={24} style={{ color: 'var(--lime)' }} />
+            </div>
+            Marca Blanca
+          </h1>
+          <p style={{ color: 'var(--text-3)', fontSize: '1rem', marginTop: '0.5rem', maxWidth: '600px' }}>
+            Personaliza el portal público que verán tus clientes con tu propio logo, nombre y colores corporativos.
+          </p>
+        </div>
+        <button 
+          onClick={handleSubmit}
+          className="btn btn-lime" 
+          disabled={saving}
+          style={{ padding: '0.75rem 1.5rem', fontSize: '1rem', fontWeight: 600, boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)' }}
+        >
+          {saving ? 'GUARDANDO...' : 'GUARDAR CAMBIOS'}
+        </button>
       </div>
 
+      {/* STATUS BANNER */}
       {profile && (
-        <div className="panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem', background: profile.status === 'approved' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(245, 158, 11, 0.05)', border: `1px solid ${profile.status === 'approved' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)'}` }}>
+        <div style={{ 
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1.5rem', 
+          background: profile.status === 'approved' ? 'linear-gradient(to right, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.02))' : 'linear-gradient(to right, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.02))', 
+          border: `1px solid ${profile.status === 'approved' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
+          borderRadius: '16px',
+          backdropFilter: 'blur(10px)'
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            {profile.status === 'approved' ? <CheckCircle2 size={24} style={{ color: '#10B981' }} /> : <AlertCircle size={24} style={{ color: '#F59E0B' }} />}
+            {profile.status === 'approved' ? <CheckCircle2 size={28} style={{ color: '#10B981' }} /> : <AlertCircle size={28} style={{ color: '#F59E0B' }} />}
             <div>
-              <div style={{ fontWeight: 600, color: profile.status === 'approved' ? '#10B981' : '#F59E0B' }}>
-                ESTADO: {profile.status === 'approved' ? 'APROBADO Y ACTIVO' : 'PENDIENTE DE REVISIÓN'}
+              <div style={{ fontWeight: 700, fontSize: '1.1rem', color: profile.status === 'approved' ? '#10B981' : '#F59E0B' }}>
+                {profile.status === 'approved' ? 'MARCA BLANCA ACTIVA' : 'PENDIENTE DE APROBACIÓN'}
               </div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}>
-                {profile.status === 'approved' ? 'Tu enlace público está habilitado para ser usado por tus clientes.' : 'Un administrador está revisando tu perfil. El enlace público no estará disponible hasta la aprobación.'}
+              <div style={{ fontSize: '0.9rem', color: 'var(--text-2)', marginTop: '0.2rem' }}>
+                {profile.status === 'approved' ? 'Tus clientes ya pueden ver tu marca al abrir los expedientes.' : 'Un administrador revisará tus datos. Mientras tanto, se mostrará el diseño por defecto.'}
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {profile && profile.status === 'approved' && (
-        <div className="panel" style={{ background: 'var(--surface)' }}>
-          <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <LinkIcon size={16} /> Tu Enlace Público
-          </h3>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <input type="text" readOnly value={publicLink} className="input-field" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }} />
-            <button type="button" className="btn btn-outline" onClick={() => { navigator.clipboard.writeText(publicLink); toast.success('Enlace copiado'); }}>
-              COPIAR
-            </button>
-            <a href={publicLink} target="_blank" rel="noopener noreferrer" className="btn btn-lime">
-              VISITAR
-            </a>
-          </div>
-        </div>
-      )}
-
-      <div className="panel" style={{ background: 'var(--surface)' }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* MAIN LAYOUT */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '2rem' }}>
+        
+        {/* LEFT COLUMN: FORM */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-            <div className="input-group">
-              <label className="input-label">Nombre Comercial de la Agencia</label>
-              <input 
-                type="text" 
-                className="input-field" 
-                placeholder="Ej. Viajes Globales SAS" 
-                value={formData.company_name}
-                onChange={e => setFormData({ ...formData, company_name: e.target.value })}
-                required 
-              />
-            </div>
+          <div className="panel" style={{ background: 'var(--surface-2)', padding: '2rem', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 8px 30px rgba(0,0,0,0.2)' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-1)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Paintbrush size={20} style={{ color: 'var(--lime)' }} />
+              Identidad Visual
+            </h2>
+            
+            <form style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div className="input-group">
+                <label className="input-label">Nombre Comercial de la Agencia</label>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  placeholder="Ej. Viajes Globales SAS" 
+                  value={formData.company_name}
+                  onChange={e => setFormData({ ...formData, company_name: e.target.value })}
+                  style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                />
+              </div>
+
+              <div className="input-group">
+                <label className="input-label">Logo de la Agencia</label>
+                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', background: 'var(--surface)', padding: '1.5rem', borderRadius: '12px', border: '1px dashed var(--border)' }}>
+                  <div style={{ width: '80px', height: '80px', borderRadius: '12px', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px solid var(--border)' }}>
+                    {fullLogoUrl ? (
+                      <img src={fullLogoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    ) : (
+                      <ImageIcon size={32} style={{ color: 'var(--text-3)' }} />
+                    )}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: 'var(--text-2)' }}>Recomendado: PNG transparente, 400x150px.</p>
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const payload = new FormData();
+                        payload.append('file', file);
+                        const toastId = toast.loading('Subiendo logo...');
+                        try {
+                          const res = await fetch(`${api.API_URL}/users/logo`, {
+                            method: 'POST',
+                            headers: api.getHeaders(true),
+                            body: payload
+                          });
+                          if (res.ok) {
+                            const data = await res.json();
+                            setFormData({ ...formData, logo_url: data.logo_url });
+                            toast.success('Logo actualizado', { id: toastId });
+                          } else {
+                            toast.error('Error al subir', { id: toastId });
+                          }
+                        } catch (err) {
+                          toast.error('Error de red', { id: toastId });
+                        }
+                      }}
+                      style={{ fontSize: '0.85rem' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="input-group">
+                <label className="input-label">Color de Marca (Acento)</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--surface)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                  <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
+                    <input 
+                      type="color" 
+                      value={formData.brand_color}
+                      onChange={e => setFormData({ ...formData, brand_color: e.target.value })}
+                      style={{ position: 'absolute', top: '-10px', left: '-10px', width: '60px', height: '60px', cursor: 'pointer', border: 'none' }}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text-1)' }}>{formData.brand_color.toUpperCase()}</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}>Haz clic en el recuadro para cambiar</span>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div className="panel" style={{ background: 'var(--surface-2)', padding: '2rem', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 8px 30px rgba(0,0,0,0.2)' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-1)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <LinkIcon size={20} style={{ color: 'var(--lime)' }} />
+              Dominio y Enlaces
+            </h2>
             
             <div className="input-group">
-              <label className="input-label">Alias del Enlace (URL)</label>
-              <input 
-                type="text" 
-                className="input-field" 
-                placeholder="ej. viajes-globales" 
-                value={formData.alias}
-                onChange={e => setFormData({ ...formData, alias: e.target.value.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase() })}
-                required 
-              />
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Solo letras minúsculas, números y guiones.</span>
+              <label className="input-label">Alias del Enlace (URL Amigable)</label>
+              <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+                <div style={{ padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.02)', color: 'var(--text-3)', borderRight: '1px solid var(--border)', fontSize: '0.9rem' }}>
+                  adelantavisa.com/
+                </div>
+                <input 
+                  type="text" 
+                  placeholder="mi-agencia" 
+                  value={formData.alias}
+                  onChange={e => setFormData({ ...formData, alias: e.target.value.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase() })}
+                  style={{ flex: 1, padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: 'var(--text-1)', outline: 'none' }}
+                />
+              </div>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginTop: '0.5rem' }}>
+                Esta es la terminación que verán tus clientes. Ej: adelantavisa.com/{formData.alias || 'tu-agencia'}/xyz
+              </span>
             </div>
           </div>
+        </div>
 
-          <div className="input-group">
-            <label className="input-label">Logo de la Agencia (PNG/JPG)</label>
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              {formData.logo_url && (
-                <img src={formData.logo_url.startsWith('http') ? formData.logo_url : `${api.API_URL.replace('/api', '')}${formData.logo_url}`} alt="Logo" style={{ height: '40px', objectFit: 'contain', borderRadius: '4px', background: 'var(--bg)' }} />
-              )}
-              <input 
-                type="file" 
-                accept="image/*"
-                onChange={async (e) => {
-                  const file = e.target.files[0];
-                  if (!file) return;
-                  const payload = new FormData();
-                  payload.append('file', file);
-                  try {
-                    const res = await fetch(`${api.API_URL}/users/logo`, {
-                      method: 'POST',
-                      headers: api.getHeaders(true), // pass true to exclude Content-Type for FormData
-                      body: payload
-                    });
-                    if (res.ok) {
-                      const data = await res.json();
-                      setFormData({ ...formData, logo_url: data.logo_url });
-                      toast.success('Logo subido correctamente');
-                    }
-                  } catch (err) {
-                    toast.error('Error al subir el logo');
-                  }
-                }}
-                style={{ flex: 1, color: 'var(--text-2)' }}
-              />
+        {/* RIGHT COLUMN: LIVE PREVIEW */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: '0.5rem', paddingLeft: '0.5rem' }}>
+            <Eye size={18} /> Vista Previa del Portal Público
+          </h2>
+          
+          {/* Mockup Frame */}
+          <div style={{ 
+            background: 'var(--bg)', 
+            borderRadius: '24px', 
+            border: '8px solid var(--surface-2)', 
+            overflow: 'hidden',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            position: 'relative',
+            height: '600px',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {/* Mock Browser Header */}
+            <div style={{ background: 'var(--surface-2)', padding: '0.75rem 1rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderBottom: '1px solid var(--border)' }}>
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#EF4444' }}></div>
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#F59E0B' }}></div>
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#10B981' }}></div>
+              <div style={{ flex: 1, background: 'rgba(255,255,255,0.05)', borderRadius: '6px', padding: '0.25rem', textAlign: 'center', fontSize: '0.7rem', color: 'var(--text-3)' }}>
+                <Globe size={10} style={{ display: 'inline', marginRight: '4px' }}/> adelantavisa.com/{formData.alias || 'agencia'}/...
+              </div>
             </div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Suba su logo para que aparezca en el portal de sus clientes.</span>
-          </div>
 
-          <div className="input-group">
-            <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Paintbrush size={14} /> Color de Marca (Brand Color)
-            </label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <input 
-                type="color" 
-                value={formData.brand_color}
-                onChange={e => setFormData({ ...formData, brand_color: e.target.value })}
-                style={{ width: '50px', height: '40px', padding: '0', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-              />
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>{formData.brand_color}</span>
+            {/* Mock Portal Content */}
+            <div style={{ padding: '2rem 1.5rem', flex: 1, overflowY: 'auto' }}>
+              <div style={{ maxWidth: '400px', margin: '0 auto', background: 'var(--surface)', padding: '2rem 1.5rem', borderRadius: '24px', border: '1px solid var(--border)', textAlign: 'center' }}>
+                
+                {/* Agency Logo */}
+                {fullLogoUrl ? (
+                  <img src={fullLogoUrl} alt="Logo" style={{ height: '60px', objectFit: 'contain', margin: '0 auto 1.5rem auto' }} />
+                ) : (
+                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto', fontSize: '1.5rem' }}>🏢</div>
+                )}
+                
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--text-1)' }}>
+                  {formData.company_name || 'Nombre de tu Agencia'}
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-3)', margin: '0 0 1.5rem 0' }}>Portal Seguro de Trámite de Visa</p>
+                
+                <div style={{ padding: '1rem', background: 'var(--bg)', borderRadius: '12px', marginBottom: '1.5rem' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginBottom: '0.5rem' }}>ESTADO DEL TRÁMITE</div>
+                  <div style={{ color: formData.brand_color, fontWeight: 600, fontSize: '1.1rem' }}>En Progreso</div>
+                </div>
+
+                <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-2)', display: 'block', marginBottom: '0.5rem' }}>Nombre Completo</label>
+                    <div style={{ height: '40px', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}></div>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-2)', display: 'block', marginBottom: '0.5rem' }}>Pasaporte (PDF)</label>
+                    <div style={{ height: '80px', background: 'var(--bg)', borderRadius: '8px', border: '1px dashed var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', fontSize: '0.8rem' }}>Subir archivo</div>
+                  </div>
+                </div>
+
+                <div 
+                  style={{ 
+                    marginTop: '2rem', 
+                    padding: '0.8rem', 
+                    borderRadius: '8px', 
+                    background: formData.brand_color, 
+                    color: '#fff', 
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: `0 4px 15px ${formData.brand_color}40`
+                  }}
+                >
+                  ENVIAR DOCUMENTOS
+                </div>
+
+              </div>
             </div>
+            
+            {/* Mock Gradient Overlay for realism */}
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(transparent, var(--bg))' }}></div>
           </div>
+        </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
-            <button type="submit" className="btn btn-lime" disabled={saving}>
-              {saving ? 'GUARDANDO...' : (profile ? 'ACTUALIZAR PERFIL' : 'CREAR PERFIL')}
-            </button>
-          </div>
-        </form>
       </div>
 
     </div>
