@@ -25,7 +25,9 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173", 
         "http://127.0.0.1:5173",
-        "https://n8n-bot-front-visatreep.gnuu1e.easypanel.host"
+        "https://n8n-bot-front-visatreep.gnuu1e.easypanel.host",
+        "https://n8n-bot-adelantavisa-front.gnuu1e.easypanel.host",
+        "https://adelantavisa.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],
