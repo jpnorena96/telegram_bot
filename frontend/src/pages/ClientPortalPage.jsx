@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
-import { ShieldCheck, Lock, UploadCloud, FileText, CheckCircle2, AlertCircle, Clock, File } from 'lucide-react';
+import { ShieldCheck, Lock, UploadCloud, FileText, CheckCircle2, AlertCircle, Clock, File, User } from 'lucide-react';
 
 const ClientPortalPage = () => {
   const { id } = useParams();
