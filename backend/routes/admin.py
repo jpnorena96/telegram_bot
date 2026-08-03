@@ -10,7 +10,7 @@ import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import DB_CONFIG
 from .auth import get_current_user, get_db, get_password_hash
-from backend.vps import get_pm2_logs
+from backend.vps import get_pm2_logs, restart_pm2_process, delete_pm2_process, get_vps_config, update_vps_config
 
 PRICE_PER_APPT = 10.0
 
@@ -264,3 +264,87 @@ def export_csv(current_user: dict = Depends(require_admin), db=Depends(get_db)):
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=auditoria_citas.csv"}
     )
+
+class ConfigUpdate(BaseModel):
+    config_content: str
+
+@router.post("/appointments/{appointment_id}/restart")
+def admin_restart_pm2(appointment_id: int, current_user: dict = Depends(require_admin), db=Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT user_id FROM user_appointments WHERE id = %s", (appointment_id,))
+        appt = cursor.fetchone()
+        if not appt:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+        cursor.execute("SELECT email FROM users WHERE id = %s", (appt["user_id"],))
+        user = cursor.fetchone()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        success = restart_pm2_process(user["email"], appointment_id)
+        if success:
+            return {"status": "ok", "message": "Proceso reiniciado en PM2"}
+        else:
+            raise HTTPException(status_code=500, detail="Error al reiniciar el proceso")
+    finally:
+        cursor.close()
+
+@router.delete("/appointments/{appointment_id}")
+def admin_delete_appointment(appointment_id: int, current_user: dict = Depends(require_admin), db=Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT user_id FROM user_appointments WHERE id = %s", (appointment_id,))
+        appt = cursor.fetchone()
+        if not appt:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+        cursor.execute("SELECT email FROM users WHERE id = %s", (appt["user_id"],))
+        user = cursor.fetchone()
+        
+        if user:
+            delete_pm2_process(user["email"], appointment_id)
+            
+        cursor.execute("DELETE FROM user_appointments WHERE id = %s", (appointment_id,))
+        db.commit()
+        return {"status": "ok", "message": "Cita y proceso eliminados"}
+    finally:
+        cursor.close()
+
+@router.get("/appointments/{appointment_id}/config")
+def admin_get_config(appointment_id: int, current_user: dict = Depends(require_admin), db=Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT user_id FROM user_appointments WHERE id = %s", (appointment_id,))
+        appt = cursor.fetchone()
+        if not appt:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+        cursor.execute("SELECT email FROM users WHERE id = %s", (appt["user_id"],))
+        user = cursor.fetchone()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        config_str = get_vps_config(user["email"], appointment_id)
+        return {"status": "ok", "config": config_str}
+    finally:
+        cursor.close()
+
+@router.put("/appointments/{appointment_id}/config")
+def admin_update_config(appointment_id: int, data: ConfigUpdate, current_user: dict = Depends(require_admin), db=Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT user_id FROM user_appointments WHERE id = %s", (appointment_id,))
+        appt = cursor.fetchone()
+        if not appt:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+        cursor.execute("SELECT email FROM users WHERE id = %s", (appt["user_id"],))
+        user = cursor.fetchone()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        success = update_vps_config(user["email"], data.config_content, appointment_id)
+        if success:
+            restart_pm2_process(user["email"], appointment_id)
+            return {"status": "ok", "message": "Configuración actualizada y proceso reiniciado"}
+        else:
+            raise HTTPException(status_code=500, detail="Error al actualizar configuración")
+    finally:
+        cursor.close()

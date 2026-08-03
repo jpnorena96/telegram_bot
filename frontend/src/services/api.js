@@ -180,6 +180,34 @@ export const api = {
     });
     return handleResponse(response);
   },
+  async adminRestartPm2(appointmentId) {
+    const response = await fetch(`${API_URL}/admin/appointments/${appointmentId}/restart`, {
+      method: 'POST',
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  async adminDeleteAppointment(appointmentId) {
+    const response = await fetch(`${API_URL}/admin/appointments/${appointmentId}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  async adminGetConfig(appointmentId) {
+    const response = await fetch(`${API_URL}/admin/appointments/${appointmentId}/config`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  async adminUpdateConfig(appointmentId, config_content) {
+    const response = await fetch(`${API_URL}/admin/appointments/${appointmentId}/config`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({ config_content }),
+    });
+    return handleResponse(response);
+  },
   async getWompiPublicKey() {
     const response = await fetch(`${API_URL}/payments/public-key`);
     return response.json();

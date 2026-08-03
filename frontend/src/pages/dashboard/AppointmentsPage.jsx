@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { useOutletContext } from 'react-router-dom';
-import { Search, RefreshCw, Plus, X, ChevronUp, ChevronDown, Eye, ArrowLeft, ArrowRight, Lock, Globe, Calendar, CheckCircle2, AlertTriangle, User, Trash2, Terminal } from 'lucide-react';
+import { Search, RefreshCw, Plus, X, ChevronUp, ChevronDown, Eye, ArrowLeft, ArrowRight, Lock, Globe, Calendar, CheckCircle2, AlertTriangle, User, Trash2, Terminal, Settings } from 'lucide-react';
 import { api } from '../../services/api';
 
 const STATUS_MAP = {
@@ -688,6 +688,7 @@ const AppointmentsPage = () => {
   const [selected, setSelected] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
   const [logsModal, setLogsModal] = useState({ open: false, data: '', loading: false, aptId: null });
+  const [configModal, setConfigModal] = useState({ open: false, data: '', loading: false, aptId: null });
 
   // Filtros de fecha para administrador
   const [startDate, setStartDate] = useState('');
@@ -754,13 +755,46 @@ const AppointmentsPage = () => {
   const handleDelete = async (id) => {
     if (!window.confirm(t('dashboard.appointments.confirm_delete') || '¿Estás seguro de que deseas eliminar este agendamiento?')) return;
     try {
-      const res = await api.deleteAppointment(id);
+      const res = await (isAdmin ? api.adminDeleteAppointment(id) : api.deleteAppointment(id));
       if (res.status === 'ok') {
         toast.success(res.message || 'Agendamiento eliminado');
         load();
       }
     } catch (error) {
       toast.error(error.message || 'Error al eliminar el agendamiento');
+    }
+  };
+
+  const handleRestartPm2 = async (id) => {
+    try {
+      toast.loading('Reiniciando proceso...', { id: 'pm2' });
+      await api.adminRestartPm2(id);
+      toast.success('Proceso reiniciado', { id: 'pm2' });
+    } catch (err) {
+      toast.error('Error al reiniciar', { id: 'pm2' });
+    }
+  };
+
+  const openConfig = async (id) => {
+    setConfigModal({ open: true, data: '', loading: true, aptId: id });
+    try {
+      const res = await api.adminGetConfig(id);
+      setConfigModal({ open: true, data: res.config || '', loading: false, aptId: id });
+    } catch (err) {
+      toast.error('Error al obtener config');
+      setConfigModal({ open: false, data: '', loading: false, aptId: null });
+    }
+  };
+
+  const saveConfig = async () => {
+    try {
+      setConfigModal(prev => ({ ...prev, loading: true }));
+      await api.adminUpdateConfig(configModal.aptId, configModal.data);
+      toast.success('Configuración guardada y proceso reiniciado');
+      setConfigModal({ open: false, data: '', loading: false, aptId: null });
+    } catch (err) {
+      toast.error('Error al guardar config');
+      setConfigModal(prev => ({ ...prev, loading: false }));
     }
   };
 
@@ -966,9 +1000,21 @@ const AppointmentsPage = () => {
                           <td style={{ textAlign: 'right' }}>
                             <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'flex-end' }}>
                               {(role === 'ADMINISTRATOR' || role === 'AUDITOR') && (
-                                <button onClick={() => openLogs(apt.id)} className="btn btn-icon btn-sm" title="Ver Logs de Consola">
-                                  <Terminal size={14} />
-                                </button>
+                                <>
+                                  <button onClick={() => openLogs(apt.id)} className="btn btn-icon btn-sm" title="Ver Logs de Consola">
+                                    <Terminal size={14} />
+                                  </button>
+                                  {role === 'ADMINISTRATOR' && (
+                                    <>
+                                      <button onClick={() => openConfig(apt.id)} className="btn btn-icon btn-sm" title="Editar Configuración">
+                                        <Settings size={14} />
+                                      </button>
+                                      <button onClick={() => handleRestartPm2(apt.id)} className="btn btn-icon btn-sm" style={{ color: 'var(--lime)' }} title="Reiniciar PM2">
+                                        <RefreshCw size={14} />
+                                      </button>
+                                    </>
+                                  )}
+                                </>
                               )}
                               {apt.status !== 'agendado' && (
                                 <button onClick={() => handleDelete(apt.id)} className="btn btn-icon btn-sm" style={{ color: '#F87171' }} title="Eliminar agendamiento">
@@ -1011,6 +1057,46 @@ const AppointmentsPage = () => {
         />,
         document.body
       )}
+      {/* Config Modal */}
+      {configModal.open && createPortal(
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div className="panel" style={{ width: '100%', maxWidth: '700px', backgroundColor: 'var(--bg)', borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+            <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--surface)' }}>
+              <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Settings size={20} color="var(--lime)" />
+                Editar Configuración
+              </h2>
+              <button onClick={() => setConfigModal({ open: false, data: '', loading: false, aptId: null })} className="btn btn-icon btn-outline" style={{ border: 'none' }}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={{ padding: '1.5rem', flex: 1, overflowY: 'auto' }}>
+              {configModal.loading ? (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                  <div className="spinner"></div>
+                </div>
+              ) : (
+                <textarea 
+                  value={configModal.data}
+                  onChange={(e) => setConfigModal({...configModal, data: e.target.value})}
+                  style={{ width: '100%', height: '400px', padding: '1rem', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', backgroundColor: '#1E1E1E', color: '#D4D4D4', border: '1px solid var(--border)', borderRadius: '8px', resize: 'vertical' }}
+                  spellCheck="false"
+                />
+              )}
+            </div>
+            
+            <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border)', backgroundColor: 'var(--surface)', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+              <button onClick={() => setConfigModal({ open: false, data: '', loading: false, aptId: null })} className="btn btn-outline">Cancelar</button>
+              <button onClick={saveConfig} disabled={configModal.loading} className="btn btn-lime">
+                {configModal.loading ? 'Guardando...' : 'Guardar y Reiniciar PM2'}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
     </div>
   );
 };

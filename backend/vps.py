@@ -392,3 +392,73 @@ def get_pm2_logs(email: str, appointment_id: int = None, lines: int = 100) -> st
     except Exception as e:
         logger.error(f"Failed to fetch PM2 logs for {email}: {e}")
         return f"Error al conectar con el servidor: {e}"
+
+def restart_pm2_process(email: str, appointment_id: int = None) -> bool:
+    """Restarts the PM2 process for the given appointment on the VPS."""
+    try:
+        base_path, folder_name = _get_base_path(email, appointment_id)
+        pm2_name = f"visa_{folder_name}"
+        logger.info(f"Connecting to VPS to restart PM2 process: {pm2_name}")
+        
+        ssh = _connect_ssh()
+        _run_ssh_command(ssh, f"pm2 restart {pm2_name}")
+        ssh.close()
+        return True
+    except Exception as e:
+        logger.error(f"Failed to restart PM2 process {pm2_name or email}: {e}")
+        return False
+
+def delete_pm2_process(email: str, appointment_id: int = None) -> bool:
+    """Deletes the PM2 process and removes the directory from the VPS."""
+    try:
+        base_path, folder_name = _get_base_path(email, appointment_id)
+        pm2_name = f"visa_{folder_name}"
+        logger.info(f"Connecting to VPS to delete PM2 process and folder: {pm2_name}")
+        
+        ssh = _connect_ssh()
+        _run_ssh_command(ssh, f"pm2 delete {pm2_name} 2>/dev/null || true")
+        _run_ssh_command(ssh, "pm2 save")
+        _run_ssh_command(ssh, f"rm -rf {base_path}")
+        ssh.close()
+        return True
+    except Exception as e:
+        logger.error(f"Failed to delete PM2 process {pm2_name or email}: {e}")
+        return False
+
+def get_vps_config(email: str, appointment_id: int = None) -> str:
+    """Reads the 'config' file from the VPS for the given appointment."""
+    try:
+        base_path, folder_name = _get_base_path(email, appointment_id)
+        config_path = f"{base_path}/config"
+        
+        ssh = _connect_ssh()
+        sftp = ssh.open_sftp()
+        try:
+            with sftp.file(config_path, "r") as f:
+                config_content = f.read().decode('utf-8')
+        except IOError:
+            config_content = ""
+        sftp.close()
+        ssh.close()
+        return config_content
+    except Exception as e:
+        logger.error(f"Failed to get config for {email}: {e}")
+        return ""
+
+def update_vps_config(email: str, config_content: str, appointment_id: int = None) -> bool:
+    """Updates the 'config' file on the VPS and optionally restarts."""
+    try:
+        base_path, folder_name = _get_base_path(email, appointment_id)
+        config_path = f"{base_path}/config"
+        
+        ssh = _connect_ssh()
+        sftp = ssh.open_sftp()
+        with sftp.file(config_path, "w") as f:
+            f.write(config_content)
+        sftp.close()
+        ssh.close()
+        
+        return True
+    except Exception as e:
+        logger.error(f"Failed to update config for {email}: {e}")
+        return False
