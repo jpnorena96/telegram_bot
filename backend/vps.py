@@ -437,7 +437,13 @@ def get_vps_config(email: str, appointment_id: int = None) -> str:
             with sftp.file(config_path, "r") as f:
                 config_content = f.read().decode('utf-8')
         except IOError:
-            config_content = ""
+            legacy_path, _ = _get_base_path(email, None)
+            legacy_config = f"{legacy_path}/config"
+            try:
+                with sftp.file(legacy_config, "r") as f:
+                    config_content = f.read().decode('utf-8')
+            except IOError:
+                config_content = ""
         sftp.close()
         ssh.close()
         return config_content
@@ -453,7 +459,16 @@ def update_vps_config(email: str, config_content: str, appointment_id: int = Non
         
         ssh = _connect_ssh()
         sftp = ssh.open_sftp()
-        with sftp.file(config_path, "w") as f:
+        
+        # Check if modern folder exists
+        try:
+            sftp.stat(base_path)
+            target_config = config_path
+        except IOError:
+            legacy_path, _ = _get_base_path(email, None)
+            target_config = f"{legacy_path}/config"
+            
+        with sftp.file(target_config, "w") as f:
             f.write(config_content)
         sftp.close()
         ssh.close()
