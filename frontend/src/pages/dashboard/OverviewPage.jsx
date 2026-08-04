@@ -65,6 +65,7 @@ const OverviewPage = () => {
   const [profile, setProfile] = useState(null);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [wompiKey, setWompiKey] = useState('');
+  const [flippedCard, setFlippedCard] = useState(null);
 
   const isAdmin = role === 'ADMINISTRATOR' || role === 'AUDITOR';
 
@@ -248,9 +249,6 @@ const OverviewPage = () => {
   const countPending = getStatusCount(['pending', 'Buscando']);
   const countSecured = getStatusCount(['agendado', 'Adelantada']);
   const countFailed = getStatusCount(['canceled', 'failed']);
-
-  // Flip State for Cards
-  const [flippedCard, setFlippedCard] = useState(null);
 
   // Generate Heatmap Grid (7x4 for 28 days approx)
   const heatmapCols = 7;
