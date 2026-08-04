@@ -70,6 +70,7 @@ const LoginPage = () => {
                   value={form.email}
                   onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                   required
+                  autoComplete="username"
                   style={{
                     width: '100%', padding: '0.85rem 1rem', borderRadius: '10px',
                     border: '1px solid var(--border-2)', background: 'var(--bg)',
@@ -96,6 +97,7 @@ const LoginPage = () => {
                   value={form.password}
                   onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
                   required
+                  autoComplete="current-password"
                   style={{
                     width: '100%', padding: '0.85rem 1rem', borderRadius: '10px',
                     border: '1px solid var(--border-2)', background: 'var(--bg)',

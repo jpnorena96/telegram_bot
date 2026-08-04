@@ -58,9 +58,9 @@ const SettingsPage = () => {
   React.useEffect(() => {
     // Fetch user details to get current plan
     api.getMe().then(res => {
-      setCurrentPlan(res.user.subscription_plan || 'Plan Básico (B2C)');
-      setUserEmail(res.user.email);
-      setUserId(res.user.id);
+      setCurrentPlan(res.plan || 'Plan Básico (B2C)');
+      setUserEmail(res.email);
+      setUserId(res.id);
     }).catch(console.error);
   }, []);
 
