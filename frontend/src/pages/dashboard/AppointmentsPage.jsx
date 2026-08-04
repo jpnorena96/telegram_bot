@@ -1076,18 +1076,45 @@ const AppointmentsPage = () => {
               </button>
             </div>
             
-            <div style={{ padding: '1.5rem', flex: 1, overflowY: 'auto' }}>
+            <div style={{ padding: '1.5rem', flex: 1, overflowY: 'auto', background: 'var(--bg)' }}>
               {configModal.loading ? (
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
                   <div className="spinner"></div>
                 </div>
+              ) : !configModal.data ? (
+                <div style={{ textAlign: 'center', color: 'var(--text-3)', padding: '3rem 1rem' }}>
+                  <AlertTriangle size={40} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
+                  <p style={{ margin: '0 0 0.5rem 0', fontWeight: 600, color: 'var(--text-2)' }}>Archivo de configuración vacío o inexistente</p>
+                  <p style={{ fontSize: '0.8rem', margin: 0 }}>Esto ocurre cuando el trámite es nuevo y el bot aún no ha sincronizado sus parámetros iniciales en el servidor VPS.</p>
+                </div>
               ) : (
-                <textarea 
-                  value={configModal.data}
-                  onChange={(e) => setConfigModal({...configModal, data: e.target.value})}
-                  style={{ width: '100%', height: '400px', padding: '1rem', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', backgroundColor: '#1E1E1E', color: '#D4D4D4', border: '1px solid var(--border)', borderRadius: '8px', resize: 'vertical' }}
-                  spellCheck="false"
-                />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  {configModal.data.split('\n').map((line, i) => {
+                    if (!line.includes('=')) return null;
+                    const [key, ...rest] = line.split('=');
+                    const val = rest.join('=');
+                    
+                    // Ocultar credenciales de base de datos y tokens por seguridad
+                    if (key.startsWith('DB_') || key === 'TELEGRAM_BOT_TOKEN') return null;
+                    
+                    return (
+                      <div key={i} className="input-group" style={{ marginBottom: 0 }}>
+                        <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-2)' }}>{key}</label>
+                        <input 
+                          type="text" 
+                          className="input-field" 
+                          value={val}
+                          onChange={(e) => {
+                            const lines = configModal.data.split('\n');
+                            lines[i] = `${key}=${e.target.value}`;
+                            setConfigModal({...configModal, data: lines.join('\n')});
+                          }}
+                          style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
             
