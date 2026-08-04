@@ -235,32 +235,32 @@ const OverviewPage = () => {
     );
   }
 
-  // ── ADMIN VIEW (GOD MODE) ──
+  // ── ADMIN VIEW (EXECUTIVE DASHBOARD) ──
   const realStatusData = adminStats?.status_distribution?.map(s => {
-    let color = '#3b82f6';
-    if (s.status === 'Adelantada' || s.status === 'agendado') color = '#10B981';
-    if (s.status === 'pending' || s.status === 'Buscando') color = '#F59E0B';
-    if (s.status === 'canceled' || s.status === 'failed') color = '#EF4444';
+    let color = '#3b82f6'; // Default Blue
+    if (s.status === 'Adelantada' || s.status === 'agendado') color = '#10B981'; // Emerald
+    if (s.status === 'pending' || s.status === 'Buscando') color = '#F59E0B'; // Amber
+    if (s.status === 'canceled' || s.status === 'failed') color = '#EF4444'; // Red
     return { name: s.status, value: s.count, color };
   }) || [];
 
   return (
-    <div className="animate-in" style={{ paddingBottom: '2rem', background: '#09090B', minHeight: 'calc(100vh - 80px)', margin: '-2rem', padding: '2rem', color: '#fff' }}>
+    <div className="animate-in" style={{ paddingBottom: '2rem', background: '#F8FAFC', minHeight: 'calc(100vh - 80px)', margin: '-2rem', padding: '2rem', color: '#0F172A' }}>
       
       {/* Header & Filters */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
         <div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: '#10B981', letterSpacing: '0.2em', marginBottom: '0.5rem' }}>
-            // GLOBAL COMMAND CENTER
+          <div style={{ fontSize: '0.75rem', color: '#64748B', letterSpacing: '0.15em', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+            Executive Dashboard
           </div>
-          <h1 style={{ fontSize: '2.5rem', fontFamily: 'var(--font-heading)', fontWeight: 800, margin: '0 0 0.25rem 0', color: '#FFFFFF', textShadow: '0 0 20px rgba(255,255,255,0.1)' }}>
+          <h1 style={{ fontSize: '2.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, margin: '0 0 0.25rem 0', color: '#0F172A', letterSpacing: '-0.02em' }}>
             System Analytics
           </h1>
-          <p style={{ margin: 0, color: '#A1A1AA', fontSize: '1rem' }}>Métricas en tiempo real extraídas del core de la base de datos.</p>
+          <p style={{ margin: 0, color: '#475569', fontSize: '0.95rem' }}>Control y monitoreo en tiempo real de la red operativa.</p>
         </div>
-        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', background: '#FFFFFF', borderRadius: '10px', border: '1px solid #E2E8F0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
           {['Día', 'Semana', 'Mes', 'Año'].map(f => (
-            <button key={f} onClick={() => setTimeFilter(f)} style={{ padding: '0.5rem 1rem', background: timeFilter === f ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', color: timeFilter === f ? '#fff' : '#A1A1AA', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
+            <button key={f} onClick={() => setTimeFilter(f)} style={{ padding: '0.6rem 1.2rem', background: timeFilter === f ? '#F1F5F9' : 'transparent', border: 'none', color: timeFilter === f ? '#0F172A' : '#64748B', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', borderRight: '1px solid #E2E8F0' }}>
               {f}
             </button>
           ))}
@@ -268,59 +268,59 @@ const OverviewPage = () => {
       </div>
 
       {/* KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
         
-        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.5rem', backdropFilter: 'blur(10px)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -50, right: -50, width: 150, height: 150, background: 'rgba(16, 185, 129, 0.1)', filter: 'blur(40px)', borderRadius: '50%' }} />
-          <p style={{ margin: '0 0 0.5rem 0', color: '#A1A1AA', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Appointments (Bots)</p>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0, color: '#fff', fontSize: '2.5rem', fontWeight: 800, fontFamily: 'var(--font-mono)' }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#3B82F6' }} />
+          <p style={{ margin: '0 0 0.5rem 0', color: '#64748B', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Citas Activas (Bots)</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <h3 style={{ margin: 0, color: '#0F172A', fontSize: '2.5rem', fontWeight: 800, lineHeight: 1 }}>
               {adminStats?.total_appointments || 0}
             </h3>
-            <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '0.5rem', borderRadius: '8px', color: '#10B981' }}>
-              <CalendarCheck size={24} />
+            <div style={{ background: '#EFF6FF', padding: '0.6rem', borderRadius: '10px', color: '#3B82F6' }}>
+              <CalendarCheck size={24} strokeWidth={2.5} />
             </div>
           </div>
         </div>
 
-        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.5rem', backdropFilter: 'blur(10px)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -50, right: -50, width: 150, height: 150, background: 'rgba(6, 182, 212, 0.1)', filter: 'blur(40px)', borderRadius: '50%' }} />
-          <p style={{ margin: '0 0 0.5rem 0', color: '#A1A1AA', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Agencias Registradas</p>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0, color: '#fff', fontSize: '2.5rem', fontWeight: 800, fontFamily: 'var(--font-mono)' }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#06B6D4' }} />
+          <p style={{ margin: '0 0 0.5rem 0', color: '#64748B', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Red de Agencias</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <h3 style={{ margin: 0, color: '#0F172A', fontSize: '2.5rem', fontWeight: 800, lineHeight: 1 }}>
               {adminStats?.total_agencies || 0}
             </h3>
-            <div style={{ background: 'rgba(6, 182, 212, 0.1)', padding: '0.5rem', borderRadius: '8px', color: '#06b6d4' }}>
-              <Users size={24} />
+            <div style={{ background: '#ECFEFF', padding: '0.6rem', borderRadius: '10px', color: '#06B6D4' }}>
+              <Users size={24} strokeWidth={2.5} />
             </div>
           </div>
         </div>
 
-        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.5rem', backdropFilter: 'blur(10px)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -50, right: -50, width: 150, height: 150, background: 'rgba(139, 92, 246, 0.1)', filter: 'blur(40px)', borderRadius: '50%' }} />
-          <p style={{ margin: '0 0 0.5rem 0', color: '#A1A1AA', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Procesos de Visa (Manuales)</p>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0, color: '#fff', fontSize: '2.5rem', fontWeight: 800, fontFamily: 'var(--font-mono)' }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#8B5CF6' }} />
+          <p style={{ margin: '0 0 0.5rem 0', color: '#64748B', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Trámites (Visas)</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <h3 style={{ margin: 0, color: '#0F172A', fontSize: '2.5rem', fontWeight: 800, lineHeight: 1 }}>
               {adminStats?.total_visa_processes || 0}
             </h3>
-            <div style={{ background: 'rgba(139, 92, 246, 0.1)', padding: '0.5rem', borderRadius: '8px', color: '#8b5cf6' }}>
-              <FileText size={24} />
+            <div style={{ background: '#F5F3FF', padding: '0.6rem', borderRadius: '10px', color: '#8B5CF6' }}>
+              <FileText size={24} strokeWidth={2.5} />
             </div>
           </div>
         </div>
 
-        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.5rem', backdropFilter: 'blur(10px)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -50, right: -50, width: 150, height: 150, background: 'rgba(239, 68, 68, 0.1)', filter: 'blur(40px)', borderRadius: '50%' }} />
-          <p style={{ margin: '0 0 0.5rem 0', color: '#A1A1AA', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Eficiencia Bot (Adelantadas)</p>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0, color: '#fff', fontSize: '2.5rem', fontWeight: 800, fontFamily: 'var(--font-mono)' }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#10B981' }} />
+          <p style={{ margin: '0 0 0.5rem 0', color: '#64748B', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tasa de Eficiencia</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <h3 style={{ margin: 0, color: '#0F172A', fontSize: '2.5rem', fontWeight: 800, lineHeight: 1 }}>
               {
                 adminStats?.status_distribution?.length ? 
                 Math.round((adminStats.status_distribution.find(s => s.status === 'Adelantada' || s.status === 'agendado')?.count || 0) / adminStats.total_appointments * 100) : 0
               }%
             </h3>
-            <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '0.5rem', borderRadius: '8px', color: '#ef4444' }}>
-              <TrendingUp size={24} />
+            <div style={{ background: '#ECFDF5', padding: '0.6rem', borderRadius: '10px', color: '#10B981' }}>
+              <TrendingUp size={24} strokeWidth={2.5} />
             </div>
           </div>
         </div>
@@ -331,55 +331,55 @@ const OverviewPage = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
         
         {/* Main Area Chart (Volume) */}
-        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.5rem', backdropFilter: 'blur(10px)' }}>
-          <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: '#fff', fontWeight: 700, letterSpacing: '0.05em' }}>Volumen de Citas (Últimos 7 Días)</h3>
+        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+          <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: '#0F172A', fontWeight: 700 }}>Demanda Operativa (Últimos 7 Días)</h3>
           <div style={{ width: '100%', height: 300, overflowX: 'auto' }}>
             <AreaChart width={650} height={300} data={adminStats?.timeline || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorCitas" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.5}/>
-                  <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.2}/>
+                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#A1A1AA', fontSize: 12, fontFamily: 'var(--font-mono)'}} dy={10} />
-              <YAxis axisLine={false} tickLine={false} tick={{fill: '#A1A1AA', fontSize: 12, fontFamily: 'var(--font-mono)'}} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 12, fontWeight: 500}} dy={10} />
+              <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 12, fontWeight: 500}} />
               <Tooltip 
-                contentStyle={{ background: '#09090B', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', color: '#fff' }}
-                itemStyle={{ fontWeight: 600, fontFamily: 'var(--font-mono)' }}
+                contentStyle={{ background: '#FFFFFF', borderRadius: '8px', border: '1px solid #E2E8F0', color: '#0F172A', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
+                itemStyle={{ fontWeight: 700 }}
               />
-              <Area type="monotone" dataKey="citas" stroke="#06b6d4" strokeWidth={3} fillOpacity={1} fill="url(#colorCitas)" />
+              <Area type="monotone" dataKey="citas" stroke="#3B82F6" strokeWidth={3} fillOpacity={1} fill="url(#colorCitas)" />
             </AreaChart>
           </div>
         </div>
 
         {/* Donut Chart (Status) */}
-        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.5rem', backdropFilter: 'blur(10px)', display: 'flex', flexDirection: 'column' }}>
-          <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: '#fff', fontWeight: 700, letterSpacing: '0.05em' }}>Estado del Pool de Citas</h3>
+        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', display: 'flex', flexDirection: 'column' }}>
+          <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: '#0F172A', fontWeight: 700 }}>Distribución de Estatus</h3>
           
           <div style={{ width: '100%', height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {realStatusData.length > 0 ? (
               <PieChart width={220} height={220}>
-                <Pie data={realStatusData} cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={5} dataKey="value" stroke="none">
+                <Pie data={realStatusData} cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={2} dataKey="value" stroke="none">
                   {realStatusData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ background: '#09090B', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', color: '#fff' }} />
+                <Tooltip contentStyle={{ background: '#FFFFFF', borderRadius: '8px', border: '1px solid #E2E8F0', color: '#0F172A', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
               </PieChart>
             ) : (
-              <div style={{ color: '#A1A1AA', fontSize: '0.9rem' }}>No hay datos suficientes</div>
+              <div style={{ color: '#94A3B8', fontSize: '0.9rem', fontWeight: 500 }}>Sin registros recientes</div>
             )}
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: 'auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: 'auto' }}>
             {realStatusData.map(d => (
               <div key={d.name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: d.color, boxShadow: `0 0 10px ${d.color}` }} />
-                  <span style={{ fontSize: '0.85rem', color: '#A1A1AA', fontWeight: 600, textTransform: 'uppercase' }}>{d.name}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <div style={{ width: 10, height: 10, borderRadius: '3px', background: d.color }} />
+                  <span style={{ fontSize: '0.9rem', color: '#475569', fontWeight: 600, textTransform: 'capitalize' }}>{d.name}</span>
                 </div>
-                <span style={{ fontSize: '1rem', color: '#fff', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{d.value}</span>
+                <span style={{ fontSize: '1.1rem', color: '#0F172A', fontWeight: 800 }}>{d.value}</span>
               </div>
             ))}
           </div>
