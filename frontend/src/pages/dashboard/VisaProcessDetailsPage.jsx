@@ -93,10 +93,10 @@ const VisaProcessDetailsPage = () => {
             <ArrowLeft size={18} />
           </button>
           <div>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-1)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem', letterSpacing: '-0.02em' }}>
+            <h1 className="dossier-title" style={{ fontSize: '1.75rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '1rem' }}>
               Expediente #{process.id.toString().padStart(4, '0')}
-              <span className={`badge ${isReady ? 'badge-success' : process.status === 'En Progreso' ? 'badge-warning' : 'badge-neutral'}`} style={{ fontSize: '0.75rem' }}>
-                {isReady ? 'Listo' : process.status}
+              <span className={`dossier-stamp ${isReady ? 'stamp-success' : process.status === 'En Progreso' ? 'stamp-warning' : 'stamp-neutral'}`} style={{ fontSize: '0.7rem' }}>
+                {isReady ? 'LISTO' : process.status}
               </span>
             </h1>
             <p style={{ color: 'var(--text-3)', fontSize: '0.9rem', margin: '0.25rem 0 0 0' }}>
@@ -124,36 +124,36 @@ const VisaProcessDetailsPage = () => {
         </div>
       </div>
 
-      {/* ── ANALYTICAL LAYOUT ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '2rem', alignItems: 'start' }} className="grid-2-tablet">
+      {/* ── DOSSIER LAYOUT ── */}
+      <div className="grid-2-tablet dossier-desk">
         
-        {/* LEFT COLUMN: METADATA PANEL */}
-        <div className="panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-1)', margin: 0, paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
+        {/* LEFT COLUMN: FOLDER TAB / CLIPBOARD */}
+        <div className="dossier-folder-tab" style={{ padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <h2 className="dossier-title" style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, paddingBottom: '1rem', borderBottom: '2px solid rgba(0,0,0,0.1)' }}>
             Detalles del Trámite
           </h2>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Cliente Principal</label>
-              <div style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--text-1)' }}>{process.client_email}</div>
+              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.1rem' }}>Cliente Principal</label>
+              <div style={{ fontSize: '0.95rem', fontWeight: 500, color: '#111827', borderBottom: '1px dotted #D1D5DB', paddingBottom: '0.25rem' }}>{process.client_email}</div>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>País Destino</label>
-              <div style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--text-1)' }}>{process.target_country}</div>
+              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.1rem' }}>País Destino</label>
+              <div style={{ fontSize: '0.95rem', fontWeight: 500, color: '#111827', borderBottom: '1px dotted #D1D5DB', paddingBottom: '0.25rem' }}>{process.target_country}</div>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Tipo de Grupo</label>
-              <div style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--text-1)' }}>{process.group_type}</div>
+              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.1rem' }}>Tipo de Grupo</label>
+              <div style={{ fontSize: '0.95rem', fontWeight: 500, color: '#111827', borderBottom: '1px dotted #D1D5DB', paddingBottom: '0.25rem' }}>{process.group_type}</div>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Propósito</label>
-              <div style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--text-1)' }}>{process.purpose}</div>
+              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.1rem' }}>Propósito</label>
+              <div style={{ fontSize: '0.95rem', fontWeight: 500, color: '#111827', borderBottom: '1px dotted #D1D5DB', paddingBottom: '0.25rem' }}>{process.purpose}</div>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Fecha de Creación</label>
-              <div style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Calendar size={14} color="var(--text-3)" />
+              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.1rem' }}>Fecha de Creación</label>
+              <div style={{ fontSize: '0.95rem', fontWeight: 500, color: '#111827', borderBottom: '1px dotted #D1D5DB', paddingBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Calendar size={14} color="#6B7280" />
                 {new Date(process.created_at).toLocaleDateString()}
               </div>
             </div>
@@ -184,60 +184,63 @@ const VisaProcessDetailsPage = () => {
           </div>
 
           {applicants.length === 0 ? (
-            <div className="panel" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-3)' }}>
+            <div className="dossier-paper" style={{ textAlign: 'center', color: '#9CA3AF' }}>
               <File size={32} style={{ opacity: 0.3, margin: '0 auto 1rem auto' }} />
               <p>El cliente aún no ha proporcionado la información de los solicitantes.</p>
             </div>
           ) : (
             applicants.map((app, index) => (
-              <div key={app.id} className="panel" style={{ padding: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+              <div key={app.id} className="dossier-paper">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem', borderBottom: '1px solid #E5E7EB', paddingBottom: '1rem' }}>
                   <div>
-                    <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-1)' }}>
+                    <h3 className="dossier-title" style={{ margin: '0 0 0.25rem 0', fontSize: '1.25rem', fontWeight: 700 }}>
                       {app.full_name}
                     </h3>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-3)', fontWeight: 500 }}>
+                    <div style={{ fontSize: '0.75rem', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
                       {index === 0 ? 'Titular Principal' : `Acompañante #${index}`}
                     </div>
                   </div>
-                  <div className="badge badge-neutral">
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', background: '#F3F4F6', padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid #E5E7EB', color: '#374151' }}>
                     Pasaporte: {app.passport_number}
                   </div>
                 </div>
 
                 {/* Documents Grid */}
                 <div>
-                  <h4 style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>Documentos Adjuntos</h4>
+                  <h4 style={{ fontSize: '0.75rem', fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>Documentos Adjuntos</h4>
                   
                   {app.documents && app.documents.length > 0 ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.25rem' }}>
                       {app.documents.map(doc => (
-                        <div key={doc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '8px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
-                            <div style={{ background: 'var(--surface)', padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border)' }}>
-                              <FileText size={16} color="var(--text-2)" />
-                            </div>
-                            <div style={{ overflow: 'hidden' }}>
-                              <div style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-1)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {doc.document_type}
+                        <div key={doc.id} className="dossier-attachment">
+                          <div className="dossier-clip"></div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
+                              <div style={{ color: '#64748B' }}>
+                                <FileText size={18} />
+                              </div>
+                              <div style={{ overflow: 'hidden' }}>
+                                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {doc.document_type}
+                                </div>
                               </div>
                             </div>
+                            <a 
+                              href={`${api.API_URL.replace('/api', '')}${doc.file_url}`} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="btn btn-icon btn-sm"
+                              style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', padding: '0.3rem', color: '#0F172A' }}
+                              title="Descargar archivo"
+                            >
+                              <Download size={14} />
+                            </a>
                           </div>
-                          <a 
-                            href={`${api.API_URL.replace('/api', '')}${doc.file_url}`} 
-                            target="_blank" 
-                            rel="noreferrer"
-                            className="btn btn-icon btn-outline"
-                            title="Descargar archivo"
-                            style={{ padding: '0.4rem' }}
-                          >
-                            <Download size={14} />
-                          </a>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div style={{ padding: '1rem', background: 'var(--surface-2)', borderRadius: '8px', border: '1px dashed var(--border-2)', color: 'var(--text-3)', fontSize: '0.85rem', textAlign: 'center' }}>
+                    <div style={{ padding: '1.5rem', background: '#F9FAFB', border: '1px dashed #D1D5DB', borderRadius: '4px', color: '#9CA3AF', fontSize: '0.85rem', textAlign: 'center', fontStyle: 'italic' }}>
                       Sin documentos cargados.
                     </div>
                   )}
