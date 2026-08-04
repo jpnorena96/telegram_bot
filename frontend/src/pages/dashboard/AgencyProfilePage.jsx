@@ -33,7 +33,8 @@ const AgencyProfilePage = () => {
         brand_color: profileData.brand_color || '#10B981'
       });
       if (profileData.logo_url) {
-        setLogoPreview(`${api.API_URL.replace('/api', '')}${profileData.logo_url}`);
+        const baseUrl = (api.url || api.API_URL || '').replace('/api', '');
+        setLogoPreview(`${baseUrl}${profileData.logo_url}`);
       }
     } catch (e) {
       toast.error('Error cargando perfil de agencia');

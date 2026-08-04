@@ -351,7 +351,8 @@ const ClientPortalPage = () => {
   }
 
   const brandColor = data.brand_color || '#10B981';
-  const fullLogoUrl = data.agency_logo ? (data.agency_logo.startsWith('http') ? data.agency_logo : `${api.API_URL.replace('/api', '')}${data.agency_logo}`) : null;
+  const baseUrl = (api.url || api.API_URL || '').replace('/api', '');
+  const fullLogoUrl = data.agency_logo ? (data.agency_logo.startsWith('http') ? data.agency_logo : `${baseUrl}${data.agency_logo}`) : null;
 
   if (success) {
     return (

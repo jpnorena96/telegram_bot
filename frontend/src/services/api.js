@@ -32,6 +32,7 @@ const getHeaders = (isFormData = false) => {
 export const api = {
   // Config
   url: API_URL,
+  API_URL: API_URL,
 
   // Auth Methods
   async getMe() {

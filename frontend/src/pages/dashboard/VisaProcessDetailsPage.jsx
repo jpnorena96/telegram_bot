@@ -288,7 +288,7 @@ const VisaProcessDetailsPage = () => {
                               </div>
                             </div>
                             <a 
-                              href={`${api.API_URL.replace('/api', '')}${doc.file_path || doc.file_url}`} 
+                              href={`${(api.url || api.API_URL || '').replace('/api', '')}${doc.file_path || doc.file_url}`} 
                               target="_blank" 
                               rel="noreferrer"
                               className="btn btn-icon btn-sm"
