@@ -44,7 +44,7 @@ async def receive_schedule_webhook(payload: SchedulePayload, background_tasks: B
         cursor = db.cursor(dictionary=True)
         cursor.execute("""
             SELECT u.whatsapp_number 
-            FROM appointments a 
+            FROM user_appointments a 
             JOIN users u ON a.user_id = u.id 
             WHERE a.schedule_id = %s
         """, (payload.schedule_id,))
