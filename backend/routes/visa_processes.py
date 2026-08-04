@@ -125,61 +125,91 @@ async def submit_public_process(process_id: int, request: Request, db = Depends(
     row = cursor.fetchone()
     if not row:
         cursor.close()
-        raise HTTPException(status_code=404, detail="Process not found")
+        raise HTTPException(status_code=404, detail="Proceso no encontrado")
         
     if row["status"] == "En Progreso" and row["created_at"]:
         expiration_date = row["created_at"] + timedelta(days=7)
         if datetime.now() > expiration_date:
             cursor.close()
-            raise HTTPException(status_code=410, detail="El enlace ha expirado. Contacta a tu agencia.")
+            raise HTTPException(status_code=410, detail="El enlace ha expirado por razones de seguridad. Contacta a tu agencia.")
             
     # Handle dynamic applicants
     applicant_count = int(form.get('applicant_count', 1))
     
-    cursor = db.cursor()
+    # Ensure upload directory exists
+    upload_dir = os.path.join(os.getcwd(), "uploads", "visas")
+    os.makedirs(upload_dir, exist_ok=True)
     
     for i in range(applicant_count):
-        full_name = form.get(f"full_name_{i}")
-        passport_number = form.get(f"passport_number_{i}")
-        passport_file = form.get(f"passport_file_{i}")
+        full_name = form.get(f"full_name_{i}", "").strip()
+        passport_number = form.get(f"passport_number_{i}", "").strip()
+        ds160_confirmation = form.get(f"ds160_confirmation_{i}", "").strip()
+        relationship = form.get(f"relationship_{i}", "primary" if i == 0 else "dependent").strip()
         
-        passport_url = None
-        if passport_file and hasattr(passport_file, 'filename') and passport_file.filename:
-            # Save file
-            file_ext = os.path.splitext(passport_file.filename)[1]
-            filename = f"passport_{process_id}_{i}{file_ext}"
-            filepath = f"uploads/visas/{filename}"
-            with open(filepath, "wb") as buffer:
-                shutil.copyfileobj(passport_file.file, buffer)
-            passport_url = f"/uploads/visas/{filename}"
-            
-        is_main = (i == 0)
-        relationship = 'primary' if is_main else 'dependent'
-        cursor.execute(
-            "INSERT INTO visa_applicants (process_id, full_name, passport_number, relationship) VALUES (%s, %s, %s, %s)",
-            (process_id, full_name, passport_number, relationship)
-        )
-        applicant_id = cursor.lastrowid
-        
-        if passport_url:
-            cursor.execute(
-                "INSERT INTO visa_documents (applicant_id, document_type, file_path, file_name) VALUES (%s, %s, %s, %s)",
-                (applicant_id, 'passport', passport_url, passport_file.filename)
-            )
-        
-        # We no longer save backward compatibility fields to visa_processes
-        pass
+        if not full_name:
+            continue
 
-    # Handle extra files (DS-160, acceptance letter, etc.)
-    # For now, we will store extra files in visa_applicants or documents table if needed.
-    # Since we removed ds160_file from visa_processes, we won't store it there.
-    # Ideally, we should insert it into visa_documents.
-    
-    cursor.execute("UPDATE visa_processes SET status = 'Pendiente Revisión' WHERE id = %s", (process_id,))
+        # Check if applicant already exists for this index
+        cursor.execute("SELECT id FROM visa_applicants WHERE process_id = %s ORDER BY id ASC LIMIT 1 OFFSET %s", (process_id, i))
+        existing_app = cursor.fetchone()
+        
+        if existing_app:
+            applicant_id = existing_app["id"]
+            cursor.execute(
+                "UPDATE visa_applicants SET full_name = %s, passport_number = %s, ds160_confirmation = %s, relationship = %s WHERE id = %s",
+                (full_name, passport_number, ds160_confirmation, relationship, applicant_id)
+            )
+        else:
+            cursor.execute(
+                "INSERT INTO visa_applicants (process_id, full_name, passport_number, ds160_confirmation, relationship) VALUES (%s, %s, %s, %s, %s)",
+                (process_id, full_name, passport_number, ds160_confirmation, relationship)
+            )
+            applicant_id = cursor.lastrowid
+            
+        # Helper to process and save uploaded document files
+        doc_fields = [
+            (f"passport_file_{i}", 'passport'),
+            (f"photo_file_{i}", 'photo'),
+            (f"ds160_file_{i}", 'ds160'),
+            (f"financial_file_{i}", 'financial_support'),
+            (f"employment_file_{i}", 'employment_support')
+        ]
+        
+        for form_key, doc_type in doc_fields:
+            file_obj = form.get(form_key)
+            if file_obj and hasattr(file_obj, 'filename') and file_obj.filename:
+                file_ext = os.path.splitext(file_obj.filename)[1].lower() or '.pdf'
+                safe_filename = f"{doc_type}_{process_id}_{applicant_id}_{i}{file_ext}"
+                filepath = os.path.join(upload_dir, safe_filename)
+                
+                with open(filepath, "wb") as buffer:
+                    shutil.copyfileobj(file_obj.file, buffer)
+                    
+                rel_url = f"/uploads/visas/{safe_filename}"
+                
+                # Upsert document into visa_documents
+                cursor.execute(
+                    "SELECT id FROM visa_documents WHERE applicant_id = %s AND document_type = %s LIMIT 1",
+                    (applicant_id, doc_type)
+                )
+                existing_doc = cursor.fetchone()
+                if existing_doc:
+                    cursor.execute(
+                        "UPDATE visa_documents SET file_path = %s, file_name = %s, status = 'uploaded' WHERE id = %s",
+                        (rel_url, file_obj.filename, existing_doc["id"])
+                    )
+                else:
+                    cursor.execute(
+                        "INSERT INTO visa_documents (applicant_id, document_type, file_path, file_name, status) VALUES (%s, %s, %s, %s, 'uploaded')",
+                        (applicant_id, doc_type, rel_url, file_obj.filename)
+                    )
+
+    # Set process status to Listo para Revisar
+    cursor.execute("UPDATE visa_processes SET status = 'Listo para Revisar' WHERE id = %s", (process_id,))
     db.commit()
     cursor.close()
     
-    return {"status": "success"}
+    return {"status": "success", "message": "Expediente actualizado y recibido correctamente."}
 
 @router.delete("/{process_id}")
 def delete_process(process_id: int, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
