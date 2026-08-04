@@ -24,15 +24,16 @@ const AgencyProfilePage = () => {
 
   const loadProfile = async () => {
     try {
-      const res = await api.getAgencyProfile();
-      setProfile(res);
+      const res = await api.getMyAgencyProfile();
+      const profileData = res.profile || {};
+      setProfile(profileData);
       setFormData({
-        company_name: res.company_name || '',
-        alias: res.alias || '',
-        brand_color: res.brand_color || '#10B981'
+        company_name: profileData.company_name || '',
+        alias: profileData.alias || '',
+        brand_color: profileData.brand_color || '#10B981'
       });
-      if (res.logo_url) {
-        setLogoPreview(`${api.API_URL.replace('/api', '')}${res.logo_url}`);
+      if (profileData.logo_url) {
+        setLogoPreview(`${api.API_URL.replace('/api', '')}${profileData.logo_url}`);
       }
     } catch (e) {
       toast.error('Error cargando perfil de agencia');
@@ -52,20 +53,37 @@ const AgencyProfilePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.company_name || !formData.alias) {
-      toast.error('Nombre y Alias son obligatorios');
+      toast.error('Nombre de empresa y alias son obligatorios');
       return;
     }
     setSaving(true);
     try {
-      const payload = new FormData();
-      payload.append('company_name', formData.company_name);
-      payload.append('alias', formData.alias);
-      payload.append('brand_color', formData.brand_color);
+      let finalLogoUrl = profile?.logo_url;
+      
+      // Upload logo first if it's a new file
       if (logoFile) {
-        payload.append('logo_file', logoFile);
+        const logoData = new FormData();
+        logoData.append('file', logoFile);
+        const uploadRes = await fetch(`${api.API_URL}/users/logo`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: logoData
+        });
+        if (!uploadRes.ok) throw new Error('Error al subir logo');
+        const uploadJson = await uploadRes.json();
+        finalLogoUrl = uploadJson.logo_url;
       }
-      await api.updateAgencyProfile(payload);
-      toast.success('Configuración guardada exitosamente');
+
+      const payload = {
+        company_name: formData.company_name,
+        alias: formData.alias,
+        brand_color: formData.brand_color,
+        logo_url: finalLogoUrl,
+      };
+      await api.updateMyAgencyProfile(payload);
+      toast.success('Perfil actualizado correctamente');
       loadProfile();
     } catch (e) {
       toast.error('Error al guardar configuración');
