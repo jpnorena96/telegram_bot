@@ -84,16 +84,19 @@ def create_appointment(apt: AppointmentCreate, background_tasks: BackgroundTasks
         price_usd = calculate_price_usd(role, apt.max_consulate_date, apt.group_size)
 
         # 1. Check and deduct balance
-        cursor.execute("SELECT balance FROM users WHERE id = %s", (current_user["id"],))
-        user_balance = cursor.fetchone()
-        if not user_balance or user_balance["balance"] < price_usd:
-            raise HTTPException(status_code=402, detail=f"No tienes saldo suficiente. Costo: ${price_usd} USD, Balance actual: ${user_balance['balance'] if user_balance else 0} USD.")
-            
-        cursor.execute("UPDATE users SET balance = balance - %s WHERE id = %s", (price_usd, current_user["id"]))
-        cursor.execute("""
-            INSERT INTO balance_history (user_id, amount, type, description)
-            VALUES (%s, %s, 'spend', %s)
-        """, (current_user["id"], price_usd, f"Agendamiento para {apt.email} (Grupo: {apt.group_size})"))
+        is_admin = role in ["ADMINISTRATOR", "AUDITOR"]
+        
+        if not is_admin:
+            cursor.execute("SELECT balance FROM users WHERE id = %s", (current_user["id"],))
+            user_balance = cursor.fetchone()
+            if not user_balance or user_balance["balance"] < price_usd:
+                raise HTTPException(status_code=402, detail=f"No tienes saldo suficiente. Costo: ${price_usd} USD, Balance actual: ${user_balance['balance'] if user_balance else 0} USD.")
+                
+            cursor.execute("UPDATE users SET balance = balance - %s WHERE id = %s", (price_usd, current_user["id"]))
+            cursor.execute("""
+                INSERT INTO balance_history (user_id, amount, type, description)
+                VALUES (%s, %s, 'spend', %s)
+            """, (current_user["id"], price_usd, f"Agendamiento para {apt.email} (Grupo: {apt.group_size})"))
         
         # 1. Insertar agendamiento en la base de datos
         cursor_insert = db.cursor()
@@ -449,11 +452,13 @@ def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest,
             
         # 0. Check Balance for Natural Person (and now Agencies too if they use discover-direct, though typically they don't, but let's calculate for everyone to be safe)
         price_usd = calculate_price_usd(role, apt["max_consulate_date"], apt["group_size"] or 1)
+        is_admin = role in ["ADMINISTRATOR", "AUDITOR"]
         
-        cursor.execute("SELECT balance FROM users WHERE id = %s", (current_user["id"],))
-        u_row = cursor.fetchone()
-        if not u_row or u_row["balance"] < price_usd:
-            raise HTTPException(status_code=402, detail=f"Saldo insuficiente. Costo: ${price_usd} USD. Por favor recarga tu balance.")
+        if not is_admin:
+            cursor.execute("SELECT balance FROM users WHERE id = %s", (current_user["id"],))
+            u_row = cursor.fetchone()
+            if not u_row or u_row["balance"] < price_usd:
+                raise HTTPException(status_code=402, detail=f"Saldo insuficiente. Costo: ${price_usd} USD. Por favor recarga tu balance.")
 
             
         # 1. Validar que no esté duplicado
@@ -470,11 +475,12 @@ def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest,
                 (req.schedule_id, req.schedule_names, appointment_id)
             )
             # Deduct balance
-            cursor.execute("UPDATE users SET balance = balance - %s WHERE id = %s", (price_usd, current_user["id"]))
-            cursor.execute("""
-                INSERT INTO balance_history (user_id, amount, type, description)
-                VALUES (%s, %s, 'spend', %s)
-            """, (current_user["id"], price_usd, f"Agendamiento Direct Connect para {apt['email']} (Grupo: {apt['group_size']})"))
+            if not is_admin:
+                cursor.execute("UPDATE users SET balance = balance - %s WHERE id = %s", (price_usd, current_user["id"]))
+                cursor.execute("""
+                    INSERT INTO balance_history (user_id, amount, type, description)
+                    VALUES (%s, %s, 'spend', %s)
+                """, (current_user["id"], price_usd, f"Agendamiento Direct Connect para {apt['email']} (Grupo: {apt['group_size']})"))
             
             # Insertar notificación
             cursor.execute(
