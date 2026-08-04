@@ -76,7 +76,7 @@ const NotificationsHistory = () => {
   };
 
   const formatFullDate = (dateStr) => {
-    if (!dateStr) return '';
+    if (!dateStr || typeof dateStr !== 'string') return '';
     try {
       const date = new Date(dateStr.replace(' ', 'T'));
       return date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });

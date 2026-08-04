@@ -27,30 +27,40 @@ const DashboardLayout = () => {
     } catch(e) {}
 
     // Real-time SSE Connection
-    const sseUrl = `${api.url.replace('/api', '')}/api/webhooks/stream`;
+    const baseUrl = (api.url || api.API_URL || '').replace('/api', '');
+    const sseUrl = `${baseUrl}/api/webhooks/stream`;
     
-    const sse = new EventSource(sseUrl);
-    
-    sse.addEventListener('session_revoked', (e) => {
-      const data = JSON.parse(e.data);
-      // Fallback: If we don't have userId in localStorage, we can check email or just force logout to be safe if the role is matching or we decode JWT.
-      // Assuming backend emits session_revoked for everyone but client filters:
-      if (userId && data.user_id === parseInt(userId)) {
-        toast.error('Sesión revocada por el Administrador.');
-        api.logout();
-        navigate('/login');
-      }
-    });
+    let sse;
+    try {
+      sse = new EventSource(sseUrl);
+      
+      sse.onerror = () => {
+        // Silently swallow network drops (e.g. net::ERR_HTTP2_PING_FAILED)
+      };
 
-    sse.addEventListener('schedule_discovered', (e) => {
-      const data = JSON.parse(e.data);
-      if (currentRole === 'AGENCY' || currentRole === 'ADMINISTRATOR') {
-        toast.success(`Nuevo Schedule: ${data.schedule_id} para ${data.client_name}`);
-      }
-    });
+      sse.addEventListener('session_revoked', (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (userId && data.user_id === parseInt(userId)) {
+            toast.error('Sesión revocada por el Administrador.');
+            api.logout();
+            navigate('/login');
+          }
+        } catch (err) {}
+      });
+
+      sse.addEventListener('schedule_discovered', (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (currentRole === 'AGENCY' || currentRole === 'ADMINISTRATOR') {
+            toast.success(`Nuevo Schedule: ${data.schedule_id} para ${data.client_name}`);
+          }
+        } catch (err) {}
+      });
+    } catch (e) {}
 
     return () => {
-      sse.close();
+      if (sse && typeof sse.close === 'function') sse.close();
     };
   }, [navigate]);
 

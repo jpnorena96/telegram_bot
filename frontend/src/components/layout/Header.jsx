@@ -66,7 +66,7 @@ const Header = ({ role, userName, onMenuClick }) => {
   };
 
   const formatTime = (dateStr) => {
-    if (!dateStr) return '';
+    if (!dateStr || typeof dateStr !== 'string') return '';
     try {
       const date = new Date(dateStr.replace(' ', 'T'));
       const diffMs = new Date() - date;
