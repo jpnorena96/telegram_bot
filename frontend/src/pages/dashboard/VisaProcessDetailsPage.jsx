@@ -80,174 +80,140 @@ const VisaProcessDetailsPage = () => {
   const isReady = process.status === 'Listo para Alta';
 
   return (
-    <div className="animate-in" style={{ padding: '0', maxWidth: '1400px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      
-      {/* ── Header ── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          <button 
-            onClick={() => navigate('/dashboard/visa-processes')}
-            className="btn btn-icon btn-outline"
-            title="Volver"
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <div>
-            <h1 className="dossier-title" style={{ fontSize: '1.75rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              Expediente #{process.id.toString().padStart(4, '0')}
-              <span className={`dossier-stamp ${isReady ? 'stamp-success' : process.status === 'En Progreso' ? 'stamp-warning' : 'stamp-neutral'}`} style={{ fontSize: '0.7rem' }}>
-                {isReady ? 'LISTO' : process.status}
-              </span>
-            </h1>
-            <p style={{ color: 'var(--text-3)', fontSize: '0.9rem', margin: '0.25rem 0 0 0' }}>
-              Última actualización: {new Date(process.updated_at).toLocaleString()}
-            </p>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <button 
-            onClick={() => window.open(`/client-portal/${process.id}`, '_blank')}
-            className="btn btn-outline"
-            title="Abrir Portal Público"
-          >
-            <Globe size={16} /> Enlace del Cliente
-          </button>
-          <button 
-            onClick={handleDelete}
-            className="btn btn-outline"
-            style={{ color: 'var(--red)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
-            title="Eliminar Expediente"
-          >
-            <Trash2 size={16} /> Eliminar
-          </button>
-        </div>
-      </div>
-
-      {/* ── DOSSIER LAYOUT ── */}
-      <div className="grid-2-tablet dossier-desk">
-        
-        {/* LEFT COLUMN: FOLDER TAB / CLIPBOARD */}
-        <div className="dossier-folder-tab" style={{ padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <h2 className="dossier-title" style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, paddingBottom: '1rem', borderBottom: '2px solid rgba(0,0,0,0.1)' }}>
-            Detalles del Trámite
-          </h2>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div className="letterhead-wrapper animate-in">
+      <div className="official-paper-sheet">
+        <div className="official-paper-content">
+          
+          {/* Header & Title */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.1rem' }}>Cliente Principal</label>
-              <div style={{ fontSize: '0.95rem', fontWeight: 500, color: '#111827', borderBottom: '1px dotted #D1D5DB', paddingBottom: '0.25rem' }}>{process.client_email}</div>
+              <button onClick={() => navigate('/dashboard/visa-processes')} className="btn btn-outline btn-sm" style={{ marginBottom: '1.5rem', color: '#4B5563', borderColor: '#D1D5DB' }}>
+                <ArrowLeft size={14} /> Volver
+              </button>
+              <h1 className="official-title" style={{ margin: 0, textAlign: 'left', borderBottom: 'none', paddingBottom: 0 }}>
+                Expediente N° {process.id.toString().padStart(4, '0')}
+              </h1>
+              <p style={{ color: '#6B7280', fontSize: '0.9rem', marginTop: '0.5rem', fontFamily: 'var(--font-mono)' }}>
+                FECHA DE CREACIÓN: {new Date(process.created_at).toLocaleDateString()}
+              </p>
             </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.1rem' }}>País Destino</label>
-              <div style={{ fontSize: '0.95rem', fontWeight: 500, color: '#111827', borderBottom: '1px dotted #D1D5DB', paddingBottom: '0.25rem' }}>{process.target_country}</div>
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.1rem' }}>Tipo de Grupo</label>
-              <div style={{ fontSize: '0.95rem', fontWeight: 500, color: '#111827', borderBottom: '1px dotted #D1D5DB', paddingBottom: '0.25rem' }}>{process.group_type}</div>
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.1rem' }}>Propósito</label>
-              <div style={{ fontSize: '0.95rem', fontWeight: 500, color: '#111827', borderBottom: '1px dotted #D1D5DB', paddingBottom: '0.25rem' }}>{process.purpose}</div>
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.1rem' }}>Fecha de Creación</label>
-              <div style={{ fontSize: '0.95rem', fontWeight: 500, color: '#111827', borderBottom: '1px dotted #D1D5DB', paddingBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Calendar size={14} color="#6B7280" />
-                {new Date(process.created_at).toLocaleDateString()}
-              </div>
+            
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button onClick={() => window.open(`/client-portal/${process.id}`, '_blank')} className="btn btn-outline btn-sm" style={{ borderColor: '#E5E7EB', color: '#4B5563' }} title="Portal Público">
+                <Globe size={14} />
+              </button>
+              <button onClick={handleDelete} className="btn btn-outline btn-sm" style={{ color: '#DC2626', borderColor: '#FCA5A5' }} title="Eliminar Expediente">
+                <Trash2 size={14} />
+              </button>
             </div>
           </div>
+
+          {/* THE REALISTIC STAMP */}
+          <div className={`realistic-stamp ${isReady ? 'stamp-success' : process.status === 'En Progreso' ? 'stamp-warning' : 'stamp-neutral'}`}>
+            {isReady ? 'LISTO' : process.status}
+          </div>
+
+          {/* Meta Data Table */}
+          <table className="official-table">
+            <tbody>
+              <tr>
+                <th>Cliente Titular</th>
+                <td>{process.client_email}</td>
+              </tr>
+              <tr>
+                <th>País de Destino</th>
+                <td>{process.target_country}</td>
+              </tr>
+              <tr>
+                <th>Tipo de Trámite</th>
+                <td>{process.group_type} - {process.purpose}</td>
+              </tr>
+              <tr>
+                <th>Última Actualización</th>
+                <td>{new Date(process.updated_at).toLocaleString()}</td>
+              </tr>
+            </tbody>
+          </table>
 
           {!isReady && (
-            <div style={{ marginTop: '1rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
+            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
               <button 
                 onClick={handleMarkReady} 
                 disabled={marking}
                 className="btn btn-primary"
-                style={{ width: '100%', padding: '0.75rem' }}
+                style={{ padding: '0.75rem 2rem', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}
               >
                 {marking ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-                Marcar Listo para Alta
+                Imponer Sello de "Listo"
               </button>
             </div>
           )}
-        </div>
 
-        {/* RIGHT COLUMN: APPLICANTS & DOCUMENTS */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-1)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <User size={20} color="var(--text-2)" /> Solicitantes ({applicants.length})
-            </h2>
-          </div>
+          <hr className="official-divider" />
+
+          {/* APPLICANTS SECTION */}
+          <h2 style={{ fontFamily: 'Times New Roman, serif', fontSize: '1.25rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#111827', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <User size={18} /> Relación de Solicitantes ({applicants.length})
+          </h2>
 
           {applicants.length === 0 ? (
-            <div className="dossier-paper" style={{ textAlign: 'center', color: '#9CA3AF' }}>
-              <File size={32} style={{ opacity: 0.3, margin: '0 auto 1rem auto' }} />
-              <p>El cliente aún no ha proporcionado la información de los solicitantes.</p>
+            <div style={{ padding: '3rem', textAlign: 'center', color: '#9CA3AF', fontStyle: 'italic', border: '1px dashed #D1D5DB' }}>
+              No se han anexado solicitantes a este expediente.
             </div>
           ) : (
-            applicants.map((app, index) => (
-              <div key={app.id} className="dossier-paper">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem', borderBottom: '1px solid #E5E7EB', paddingBottom: '1rem' }}>
-                  <div>
-                    <h3 className="dossier-title" style={{ margin: '0 0 0.25rem 0', fontSize: '1.25rem', fontWeight: 700 }}>
-                      {app.full_name}
-                    </h3>
-                    <div style={{ fontSize: '0.75rem', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-                      {index === 0 ? 'Titular Principal' : `Acompañante #${index}`}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              {applicants.map((app, index) => (
+                <div key={app.id} style={{ padding: '1.5rem', background: '#F9FAFB', border: '1px solid #E5E7EB', position: 'relative' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', borderBottom: '1px solid #D1D5DB', paddingBottom: '0.75rem' }}>
+                    <div>
+                      <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.1rem', fontWeight: 700, color: '#111827', textTransform: 'uppercase' }}>
+                        {app.full_name}
+                      </h3>
+                      <div style={{ fontSize: '0.75rem', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        {index === 0 ? 'Titular Principal' : `Acompañante #${index}`}
+                      </div>
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', background: '#F3F4F6', padding: '0.25rem 0.5rem', border: '1px solid #D1D5DB', color: '#111827' }}>
+                      PST: {app.passport_number}
                     </div>
                   </div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', background: '#F3F4F6', padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid #E5E7EB', color: '#374151' }}>
-                    Pasaporte: {app.passport_number}
-                  </div>
-                </div>
 
-                {/* Documents Grid */}
-                <div>
-                  <h4 style={{ fontSize: '0.75rem', fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>Documentos Adjuntos</h4>
+                  {/* Documents List */}
+                  <h4 style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>Anexos Documentales</h4>
                   
                   {app.documents && app.documents.length > 0 ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.25rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
                       {app.documents.map(doc => (
-                        <div key={doc.id} className="dossier-attachment">
-                          <div className="dossier-clip"></div>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
-                              <div style={{ color: '#64748B' }}>
-                                <FileText size={18} />
-                              </div>
-                              <div style={{ overflow: 'hidden' }}>
-                                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                  {doc.document_type}
-                                </div>
-                              </div>
+                        <div key={doc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: '#FFFFFF', border: '1px solid #D1D5DB' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
+                            <FileText size={16} color="#6B7280" />
+                            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {doc.document_type}
                             </div>
-                            <a 
-                              href={`${api.API_URL.replace('/api', '')}${doc.file_url}`} 
-                              target="_blank" 
-                              rel="noreferrer"
-                              className="btn btn-icon btn-sm"
-                              style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', padding: '0.3rem', color: '#0F172A' }}
-                              title="Descargar archivo"
-                            >
-                              <Download size={14} />
-                            </a>
                           </div>
+                          <a 
+                            href={`${api.API_URL.replace('/api', '')}${doc.file_url}`} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className="btn btn-icon btn-sm"
+                            style={{ background: '#F3F4F6', border: 'none', color: '#111827' }}
+                            title="Descargar"
+                          >
+                            <Download size={12} />
+                          </a>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div style={{ padding: '1.5rem', background: '#F9FAFB', border: '1px dashed #D1D5DB', borderRadius: '4px', color: '#9CA3AF', fontSize: '0.85rem', textAlign: 'center', fontStyle: 'italic' }}>
-                      Sin documentos cargados.
+                    <div style={{ padding: '1rem', background: '#FFFFFF', border: '1px dotted #D1D5DB', color: '#9CA3AF', fontSize: '0.8rem', fontStyle: 'italic' }}>
+                      Sin anexos presentados.
                     </div>
                   )}
                 </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
+
         </div>
       </div>
     </div>
