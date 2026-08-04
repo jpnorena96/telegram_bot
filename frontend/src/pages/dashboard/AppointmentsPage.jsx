@@ -147,6 +147,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
     ivr: 'null',
     min_consulate_date: '',
     max_consulate_date: '',
+    group_size: 1,
   });
 
   const [mode, setMode] = useState('discover'); // 'discover' | 'manual'
@@ -453,6 +454,10 @@ const CreateWizard = ({ onClose, onCreated }) => {
                 <div className="input-group" style={{ marginBottom: 0 }}>
                   <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Calendar size={11} /> FECHA MÁXIMA</label>
                   <input className="input-field" type="date" value={formData.max_consulate_date} onChange={e => setFormData({ ...formData, max_consulate_date: e.target.value })} style={{ colorScheme: 'dark' }} />
+                </div>
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><User size={11} /> TAMAÑO DEL GRUPO</label>
+                  <input className="input-field" type="number" min="1" max="15" value={formData.group_size} onChange={e => setFormData({ ...formData, group_size: parseInt(e.target.value) || 1 })} required />
                 </div>
               </div>
             </div>

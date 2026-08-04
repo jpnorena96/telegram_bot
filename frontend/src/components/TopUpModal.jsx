@@ -4,8 +4,9 @@ import { api } from '../services/api';
 import toast from 'react-hot-toast';
 
 const PACKAGES = [
-  { id: '1_cita', name: '1 Cita', price: 50000, desc: 'Adelanta 1 cita', highlight: false },
-  { id: '3_citas', name: '3 Citas', price: 135000, desc: 'Ahorra $15.000', highlight: true }
+  { id: '15_usd', name: '$15 USD', price: 60000, desc: 'Recarga mínima', highlight: false },
+  { id: '50_usd', name: '$50 USD', price: 200000, desc: 'Recomendado', highlight: true },
+  { id: '100_usd', name: '$100 USD', price: 400000, desc: 'Ideal agencias', highlight: false }
 ];
 
 const TopUpModal = ({ isOpen, onClose, wompiPubKey, email, onTopUpSuccess }) => {

@@ -173,12 +173,8 @@ def verify_topup_payment(req: TopUpVerificationRequest, current_user: dict = Dep
             except:
                 pass
                 
-        # Determine citas to add based on amount
-        citas_added = 1
-        if real_amount >= 135000:
-            citas_added = 3
-        elif real_amount >= 50000:
-            citas_added = real_amount // 50000
+        # Determine USD to add based on amount (1 USD = 4000 COP)
+        usd_added = real_amount // 4000
                 
         # Record transaction and update balance atomically
         cursor.execute("INSERT INTO processed_transactions (transaction_id, user_id, amount) VALUES (%s, %s, %s)", 
@@ -188,12 +184,12 @@ def verify_topup_payment(req: TopUpVerificationRequest, current_user: dict = Dep
         cursor.execute("""
             INSERT INTO balance_history (user_id, amount, type, description)
             VALUES (%s, %s, 'topup', %s)
-        """, (current_user["id"], citas_added, f"Recarga de saldo Wompi: ${real_amount} COP"))
+        """, (current_user["id"], usd_added, f"Recarga de saldo Wompi: ${real_amount} COP (${usd_added} USD)"))
         
-        cursor.execute("UPDATE users SET balance = balance + %s WHERE id = %s", (citas_added, current_user["id"]))
+        cursor.execute("UPDATE users SET balance = balance + %s WHERE id = %s", (usd_added, current_user["id"]))
         db.commit()
         
-        return {"status": "success", "message": f"Recarga verificada exitosamente. Se abonaron {citas_added} Cita(s)."}
+        return {"status": "success", "message": f"Recarga verificada exitosamente. Se abonaron ${usd_added} USD."}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

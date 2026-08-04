@@ -30,6 +30,31 @@ class AppointmentCreate(BaseModel):
     max_consulate_time: Optional[time] = None
     schedule_id: Optional[str] = None
     ivr: Optional[str] = 'null'
+    group_size: int = 1
+
+
+def calculate_price_usd(role: str, max_consulate_date: date, group_size: int = 1) -> int:
+    import datetime
+    today = datetime.date.today()
+    is_urgent = False
+    
+    if max_consulate_date:
+        diff_days = (max_consulate_date - today).days
+        if diff_days <= 30:
+            is_urgent = True
+
+    extra_persons = max(0, group_size - 1)
+    
+    if is_urgent:
+        if role in ["TRAVEL_AGENCY", "AGENCY"]:
+            return 20 + (15 * extra_persons)
+        else:
+            return 60 + (10 * extra_persons)
+    else:
+        if role in ["TRAVEL_AGENCY", "AGENCY"]:
+            return 15 + (13 * extra_persons)
+        else:
+            return 45 + (15 * extra_persons)
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
@@ -54,17 +79,21 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 def create_appointment(apt: AppointmentCreate, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     cursor = db.cursor(dictionary=True)
     try:
-        # 0. Check and deduct balance
+        # 0. Calcular precio
+        role = current_user["roles"][0]
+        price_usd = calculate_price_usd(role, apt.max_consulate_date, apt.group_size)
+
+        # 1. Check and deduct balance
         cursor.execute("SELECT balance FROM users WHERE id = %s", (current_user["id"],))
         user_balance = cursor.fetchone()
-        if not user_balance or user_balance["balance"] <= 0:
-            raise HTTPException(status_code=402, detail="No tienes saldo suficiente (citas). Por favor recarga tu balance.")
+        if not user_balance or user_balance["balance"] < price_usd:
+            raise HTTPException(status_code=402, detail=f"No tienes saldo suficiente. Costo: ${price_usd} USD, Balance actual: ${user_balance['balance'] if user_balance else 0} USD.")
             
-        cursor.execute("UPDATE users SET balance = balance - 1 WHERE id = %s", (current_user["id"],))
+        cursor.execute("UPDATE users SET balance = balance - %s WHERE id = %s", (price_usd, current_user["id"]))
         cursor.execute("""
             INSERT INTO balance_history (user_id, amount, type, description)
-            VALUES (%s, 1, 'spend', %s)
-        """, (current_user["id"], f"Agendamiento para {apt.email}"))
+            VALUES (%s, %s, 'spend', %s)
+        """, (current_user["id"], price_usd, f"Agendamiento para {apt.email} (Grupo: {apt.group_size})"))
         
         # 1. Insertar agendamiento en la base de datos
         cursor_insert = db.cursor()
@@ -72,16 +101,16 @@ def create_appointment(apt: AppointmentCreate, background_tasks: BackgroundTasks
             INSERT INTO user_appointments (
                 user_id, email, password, country, consulate, consulate_asc,
                 min_consulate_date, max_consulate_date, min_consulate_time, max_consulate_time,
-                schedule_id, ivr, status
+                schedule_id, ivr, status, group_size
             ) VALUES (
                 %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s,
-                %s, %s, 'pending'
+                %s, %s, 'pending', %s
             )
         """, (
             current_user["id"], apt.email, apt.password, apt.country, apt.consulate, apt.consulate_asc,
             apt.min_consulate_date, apt.max_consulate_date, apt.min_consulate_time, apt.max_consulate_time,
-            apt.schedule_id, apt.ivr
+            apt.schedule_id, apt.ivr, apt.group_size
         ))
         db.commit()
         new_id = cursor_insert.lastrowid
@@ -335,6 +364,7 @@ class DiscoverDirectRequest(BaseModel):
     min_consulate_date: Optional[date] = None
     max_consulate_date: Optional[date] = None
     ivr: Optional[str] = 'null'
+    group_size: int = 1
 
 
 @router.post("/discover-direct")
@@ -349,14 +379,14 @@ def discover_direct(req: DiscoverDirectRequest, current_user: dict = Depends(get
         cursor_insert.execute("""
             INSERT INTO user_appointments (
                 user_id, email, password, country, consulate, consulate_asc,
-                min_consulate_date, max_consulate_date, status, ivr
+                min_consulate_date, max_consulate_date, status, ivr, group_size
             ) VALUES (
                 %s, %s, %s, %s, %s, %s,
-                %s, %s, 'guardada', %s
+                %s, %s, 'guardada', %s, %s
             )
         """, (
             current_user["id"], req.email, req.password, req.country, req.consulate, req.consulate_asc,
-            req.min_consulate_date, req.max_consulate_date, req.ivr
+            req.min_consulate_date, req.max_consulate_date, req.ivr, req.group_size
         ))
         db.commit()
         new_id = cursor_insert.lastrowid
@@ -407,7 +437,7 @@ class SelectScheduleRequest(BaseModel):
 def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     cursor = db.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT email, user_id FROM user_appointments WHERE id = %s", (appointment_id,))
+        cursor.execute("SELECT email, user_id, max_consulate_date, group_size FROM user_appointments WHERE id = %s", (appointment_id,))
         apt = cursor.fetchone()
         
         if not apt:
@@ -417,12 +447,14 @@ def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest,
         if role not in ["ADMINISTRATOR", "AUDITOR"] and apt["user_id"] != current_user["id"]:
             raise HTTPException(status_code=403, detail="Not authorized")
             
-        # 0. Check Balance for Natural Person
-        if role == "NATURAL_PERSON":
-            cursor.execute("SELECT balance FROM users WHERE id = %s", (current_user["id"],))
-            u_row = cursor.fetchone()
-            if not u_row or u_row["balance"] < 50000:
-                raise HTTPException(status_code=402, detail="Saldo insuficiente. Por favor recarga tu balance.")
+        # 0. Check Balance for Natural Person (and now Agencies too if they use discover-direct, though typically they don't, but let's calculate for everyone to be safe)
+        price_usd = calculate_price_usd(role, apt["max_consulate_date"], apt["group_size"] or 1)
+        
+        cursor.execute("SELECT balance FROM users WHERE id = %s", (current_user["id"],))
+        u_row = cursor.fetchone()
+        if not u_row or u_row["balance"] < price_usd:
+            raise HTTPException(status_code=402, detail=f"Saldo insuficiente. Costo: ${price_usd} USD. Por favor recarga tu balance.")
+
             
         # 1. Validar que no esté duplicado
         cursor.execute("SELECT id FROM user_appointments WHERE schedule_id = %s", (req.schedule_id,))
@@ -438,8 +470,12 @@ def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest,
                 (req.schedule_id, req.schedule_names, appointment_id)
             )
             # Deduct balance
-            if role == "NATURAL_PERSON":
-                cursor.execute("UPDATE users SET balance = balance - 50000 WHERE id = %s", (current_user["id"],))
+            cursor.execute("UPDATE users SET balance = balance - %s WHERE id = %s", (price_usd, current_user["id"]))
+            cursor.execute("""
+                INSERT INTO balance_history (user_id, amount, type, description)
+                VALUES (%s, %s, 'spend', %s)
+            """, (current_user["id"], price_usd, f"Agendamiento Direct Connect para {apt['email']} (Grupo: {apt['group_size']})"))
+            
             # Insertar notificación
             cursor.execute(
                 "INSERT INTO notifications (user_id, message, status) VALUES (%s, %s, 'success')",
