@@ -577,3 +577,159 @@ a:hover { color: var(--text-2); }
   padding: 0.75rem;
 }
 
+/* =========================================
+   DIDACTIC DASHBOARD COMPONENTS
+   ========================================= */
+
+/* 1. 3D Flip Cards */
+.flip-card {
+  background-color: transparent;
+  perspective: 1000px;
+}
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden; /* Safari */
+  backface-visibility: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+.flip-card-front {
+  background-color: #ffffff;
+  color: #0F172A;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+}
+.flip-card-back {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: white;
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+/* 2. Interactive Pipeline */
+.pipeline-container {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  width: 100%;
+  padding: 2rem 0;
+  position: relative;
+}
+.pipeline-node {
+  flex: 1;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.pipeline-node:hover {
+  transform: translateY(-5px);
+  border-color: #3b82f6;
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+}
+.pipeline-connector {
+  flex: 0.5;
+  height: 4px;
+  background: #e2e8f0;
+  position: relative;
+  z-index: 1;
+  border-radius: 2px;
+  overflow: hidden;
+  align-self: center;
+}
+.pipeline-connector-flow {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+  animation: pulseFlow 2s infinite linear;
+}
+@keyframes pulseFlow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* 3. Heatmap Grid */
+.heatmap-container {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}
+.heatmap-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.heatmap-cell {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: #ebedf0;
+  transition: transform 0.1s;
+}
+.heatmap-cell:hover {
+  transform: scale(1.4);
+  z-index: 10;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+.heatmap-level-1 { background: #9be9a8; }
+.heatmap-level-2 { background: #40c463; }
+.heatmap-level-3 { background: #30a14e; }
+.heatmap-level-4 { background: #216e39; }
+
+/* 4. Live Feed Ticker */
+.live-feed-container {
+  overflow: hidden;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.live-feed-content {
+  display: flex;
+  gap: 3rem;
+  animation: scrollTicker 30s linear infinite;
+  white-space: nowrap;
+}
+.live-feed-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: #475569;
+}
+@keyframes scrollTicker {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
