@@ -465,9 +465,115 @@ a:hover { color: var(--text-2); }
   color: #111827;
 }
 
-/* Divider oficial */
 .official-divider {
   border: 0;
   border-top: 1px solid #D1D5DB;
   margin: 3rem 0;
 }
+/* ═══════════════════════════════════
+   DUE DILIGENCE COMMAND CENTER (AdminAgenciesPage)
+═══════════════════════════════════ */
+/* Risk Card Container */
+.risk-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--t-fast);
+}
+.risk-card:hover {
+  border-color: var(--border-2);
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+}
+
+/* Intelligence Header inside Risk Card */
+.risk-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+}
+
+/* Security Tag / Badge */
+.security-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.security-tag.tag-safe { background: rgba(16, 185, 129, 0.05); color: #059669; border-color: rgba(16, 185, 129, 0.2); }
+.security-tag.tag-warn { background: rgba(245, 158, 11, 0.05); color: #D97706; border-color: rgba(245, 158, 11, 0.2); }
+.security-tag.tag-danger { background: rgba(239, 68, 68, 0.05); color: #DC2626; border-color: rgba(239, 68, 68, 0.2); }
+
+/* Circular Trust Score Indicator (CSS Only) */
+.trust-score-wrapper {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(var(--score-color) var(--score-pct), var(--surface-2) 0);
+}
+.trust-score-inner {
+  width: 48px;
+  height: 48px;
+  background: var(--surface);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.trust-score-val {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text-1);
+}
+.trust-score-label {
+  font-size: 0.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+/* Fingerprint (Brand Identity) */
+.brand-fingerprint {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border-2);
+}
+
+/* Terminal style buttons */
+.btn-terminal {
+  flex: 1;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  padding: 0.75rem;
+}
+
