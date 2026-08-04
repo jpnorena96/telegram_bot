@@ -200,14 +200,22 @@ export const api = {
     });
     return handleResponse(response);
   },
-  async adminUpdateConfig(appointmentId, config_content) {
-    const response = await fetch(`${API_URL}/admin/appointments/${appointmentId}/config`, {
+  async adminUpdateConfig(aptId, config_content) {
+    const response = await fetch(`${API_URL}/admin/appointments/${aptId}/config`, {
       method: 'PUT',
       headers: getHeaders(),
-      body: JSON.stringify({ config_content }),
+      body: JSON.stringify({ config_content })
     });
     return handleResponse(response);
   },
+
+  async getAdminDashboardStats() {
+    const response = await fetch(`${API_URL}/admin/dashboard-stats`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+
   async getWompiPublicKey() {
     const response = await fetch(`${API_URL}/payments/public-key`);
     return response.json();
