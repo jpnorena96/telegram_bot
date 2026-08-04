@@ -112,6 +112,7 @@ def get_processes(current_user: dict = Depends(get_current_user), db = Depends(g
 def get_process_details(process_id: int, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     process = check_process_access(process_id, current_user, db)
     
+    import json
     cursor = db.cursor(dictionary=True)
     # Fetch applicants
     cursor.execute("SELECT * FROM visa_applicants WHERE process_id = %s ORDER BY id ASC", (process_id,))
@@ -119,6 +120,14 @@ def get_process_details(process_id: int, current_user: dict = Depends(get_curren
     
     # Fetch documents for each applicant
     for app in applicants:
+        if app.get("form_data") and isinstance(app["form_data"], str):
+            try:
+                app["form_data"] = json.loads(app["form_data"])
+            except Exception:
+                app["form_data"] = {}
+        elif not app.get("form_data"):
+            app["form_data"] = {}
+
         cursor.execute("SELECT * FROM visa_documents WHERE applicant_id = %s", (app["id"],))
         app["documents"] = cursor.fetchall()
         

@@ -60,16 +60,24 @@ def get_public_process(process_id: int, db = Depends(get_db)):
             raise HTTPException(status_code=410, detail="Expediente expirado por seguridad. Contacta a tu agencia para generar un nuevo enlace.")
 
     # Fetch applicants
-    cursor.execute("SELECT id, full_name, passport_number, relationship FROM visa_applicants WHERE process_id = %s", (process_id,))
+    cursor.execute("SELECT id, full_name, passport_number, ds160_confirmation, relationship, form_data FROM visa_applicants WHERE process_id = %s ORDER BY id ASC", (process_id,))
     applicants = cursor.fetchall()
     
     # Fetch documents for each applicant (to find passport_file)
+    import json
     for app in applicants:
         app["is_main_applicant"] = (app.get("relationship") == 'primary')
+        if app.get("form_data") and isinstance(app["form_data"], str):
+            try:
+                app["form_data"] = json.loads(app["form_data"])
+            except Exception:
+                app["form_data"] = {}
+        elif not app.get("form_data"):
+            app["form_data"] = {}
+
         cursor.execute("SELECT file_path FROM visa_documents WHERE applicant_id = %s AND document_type = 'passport' LIMIT 1", (app["id"],))
         doc = cursor.fetchone()
         app["passport_file"] = doc["file_path"] if doc else None
-    
     
     # Get agency logo and name
     cursor.execute("SELECT full_name, logo_url FROM users WHERE id = %s", (row.get("user_id"),))
@@ -145,6 +153,7 @@ async def submit_public_process(process_id: int, request: Request, db = Depends(
         passport_number = form.get(f"passport_number_{i}", "").strip()
         ds160_confirmation = form.get(f"ds160_confirmation_{i}", "").strip()
         relationship = form.get(f"relationship_{i}", "primary" if i == 0 else "dependent").strip()
+        form_data_str = form.get(f"form_data_{i}", "{}")
         
         if not full_name:
             continue
@@ -156,13 +165,13 @@ async def submit_public_process(process_id: int, request: Request, db = Depends(
         if existing_app:
             applicant_id = existing_app["id"]
             cursor.execute(
-                "UPDATE visa_applicants SET full_name = %s, passport_number = %s, ds160_confirmation = %s, relationship = %s WHERE id = %s",
-                (full_name, passport_number, ds160_confirmation, relationship, applicant_id)
+                "UPDATE visa_applicants SET full_name = %s, passport_number = %s, ds160_confirmation = %s, relationship = %s, form_data = %s WHERE id = %s",
+                (full_name, passport_number, ds160_confirmation, relationship, form_data_str, applicant_id)
             )
         else:
             cursor.execute(
-                "INSERT INTO visa_applicants (process_id, full_name, passport_number, ds160_confirmation, relationship) VALUES (%s, %s, %s, %s, %s)",
-                (process_id, full_name, passport_number, ds160_confirmation, relationship)
+                "INSERT INTO visa_applicants (process_id, full_name, passport_number, ds160_confirmation, relationship, form_data) VALUES (%s, %s, %s, %s, %s, %s)",
+                (process_id, full_name, passport_number, ds160_confirmation, relationship, form_data_str)
             )
             applicant_id = cursor.lastrowid
             
