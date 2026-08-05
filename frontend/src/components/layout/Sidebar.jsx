@@ -11,8 +11,7 @@ const ROLE_LABELS = {
 
 const NAV = [
   { to: '/dashboard', label: 'Resumen', icon: LayoutGrid, roles: ['ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER', 'TRAVEL_AGENCY', 'NATURAL_PERSON'] },
-  { to: '/dashboard/visa-processes', label: 'Clientes (Marca Blanca)', icon: Users, roles: ['TRAVEL_AGENCY', 'ADMINISTRATOR'] },
-  { to: '/dashboard/documentos', label: 'Mis Trámites', icon: FolderOpen, roles: ['ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER', 'NATURAL_PERSON'] },
+  { to: '/dashboard/visa-processes', label: 'Mis Trámites & Expedientes', icon: FolderOpen, roles: ['ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER', 'TRAVEL_AGENCY', 'NATURAL_PERSON'] },
   { to: '/dashboard/citas', label: 'Adelantar Cita', icon: CalendarCheck, roles: ['ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER', 'TRAVEL_AGENCY', 'NATURAL_PERSON'] },
   { to: '/dashboard/agencia-perfil', label: 'Mi Agencia', icon: Store, roles: ['TRAVEL_AGENCY'] },
   { to: '/dashboard/usuarios', label: 'Usuarios', icon: Users, roles: ['ADMINISTRATOR', 'AUDITOR'] },

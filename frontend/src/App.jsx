@@ -56,7 +56,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<OverviewPage />} />
           <Route path="citas" element={<AppointmentsPage />} />
-          <Route path="documentos" element={<DocumentsPage />} />
+          <Route path="documentos" element={<VisaProcessesPage />} />
           <Route path="usuarios" element={<UsersPage />} />
           <Route path="configuracion" element={<SettingsPage />} />
           <Route path="auditoria" element={<AdminPage />} />
