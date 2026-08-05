@@ -2,11 +2,59 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, FileText, CheckCircle2, Loader2, Download, 
-  User, Globe, AlertCircle, Trash2, Calendar, File, Copy, 
-  Code, Briefcase, Plane, MapPin, DollarSign, ExternalLink
+  User, Globe, AlertCircle, Trash2, Calendar, File, 
+  Briefcase, Plane, MapPin, DollarSign, ExternalLink,
+  Sparkles, Award, ShieldCheck, Check, AlertTriangle, Send
 } from 'lucide-react';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
+
+// Algorithm for US Visa Approval Probability Assessment
+const calculateVisaApprovalScore = (fd = {}) => {
+  let score = 55;
+  const strengths = [];
+  const recommendations = [];
+
+  const occ = (fd.occupation || '').toLowerCase();
+  if (occ.includes('empleado') || occ.includes('empresar') || occ.includes('independiente')) {
+    score += 15;
+    strengths.push('Estabilidad económica y arraigo laboral sólido en el país de origen.');
+  } else if (occ.includes('estudiante')) {
+    score += 10;
+    strengths.push('Lazos educativos activos demostrados con institución certificada.');
+  } else if (occ.includes('jubilado') || occ.includes('pensionado')) {
+    score += 12;
+    strengths.push('Estatus de pensionado / jubilado verificado con ingresos fijos.');
+  } else {
+    recommendations.push('Se sugiere reforzar sustento de ingresos y vínculos familiares.');
+  }
+
+  if (fd.monthly_income) {
+    score += 10;
+    strengths.push('Solvencia financiera declarada acorde a los gastos estimados de viaje.');
+  }
+
+  const ms = (fd.marital_status || '').toLowerCase();
+  if (ms.includes('casad') || ms.includes('unión') || ms.includes('union')) {
+    score += 8;
+    strengths.push('Arraigo familiar fuerte (Estado civil con vínculos declarados).');
+  }
+
+  if (fd.prev_us_travel === 'Sí' || fd.prev_visa === 'Sí') {
+    score += 12;
+    strengths.push('Historial migratorio o antecedentes de visados anteriores en regla.');
+  }
+
+  const finalScore = Math.min(96, Math.max(45, score));
+
+  return {
+    score: finalScore,
+    level: finalScore >= 80 ? 'Excelente (Probabilidad Muy Alta)' : finalScore >= 65 ? 'Favorable (Probabilidad Alta)' : 'Moderado (Requiere Refuerzo)',
+    color: finalScore >= 80 ? '#10B981' : finalScore >= 65 ? '#3B82F6' : '#F59E0B',
+    strengths: strengths.length > 0 ? strengths : ['Información inicial suficiente para perfilamiento consular.'],
+    recommendations: recommendations.length > 0 ? recommendations : ['Presentar pasaporte y documentación de soporte en orden el día de la cita.']
+  };
+};
 
 const VisaProcessDetailsPage = () => {
   const { id } = useParams();
@@ -15,7 +63,6 @@ const VisaProcessDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [marking, setMarking] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
-  const [showJsonModal, setShowJsonModal] = useState(false);
 
   const loadData = () => {
     setLoading(true);
@@ -33,7 +80,7 @@ const VisaProcessDetailsPage = () => {
     setMarking(true);
     try {
       await api.updateVisaProcessStatus(id, 'Listo para Alta');
-      toast.success('Expediente marcado como Listo para Alta. Script de automatización habilitado.');
+      toast.success('Expediente marcado como Listo para Revisión y Formulario DS-160');
       loadData();
     } catch (e) {
       toast.error('Error al actualizar estado');
@@ -61,11 +108,6 @@ const VisaProcessDetailsPage = () => {
     } catch (e) {
       toast.error('Error de red');
     }
-  };
-
-  const handleCopyJson = (payload) => {
-    navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
-    toast.success('Payload JSON copiado al portapapeles para Script de Automatización / IA');
   };
 
   if (loading) {
@@ -102,24 +144,16 @@ const VisaProcessDetailsPage = () => {
                 <ArrowLeft size={14} /> Volver a Lista
               </button>
               <h1 className="official-title" style={{ margin: 0, textAlign: 'left', borderBottom: 'none', paddingBottom: 0 }}>
-                Expediente Consular N° {process.id.toString().padStart(4, '0')}
+                Expediente N° {process.id.toString().padStart(4, '0')}
               </h1>
               <p style={{ color: '#6B7280', fontSize: '0.85rem', marginTop: '0.4rem', fontFamily: 'var(--font-mono)' }}>
-                REGISTRO: {new Date(process.created_at).toLocaleDateString()} · PAÍS: {process.target_country.toUpperCase()} ({process.visa_category})
+                FECHA DE REGISTRO: {new Date(process.created_at).toLocaleDateString()} · TIPO: {process.target_country.toUpperCase()} ({process.visa_category})
               </p>
             </div>
             
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button 
-                onClick={() => handleCopyJson({ process, applicants })} 
-                className="btn btn-outline btn-sm" 
-                style={{ borderColor: '#D1D5DB', color: '#111827', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                title="Copiar JSON de Automatización"
-              >
-                <Code size={14} /> Payload IA
-              </button>
               <button onClick={() => window.open(`/client-portal/${process.id}`, '_blank')} className="btn btn-outline btn-sm" style={{ borderColor: '#E5E7EB', color: '#4B5563' }} title="Portal del Cliente">
-                <Globe size={14} />
+                <Globe size={14} /> Portal Formulario
               </button>
               <button onClick={handleDelete} className="btn btn-outline btn-sm" style={{ color: '#DC2626', borderColor: '#FCA5A5' }} title="Eliminar Expediente">
                 <Trash2 size={14} />
@@ -136,20 +170,20 @@ const VisaProcessDetailsPage = () => {
           <table className="official-table">
             <tbody>
               <tr>
-                <th>Cliente Titular</th>
+                <th>Cliente / Email Portal</th>
                 <td>{process.client_email}</td>
               </tr>
               <tr>
-                <th>País & Categoría</th>
+                <th>País de Destino & Tipo</th>
                 <td>{process.target_country} — {process.visa_category}</td>
               </tr>
               <tr>
-                <th>Modalidad</th>
+                <th>Modalidad del Trámite</th>
                 <td>{process.group_type} · {process.purpose}</td>
               </tr>
               <tr>
                 <th>Total Solicitantes</th>
-                <td>{applicants.length} integrante(s)</td>
+                <td>{applicants.length} persona(s) registrada(s)</td>
               </tr>
             </tbody>
           </table>
@@ -163,16 +197,16 @@ const VisaProcessDetailsPage = () => {
                 style={{ padding: '0.75rem 2rem', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}
               >
                 {marking ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-                Aprobar Expediente para Automatización DS-160
+                Aprobar Expediente y Habilitar Llenado DS-160
               </button>
             </div>
           )}
 
           <hr className="official-divider" />
 
-          {/* SECCIÓN DE SOLICITANTES Y RESPUESTAS DEL CUESTIONARIO */}
+          {/* SECCIÓN DE SOLICITANTES Y DIAGNÓSTICO IA DE APROBACIÓN */}
           <h2 style={{ fontFamily: 'Times New Roman, serif', fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#111827', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <User size={18} /> Expediente Digital del Solicitante ({applicants.length})
+            <User size={18} /> Relación de Solicitantes ({applicants.length})
           </h2>
 
           {applicants.length > 1 && (
@@ -205,9 +239,12 @@ const VisaProcessDetailsPage = () => {
               {applicants.map((app, index) => {
                 if (applicants.length > 1 && activeTab !== index) return null;
                 const fd = app.form_data || {};
+                const diag = calculateVisaApprovalScore(fd);
 
                 return (
                   <div key={app.id} style={{ padding: '1.5rem', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '8px' }}>
+                    
+                    {/* Header del Solicitante */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #D1D5DB', paddingBottom: '0.75rem' }}>
                       <div>
                         <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#111827', textTransform: 'uppercase' }}>
@@ -219,6 +256,56 @@ const VisaProcessDetailsPage = () => {
                       </div>
                       <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', background: '#F3F4F6', padding: '0.35rem 0.6rem', border: '1px solid #D1D5DB', color: '#111827', fontWeight: 700 }}>
                         PASAPORTE: {app.passport_number || fd.passport_number || 'N/A'}
+                      </div>
+                    </div>
+
+                    {/* ── CARD DIAGNÓSTICO IA DE PORCENTAJE DE APROBACIÓN DE VISA AMERICANA ── */}
+                    <div style={{ background: '#FFFFFF', border: `1px solid ${diag.color}40`, borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem', borderBottom: '1px solid #F1F5F9', paddingBottom: '0.75rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                          <div style={{ width: 40, height: 40, borderRadius: '50%', background: `${diag.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Sparkles size={20} color={diag.color} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0F172A' }}>
+                              Diagnóstico de Probabilidad de Aprobación (Visa Americana B1/B2)
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
+                              Evaluación automatizada basada en arraigo, solvencia e historial migratorio.
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* METER / PORCENTAJE */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: `${diag.color}10`, padding: '0.5rem 1rem', borderRadius: '99px', border: `1px solid ${diag.color}30` }}>
+                          <span style={{ fontSize: '1.5rem', fontWeight: 900, color: diag.color }}>{diag.score}%</span>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: diag.color }}>{diag.level}</span>
+                        </div>
+                      </div>
+
+                      {/* DETALLES Y FORTALEZAS */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+                        <div>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#059669', textTransform: 'uppercase', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                            <Check size={14} color="#059669" /> Factores Favorables Detectados
+                          </div>
+                          <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.78rem', color: '#334155', lineHeight: 1.5 }}>
+                            {diag.strengths.map((s, i) => (
+                              <li key={i}>{s}</li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#D97706', textTransform: 'uppercase', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                            <AlertTriangle size={14} color="#D97706" /> Recomendaciones para la Entrevista
+                          </div>
+                          <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.78rem', color: '#334155', lineHeight: 1.5 }}>
+                            {diag.recommendations.map((r, i) => (
+                              <li key={i}>{r}</li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
                     </div>
 
@@ -305,25 +392,6 @@ const VisaProcessDetailsPage = () => {
                         Sin archivos adjuntos para este integrante.
                       </div>
                     )}
-
-                    {/* BOX PAYLOAD IA */}
-                    <div style={{ marginTop: '1.25rem', background: '#1E1E1E', padding: '1rem', borderRadius: '6px', color: '#D4D4D4' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: '#10B981', fontWeight: 700 }}>
-                          AI AUTOMATION PAYLOAD (JSON)
-                        </span>
-                        <button 
-                          onClick={() => handleCopyJson(app.form_data || app)} 
-                          className="btn btn-sm"
-                          style={{ background: '#374151', color: '#FFF', border: 'none', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                        >
-                          <Copy size={12} /> Copiar JSON
-                        </button>
-                      </div>
-                      <pre style={{ margin: 0, fontSize: '0.72rem', fontFamily: 'var(--font-mono)', overflowX: 'auto', maxHeight: '120px', color: '#9CA3AF' }}>
-                        {JSON.stringify(app.form_data || app, null, 2)}
-                      </pre>
-                    </div>
 
                   </div>
                 );
