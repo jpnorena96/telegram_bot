@@ -99,18 +99,22 @@ def get_admin_users(current_user: dict = Depends(require_admin), db=Depends(get_
 def view_pm2_logs(appointment_id: int, current_user: dict = Depends(require_admin), db=Depends(get_db)):
     cursor = db.cursor(dictionary=True)
     try:
-        # Get the email associated with the appointment
-        cursor.execute("SELECT user_id FROM user_appointments WHERE id = %s", (appointment_id,))
+        cursor.execute("SELECT email, user_id FROM user_appointments WHERE id = %s", (appointment_id,))
         appt = cursor.fetchone()
         if not appt:
             raise HTTPException(status_code=404, detail="Appointment not found")
             
-        cursor.execute("SELECT email FROM users WHERE id = %s", (appt["user_id"],))
-        user = cursor.fetchone()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found for this appointment")
+        target_email = appt.get("email")
+        if not target_email and appt.get("user_id"):
+            cursor.execute("SELECT email FROM users WHERE id = %s", (appt["user_id"],))
+            u = cursor.fetchone()
+            if u:
+                target_email = u.get("email")
+                
+        if not target_email:
+            raise HTTPException(status_code=404, detail="Email not found for this appointment")
             
-        logs = get_pm2_logs(user["email"], appointment_id)
+        logs = get_pm2_logs(target_email, appointment_id)
         return {"status": "ok", "logs": logs}
     finally:
         cursor.close()
@@ -272,16 +276,22 @@ class ConfigUpdate(BaseModel):
 def admin_restart_pm2(appointment_id: int, current_user: dict = Depends(require_admin), db=Depends(get_db)):
     cursor = db.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT user_id FROM user_appointments WHERE id = %s", (appointment_id,))
+        cursor.execute("SELECT email, user_id FROM user_appointments WHERE id = %s", (appointment_id,))
         appt = cursor.fetchone()
         if not appt:
             raise HTTPException(status_code=404, detail="Appointment not found")
-        cursor.execute("SELECT email FROM users WHERE id = %s", (appt["user_id"],))
-        user = cursor.fetchone()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
         
-        success = restart_pm2_process(user["email"], appointment_id)
+        target_email = appt.get("email")
+        if not target_email and appt.get("user_id"):
+            cursor.execute("SELECT email FROM users WHERE id = %s", (appt["user_id"],))
+            u = cursor.fetchone()
+            if u:
+                target_email = u.get("email")
+                
+        if not target_email:
+            raise HTTPException(status_code=404, detail="Email not found")
+        
+        success = restart_pm2_process(target_email, appointment_id)
         if success:
             return {"status": "ok", "message": "Proceso reiniciado en PM2"}
         else:
@@ -293,15 +303,20 @@ def admin_restart_pm2(appointment_id: int, current_user: dict = Depends(require_
 def admin_delete_appointment(appointment_id: int, current_user: dict = Depends(require_admin), db=Depends(get_db)):
     cursor = db.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT user_id FROM user_appointments WHERE id = %s", (appointment_id,))
+        cursor.execute("SELECT email, user_id FROM user_appointments WHERE id = %s", (appointment_id,))
         appt = cursor.fetchone()
         if not appt:
             raise HTTPException(status_code=404, detail="Appointment not found")
-        cursor.execute("SELECT email FROM users WHERE id = %s", (appt["user_id"],))
-        user = cursor.fetchone()
+            
+        target_email = appt.get("email")
+        if not target_email and appt.get("user_id"):
+            cursor.execute("SELECT email FROM users WHERE id = %s", (appt["user_id"],))
+            u = cursor.fetchone()
+            if u:
+                target_email = u.get("email")
         
-        if user:
-            delete_pm2_process(user["email"], appointment_id)
+        if target_email:
+            delete_pm2_process(target_email, appointment_id)
             
         cursor.execute("DELETE FROM user_appointments WHERE id = %s", (appointment_id,))
         db.commit()
@@ -313,16 +328,22 @@ def admin_delete_appointment(appointment_id: int, current_user: dict = Depends(r
 def admin_get_config(appointment_id: int, current_user: dict = Depends(require_admin), db=Depends(get_db)):
     cursor = db.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT user_id FROM user_appointments WHERE id = %s", (appointment_id,))
+        cursor.execute("SELECT email, user_id FROM user_appointments WHERE id = %s", (appointment_id,))
         appt = cursor.fetchone()
         if not appt:
             raise HTTPException(status_code=404, detail="Appointment not found")
-        cursor.execute("SELECT email FROM users WHERE id = %s", (appt["user_id"],))
-        user = cursor.fetchone()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+            
+        target_email = appt.get("email")
+        if not target_email and appt.get("user_id"):
+            cursor.execute("SELECT email FROM users WHERE id = %s", (appt["user_id"],))
+            u = cursor.fetchone()
+            if u:
+                target_email = u.get("email")
+                
+        if not target_email:
+            raise HTTPException(status_code=404, detail="Email not found")
         
-        config_str = get_vps_config(user["email"], appointment_id)
+        config_str = get_vps_config(target_email, appointment_id)
         return {"status": "ok", "config": config_str}
     finally:
         cursor.close()
@@ -331,18 +352,24 @@ def admin_get_config(appointment_id: int, current_user: dict = Depends(require_a
 def admin_update_config(appointment_id: int, data: ConfigUpdate, current_user: dict = Depends(require_admin), db=Depends(get_db)):
     cursor = db.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT user_id FROM user_appointments WHERE id = %s", (appointment_id,))
+        cursor.execute("SELECT email, user_id FROM user_appointments WHERE id = %s", (appointment_id,))
         appt = cursor.fetchone()
         if not appt:
             raise HTTPException(status_code=404, detail="Appointment not found")
-        cursor.execute("SELECT email FROM users WHERE id = %s", (appt["user_id"],))
-        user = cursor.fetchone()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+            
+        target_email = appt.get("email")
+        if not target_email and appt.get("user_id"):
+            cursor.execute("SELECT email FROM users WHERE id = %s", (appt["user_id"],))
+            u = cursor.fetchone()
+            if u:
+                target_email = u.get("email")
+                
+        if not target_email:
+            raise HTTPException(status_code=404, detail="Email not found")
         
-        success = update_vps_config(user["email"], data.config_content, appointment_id)
+        success = update_vps_config(target_email, data.config_content, appointment_id)
         if success:
-            restart_pm2_process(user["email"], appointment_id)
+            restart_pm2_process(target_email, appointment_id)
             return {"status": "ok", "message": "Configuración actualizada y proceso reiniciado"}
         else:
             raise HTTPException(status_code=500, detail="Error al actualizar configuración")
