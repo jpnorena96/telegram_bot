@@ -451,9 +451,9 @@ const OverviewPage = () => {
               Live Operations System
             </div>
             <h1 style={{ fontSize: '2.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, margin: '0 0 0.25rem 0', color: '#0F172A', letterSpacing: '-0.02em' }}>
-              Centro Didáctico
+              Dashboard Operativo
             </h1>
-            <p style={{ margin: 0, color: '#475569', fontSize: '0.95rem' }}>Explora de forma interactiva el flujo de trabajo de los bots automáticos.</p>
+            <p style={{ margin: 0, color: '#475569', fontSize: '0.95rem' }}>Métricas en tiempo real del sistema central de reservas.</p>
           </div>
           <div style={{ display: 'flex', background: '#FFFFFF', borderRadius: '10px', border: '1px solid #E2E8F0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
             {['Día', 'Semana', 'Mes', 'Año'].map(f => (
@@ -466,13 +466,28 @@ const OverviewPage = () => {
 
         {/* Live Ticker */}
         <div className="live-feed-container">
-          <div style={{ fontWeight: 700, color: '#3B82F6', fontSize: '0.85rem', paddingRight: '1rem', borderRight: '1px solid #E2E8F0' }}>FEED</div>
+          <div style={{ fontWeight: 700, color: '#3B82F6', fontSize: '0.85rem', paddingRight: '1rem', borderRight: '1px solid #E2E8F0' }}>ACTIVIDAD RECIENTE</div>
           <div className="live-feed-content">
-            <div className="live-feed-item"><CheckCircle size={14} color="#10B981" /> El bot #104 acaba de asegurar una cita adelantada.</div>
-            <div className="live-feed-item"><Users size={14} color="#3B82F6" /> Nueva agencia de viajes registrada en el nodo central.</div>
-            <div className="live-feed-item"><Search size={14} color="#F59E0B" /> Monitoreando disponibilidad consular en Bogotá...</div>
-            <div className="live-feed-item"><CheckCircle size={14} color="#10B981" /> Operación de enrutamiento completada con éxito.</div>
-            <div className="live-feed-item"><Users size={14} color="#3B82F6" /> 15 usuarios activos en los portales de clientes.</div>
+            {adminStats?.recent_appointments?.length > 0 ? (
+              adminStats.recent_appointments.map((apt, idx) => (
+                <div key={idx} className="live-feed-item">
+                  {apt.status === 'agendado' || apt.status === 'Adelantada' ? (
+                    <CheckCircle size={14} color="#10B981" />
+                  ) : apt.status === 'pending' || apt.status === 'Buscando' ? (
+                    <Search size={14} color="#F59E0B" />
+                  ) : (
+                    <Activity size={14} color="#3B82F6" />
+                  )}
+                  {apt.status === 'agendado' || apt.status === 'Adelantada' 
+                    ? `Cita asegurada para ${apt.email} en ${apt.consulate}`
+                    : apt.status === 'pending' || apt.status === 'Buscando'
+                    ? `Buscando adelanto para ${apt.email} en ${apt.consulate}`
+                    : `Trámite de ${apt.email} actualizado (${apt.status})`}
+                </div>
+              ))
+            ) : (
+              <div className="live-feed-item"><Server size={14} color="#94A3B8" /> Esperando actividad del sistema...</div>
+            )}
           </div>
         </div>
       </div>
@@ -591,7 +606,7 @@ const OverviewPage = () => {
           
           <div style={{ background: '#F8FAFC', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #3B82F6', marginTop: '1rem' }}>
             <p style={{ margin: 0, fontSize: '0.85rem', color: '#475569', lineHeight: 1.5 }}>
-              <strong>Didáctica:</strong> El motor de reservas procesa múltiples sesiones en paralelo. Cuando la barra de conexión parpadea, significa que el demonio <i>PM2</i> está emitiendo pings activos al consulado.
+              <strong>Operativo:</strong> El motor de reservas procesa múltiples expedientes en paralelo. Los nodos centrales interrogan a los servidores de manera ininterrumpida.
             </p>
           </div>
         </div>
@@ -607,12 +622,11 @@ const OverviewPage = () => {
                 {Array.from({ length: heatmapRows }).map((_, rowIndex) => {
                   const dataIndex = (colIndex * heatmapRows + rowIndex) % (timeline?.length || 1);
                   const val = timeline?.[dataIndex]?.citas || 0;
-                  const randomVal = val > 0 ? val + Math.floor(Math.random() * 3) : Math.floor(Math.random() * 2);
                   return (
                     <div 
                       key={rowIndex} 
-                      className={`heatmap-cell ${getHeatmapColor(randomVal)}`} 
-                      title={`Nivel de actividad: ${randomVal} citas operadas`}
+                      className={`heatmap-cell ${getHeatmapColor(val)}`} 
+                      title={`Nivel de actividad: ${val} citas operadas`}
                     />
                   );
                 })}
