@@ -1023,22 +1023,34 @@ class Bot:
                                     database=self.config.db_name
                                 )
                                 cursor = conn.cursor()
-                                # 1. Actualizar estado y fecha en la tabla de citas
-                                cursor.execute(
-                                    "UPDATE user_appointments SET status = 'agendado', date_booked = NOW() WHERE email = %s",
-                                    (self.config.email,)
-                                )
-                                # 2. Obtener el user_id para registrar la notificación
-                                cursor.execute(
-                                    "SELECT user_id FROM user_appointments WHERE email = %s ORDER BY id DESC LIMIT 1",
-                                    (self.config.email,)
-                                )
+                                # 1. Actualizar estado y fecha en la tabla de citas usando appointment_id o schedule_id
+                                if self.config.appointment_id:
+                                    cursor.execute(
+                                        "UPDATE user_appointments SET status = 'agendado', date_booked = NOW() WHERE id = %s",
+                                        (self.config.appointment_id,)
+                                    )
+                                    # 2. Obtener el user_id
+                                    cursor.execute(
+                                        "SELECT user_id FROM user_appointments WHERE id = %s",
+                                        (self.config.appointment_id,)
+                                    )
+                                else:
+                                    cursor.execute(
+                                        "UPDATE user_appointments SET status = 'agendado', date_booked = NOW() WHERE email = %s AND schedule_id = %s",
+                                        (self.config.email, self.config.schedule_id)
+                                    )
+                                    # 2. Obtener el user_id
+                                    cursor.execute(
+                                        "SELECT user_id FROM user_appointments WHERE email = %s AND schedule_id = %s ORDER BY id DESC LIMIT 1",
+                                        (self.config.email, self.config.schedule_id)
+                                    )
+
                                 row = cursor.fetchone()
                                 if row:
                                     user_id = row[0]
                                     cursor.execute(
                                         "INSERT INTO notifications (user_id, message, status) VALUES (%s, %s, 'success')",
-                                        (user_id, f"¡Agendamiento exitoso! Se adelantó la cita para {self.config.email}.",)
+                                        (user_id, f"¡Agendamiento exitoso! Se adelantó la cita para {self.config.email} (Schedule: {self.config.schedule_id}).",)
                                     )
                                     # Whatsapp Notification
                                     cursor.execute("SELECT whatsapp_number, full_name FROM users WHERE id = %s", (user_id,))
@@ -1065,20 +1077,20 @@ class Bot:
                             except Exception as db_err:
                                 self.logger(f"Error actualizando DB: {db_err}")
 
-                        # ✋ Detener el proceso PM2 propio (cita ya agendada, no hay nada más que hacer)
+                        # ✋ Detener el proceso PM2 específico (cita ya agendada, no hay nada más que hacer)
                         try:
                             import subprocess
-                            folder_name = self.config.email.replace('@', '_').replace('.', '_')
-                            appt_id = getattr(self.config, 'appointment_id', None)
-                            if appt_id:
-                                pm2_name = f"visa_{folder_name}_{appt_id}"
+                            safe_email = self.config.email.replace('@', '_').replace('.', '_')
+                            if getattr(self.config, 'appointment_id', None):
+                                process_name = f"bot_{safe_email}_{self.config.appointment_id}"
                             else:
-                                pm2_name = f"visa_{folder_name}"
-                            self.logger(f"[PM2] Deteniendo proceso PM2: {pm2_name}")
+                                process_name = f"bot_{safe_email}"
+                                
+                            self.logger(f"[PM2] Deteniendo proceso PM2: {process_name}")
                             send_to_all(
-                                f"🛑 Bot detenido automáticamente.\nCita agendada para: {self.config.email}\nPM2 proceso '{pm2_name}' eliminado."
+                                f"🛑 Bot detenido automáticamente.\nCita agendada para: {self.config.email}\nPM2 proceso '{process_name}' eliminado."
                             )
-                            subprocess.Popen(["pm2", "delete", pm2_name])
+                            subprocess.Popen(["pm2", "delete", process_name])
                         except Exception as pm2_err:
                             self.logger(f"[PM2] Error deteniendo proceso: {pm2_err}")
 
