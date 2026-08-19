@@ -11,7 +11,6 @@ import {
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
-import TopUpModal from '../../components/TopUpModal';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -59,7 +58,6 @@ const OverviewPage = () => {
   const [visaProcesses, setVisaProcesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
-  const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [wompiKey, setWompiKey] = useState('');
   const [adminStats, setAdminStats] = useState(null);
   const [timeFilter, setTimeFilter] = useState('Semana');
@@ -363,7 +361,7 @@ const OverviewPage = () => {
                     {profile?.balance || 0} <span style={{fontSize: '0.9rem', color: 'var(--text-3)', fontWeight: 400}}>Cita(s)</span>
                   </h3>
                 </div>
-                <button onClick={() => setIsTopUpOpen(true)} className="btn btn-lime" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', cursor: 'pointer' }}>
+                <button onClick={() => navigate('/dashboard/billetera')} className="btn btn-lime" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', cursor: 'pointer' }}>
                   Recargar
                 </button>
               </div>
@@ -411,16 +409,6 @@ const OverviewPage = () => {
             </div>
           )}
         </div>
-
-        <TopUpModal 
-          isOpen={isTopUpOpen} 
-          onClose={() => setIsTopUpOpen(false)} 
-          wompiPubKey={wompiKey} 
-          email={profile?.email}
-          onTopUpSuccess={() => {
-             api.getMe().then(p => setProfile(p));
-          }}
-        />
       </div>
     );
   }

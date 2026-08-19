@@ -98,7 +98,7 @@ const AdminAgenciesPage = () => {
           <p>La red no reporta solicitudes entrantes de nuevas agencias.</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+        <div className="stack-grid-mobile" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
           {agencies.map(a => {
             const intel = getIntelligence(a.email, a.status);
             return (

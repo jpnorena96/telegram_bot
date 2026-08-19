@@ -510,7 +510,7 @@ const ClientPortalPage = () => {
                   )}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
+                <div className="stack-grid-mobile" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
                   <div>
                     <label className="input-label">Nombres de Pila *</label>
                     <input 
@@ -631,7 +631,7 @@ const ClientPortalPage = () => {
                   Pasaporte de: <span style={{ color: brandColor }}>{app.full_name || `Solicitante #${idx + 1}`}</span>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
+                <div className="stack-grid-mobile" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
                   <div>
                     <label className="input-label">Nº de Pasaporte *</label>
                     <input 
@@ -746,7 +746,7 @@ const ClientPortalPage = () => {
                   Ocupación de: <span style={{ color: brandColor }}>{app.full_name || `Solicitante #${idx + 1}`}</span>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
+                <div className="stack-grid-mobile" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
                   <div>
                     <label className="input-label">Ocupación / Situación Actual</label>
                     <select className="input-field" value={app.occupation} onChange={e => updateApplicantField(idx, 'occupation', e.target.value)}>
@@ -829,7 +829,7 @@ const ClientPortalPage = () => {
                   Itinerario de: <span style={{ color: brandColor }}>{app.full_name || `Solicitante #${idx + 1}`}</span>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
+                <div className="stack-grid-mobile" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
                   <div>
                     <label className="input-label">Propósito Principal del Viaje</label>
                     <input 
@@ -936,7 +936,7 @@ const ClientPortalPage = () => {
                 Adjuntar archivos para: <span style={{ color: brandColor }}>{applicants[activeApplicantTab]?.full_name || `Solicitante #${activeApplicantTab + 1}`}</span>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+              <div className="stack-grid-mobile" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
                 {DOC_TYPES.map(doc => {
                   const currentFile = applicants[activeApplicantTab]?.files?.[doc.id];
                   const Icon = doc.icon;

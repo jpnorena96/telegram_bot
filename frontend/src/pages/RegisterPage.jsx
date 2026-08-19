@@ -263,8 +263,8 @@ const RegisterPage = () => {
         </div>
       </div>
 
-      {/* ── RIGHT: Visual / Branding Section ── */}
-      <div style={{ flex: '1 1 50%', display: 'none', '@media (min-width: 900px)': { display: 'block' }, position: 'relative', background: '#0F172A', overflow: 'hidden' }} className="hide-mobile">
+      {/* ── RIGHT: Visual / Trust Section ── */}
+      <div style={{ flex: '1 1 50%', position: 'relative', background: 'var(--lime)', overflow: 'hidden' }} className="hide-on-mobile">
 
         {/* Modern glowing background blobs */}
         <div style={{ position: 'absolute', top: '10%', left: '20%', width: '400px', height: '400px', borderRadius: '50%', background: 'var(--lime)', filter: 'blur(120px)', opacity: 0.15, animation: 'pulse 8s infinite alternate' }} />

@@ -174,8 +174,8 @@ const LandingPage = () => {
 
         {/* Mobile Menu Toggle */}
         <button
-          className="btn btn-icon btn-sm hide-on-mobile block-on-mobile"
-          style={{ display: 'none', background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+          className="btn btn-icon btn-sm hide-on-desktop"
+          style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -205,9 +205,9 @@ const LandingPage = () => {
       )}
 
       {/* ── HERO (SPLIT LAYOUT) ── */}
-      <section ref={heroRef} style={{ position: "relative", zIndex: 1, padding: "10rem 2rem 5rem", background: "var(--surface)" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", gap: "4rem", flexWrap: "wrap" }}>
-          <div style={{ flex: "1 1 500px", ...S.reveal(heroInView, 0) }}>
+      <section ref={heroRef} className="hero-section" style={{ position: "relative", zIndex: 1, padding: "8rem 1.5rem 4rem", background: "var(--surface)" }}>
+        <div className="flex-col-mobile" style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", gap: "3rem", flexWrap: "wrap" }}>
+          <div className="w-full-mobile text-center-mobile" style={{ flex: "1 1 400px", ...S.reveal(heroInView, 0) }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 1rem", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, color: "var(--lime)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.02)" }}>
               <Shield size={14} /> {t('hero.badge')}
             </div>

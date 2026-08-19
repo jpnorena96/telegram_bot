@@ -19,6 +19,7 @@ import NotificationsHistory from './pages/dashboard/NotificationsHistory';
 import AgencyProfilePage from './pages/dashboard/AgencyProfilePage';
 import VisaProcessesPage from './pages/dashboard/VisaProcessesPage';
 import VisaProcessDetailsPage from './pages/dashboard/VisaProcessDetailsPage';
+import WalletPage from './pages/dashboard/WalletPage';
 import ClientPortalPage from './pages/ClientPortalPage';
 import { Toaster } from 'react-hot-toast';
 
@@ -66,6 +67,7 @@ function App() {
           <Route path="agencia-perfil" element={<AgencyProfilePage />} />
           <Route path="visa-processes" element={<VisaProcessesPage />} />
           <Route path="visa-processes/:id" element={<VisaProcessDetailsPage />} />
+          <Route path="billetera" element={<WalletPage />} />
         </Route>
       </Routes>
     </Router>

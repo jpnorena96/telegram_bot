@@ -401,7 +401,7 @@ def get_dashboard_stats(current_user: dict = Depends(require_admin), db=Depends(
         
         # Recent Agencies List
         cursor.execute("""
-            SELECT id, full_name, email, plan, balance, is_authorized, created_at 
+            SELECT id, full_name, email, plan, balance, is_authorized, updated_at AS created_at 
             FROM users 
             WHERE role = 'TRAVEL_AGENCY' 
             ORDER BY id DESC LIMIT 5

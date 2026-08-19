@@ -110,7 +110,7 @@ const AdminPage = () => {
         <div className="panel-header">
           <h2 className="panel-title">Desglose por Usuario</h2>
         </div>
-        <div style={{ overflowX: 'auto' }}>
+        <div className="table-responsive">
           <table className="data-table">
             <thead>
               <tr>

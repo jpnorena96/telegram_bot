@@ -87,7 +87,7 @@ const DashboardLayout = () => {
 
         <Header role={role} userName={userName} onMenuClick={() => setMobileMenuOpen(true)} />
         
-        <main className="mobile-main-content" style={{ flex: 1, overflowY: 'auto', padding: '2rem', position: 'relative', zIndex: 1 }}>
+        <main className="main-content" style={{ flex: 1, overflowY: 'auto', position: 'relative', zIndex: 1 }}>
           <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
             <Outlet context={{ role, userName }} />
           </div>

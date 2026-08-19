@@ -1,3 +1,48 @@
-.env
+# ── PYTHON ──
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+venv_telebot/
+
+# ── NODE.JS / NPM ──
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# ── BUILD & DIST ──
+dist/
+build/
+.next/
+out/
+
+# ── VARIABLES DE ENTORNO ──
+.env
+.env.*
+!.env.example
+
+# ── LOGS Y BASES DE DATOS ──
+logs/
+*.log
+*.sqlite3
+*.db
+test.db
+
+# ── PLAYWRIGHT / TESTING ──
+playwright-report/
+test-results/
+.playwright/
+
+# ── OS Y EDITORES ──
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ── BOT TEMPORALES ──
+*.session
+*.session-journal
+temp/

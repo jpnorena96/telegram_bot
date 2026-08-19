@@ -194,7 +194,7 @@ const LoginPage = () => {
       )}
 
       {/* ── RIGHT: Visual / Branding Section ── */}
-      <div style={{ flex: '1 1 50%', display: 'none', '@media (min-width: 900px)': { display: 'block' }, position: 'relative', background: 'var(--lime)', overflow: 'hidden' }} className="hide-mobile">
+      <div style={{ flex: '1 1 50%', position: 'relative', background: 'var(--lime)', overflow: 'hidden' }} className="hide-on-mobile">
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, var(--lime) 0%, #312E81 100%)' }} />
         
         {/* Decorative elements */}

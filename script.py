@@ -877,16 +877,6 @@ class Bot:
                 # === HOURLY STATUS REPORT ===
                 elapsed = (now - last_status_time).total_seconds()
                 if elapsed >= 3600:  # 1 hora
-                    status_msg = (
-                        f"📊 *Estado del bot - {self.config.email}*\n"
-                        f"⏱️ Última hora:\n"
-                        f"  🔍 Consultas realizadas: {checks_count}\n"
-                        f"  ⚠️ Errores: {errors_count}\n"
-                        f"  📅 Cita actual: {(self.appointment_datetime.strftime(DATE_TIME_FORMAT) if self.appointment_datetime else 'No agendado')}\n"
-                        f"  🌐 Proxy actual: {self.current_proxy or 'N/A'}\n"
-                        f"  ✅ Estado: Monitoreando"
-                    )
-                    send_to_all(status_msg)
                     last_status_time = now
                     checks_count = 0
                     errors_count = 0

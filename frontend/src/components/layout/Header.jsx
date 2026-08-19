@@ -132,8 +132,8 @@ const Header = ({ role, userName, onMenuClick }) => {
         {/* Title & Mobile Menu Button */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button 
-            className="btn btn-icon btn-sm hide-on-mobile block-on-mobile" 
-            style={{ display: 'none', background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+            className="btn btn-icon btn-sm hide-on-desktop" 
+            style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
             onClick={onMenuClick}
             type="button"
           >
@@ -148,7 +148,7 @@ const Header = ({ role, userName, onMenuClick }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
 
           {/* Search */}
-          <form onSubmit={(e) => { e.preventDefault(); if (searchQuery.trim()) navigate(`/dashboard/buscar?q=${encodeURIComponent(searchQuery)}`); }} 
+          <form className="hide-on-mobile" onSubmit={(e) => { e.preventDefault(); if (searchQuery.trim()) navigate(`/dashboard/buscar?q=${encodeURIComponent(searchQuery)}`); }} 
                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '99px', padding: '0.4rem 1rem', color: 'var(--text-3)', transition: 'all 0.2s', cursor: 'text' }}
                 onMouseOver={e => e.currentTarget.style.borderColor = 'var(--border-2)'}
                 onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border)'}>
