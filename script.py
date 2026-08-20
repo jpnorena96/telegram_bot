@@ -1082,9 +1082,11 @@ class Bot:
                             import subprocess
                             safe_email = self.config.email.replace('@', '_').replace('.', '_')
                             if getattr(self.config, 'appointment_id', None):
-                                process_name = f"bot_{safe_email}_{self.config.appointment_id}"
+                                folder_name = f"{safe_email}_{self.config.appointment_id}"
                             else:
-                                process_name = f"bot_{safe_email}"
+                                folder_name = safe_email
+                                
+                            process_name = f"visa_{folder_name}"
                                 
                             self.logger(f"[PM2] Deteniendo proceso PM2: {process_name}")
                             send_to_all(
