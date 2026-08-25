@@ -5,13 +5,14 @@ import {
   Eye, CheckCircle2, ChevronRight, Filter, Globe, Users, 
   FolderOpen, Sparkles, Copy, ExternalLink, ShieldCheck, Check, Clock, UserCheck
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
 
 const VisaProcessesPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { role } = useOutletContext() || {};
   const [processes, setProcesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -117,6 +118,18 @@ const VisaProcessesPage = () => {
       return matchesSearch && matchesStatus;
     });
   }, [processes, searchQuery, statusFilter]);
+
+  if (role === 'AGENCY' || role === 'TRAVEL_AGENCY') {
+    return (
+      <div className="animate-in" style={{ padding: '0', maxWidth: '1200px', margin: '0 auto', textAlign: 'center', marginTop: '4rem' }}>
+        <div style={{ background: '#FFF', padding: '3rem', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <FolderOpen size={48} style={{ color: '#8B5CF6', marginBottom: '1rem' }} />
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.5rem' }}>Sección en Construcción</h2>
+          <p style={{ color: '#64748B', fontSize: '1rem' }}>Esta sección de Mis Trámites y Expedientes estará habilitada muy pronto para tu rol de agencia. ¡Estamos trabajando en ello!</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', color: 'var(--text-3)' }}>

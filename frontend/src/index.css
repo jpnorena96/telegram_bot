@@ -140,6 +140,19 @@ a:hover { color: var(--text-2); }
   color: #FFFFFF;
 }
 
+.btn-lime {
+  background: var(--lime);
+  color: #FFFFFF;
+  border-color: transparent;
+  box-shadow: 0 4px 12px var(--lime-glow);
+}
+.btn-lime:hover:not(:disabled) { 
+  background: var(--lime-dim); 
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px var(--lime-glow);
+  color: #FFFFFF;
+}
+
 .btn-outline {
   background: transparent;
   color: var(--text-2);

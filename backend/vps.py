@@ -138,7 +138,16 @@ def create_vps_config(user_data: dict) -> bool:
         # Get facility IDs based on consulate
         need_cas = user_data.get("need_cas", True)
         consulate_name = user_data.get("consulate", "")
-        facility_id, asc_facility_id = _get_facility_ids(consulate_name, need_cas)
+        facility_id, derived_asc = _get_facility_ids(consulate_name, need_cas)
+        
+        asc_facility_id = "None"
+        if need_cas:
+            provided_asc = user_data.get("consulate_asc")
+            if provided_asc and str(provided_asc).strip().lower() not in ["ninguno", "none", "null", ""]:
+                asc_facility_id = str(provided_asc).strip()
+            else:
+                asc_facility_id = derived_asc
+
         logger.info(f"Consulate: {consulate_name} → FACILITY_ID={facility_id}, ASC={asc_facility_id}, NEED_ASC={need_cas}")
 
         # Format dates from YYYY-MM-DD to DD.MM.YYYY (safely handle optional dates)

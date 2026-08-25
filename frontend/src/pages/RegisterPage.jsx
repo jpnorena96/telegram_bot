@@ -17,9 +17,14 @@ const RegisterPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
+    if (!termsAccepted) {
+      setError('Debes aceptar los Términos y Condiciones para crear tu cuenta.');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
@@ -232,6 +237,19 @@ const RegisterPage = () => {
                   <ShieldCheck size={16} /> {error}
                 </div>
               )}
+
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <input
+                  type="checkbox"
+                  id="terms"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  style={{ marginTop: '0.2rem', cursor: 'pointer', accentColor: 'var(--lime)', width: '1.2rem', height: '1.2rem' }}
+                />
+                <label htmlFor="terms" style={{ fontSize: '0.85rem', color: 'var(--text-2)', lineHeight: '1.5' }}>
+                  He leído y acepto los <Link to="/terms" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-1)', fontWeight: 600, textDecoration: 'underline' }}>Términos, Condiciones y Políticas de Privacidad</Link>. Autorizo el tratamiento de mis datos personales según la Ley 1581 de 2012.
+                </label>
+              </div>
 
               <button
                 type="submit"

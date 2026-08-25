@@ -1,0 +1,107 @@
+POLÍTICA DE PRIVACIDAD GLOBAL Y TRATAMIENTO DE DATOS
+
+En Tricolor Red Social, valoramos su privacidad. Este documento explica cómo recolectamos, usamos y protegemos su información en cumplimiento con la Ley 1581 de 2012 (Colombia), el Reglamento General de Protección de Datos (RGPD - UE) y la Ley de Privacidad del Consumidor de California (CCPA/CPRA - EE. UU.).
+
+1. Responsable del Tratamiento
+
+El responsable del tratamiento de sus datos personales es Tricolor Red Social, con domicilio en Bogotá, Colombia y correo electrónico de contacto: 
+
+soytricolorapp@gmail.com
+
+2. Información que Recolectamos
+
+Datos de Identificación: Nombre de usuario, correo electrónico y fecha de nacimiento.
+
+Datos de Ubicación: Geografía regional (departamento/ciudad) para personalizar su experiencia con contenido local, eventos, cultura y noticias de interés, solo si usted lo autoriza.
+
+Datos de Contenido: Opiniones, comentarios, fotos y videos relacionados con estilo de vida, turismo, gastronomía, deportes, arte, cultura, política y cualquier tema de interés general vinculado a la identidad colombiana.
+
+Datos Técnicos: Dirección IP, tipo de dispositivo y cookies.
+
+3. Finalidad del Tratamiento Sus datos serán utilizados para:
+
+Permitir la interacción y publicación de contenido global sobre Colombia en todas sus facetas.
+
+Personalizar su "feed" o muro según sus intereses (ej. cultura, emprendimiento, noticias locales o entretenimiento).
+
+Garantizar un entorno seguro, libre de discriminación y proteger la veracidad de la información en temas de interés público.
+
+4. Bases Legales para el Tratamiento
+
+Consentimiento: Usted acepta el tratamiento al registrarse.
+
+Ejecución de Contrato: Necesitamos sus datos para que la app funcione.
+
+Cumplimiento Legal: Para prevenir fraudes o delitos en temas de orden público.
+
+5. Sus Derechos Globales (Habeas Data)
+
+Sin importar su ubicación geográfica, usted tiene derecho a:
+
+Acceso y Rectificación: Consultar y corregir sus datos.
+
+Supresión (Derecho al Olvido): Solicitar la eliminación total de su cuenta y rastro digital.
+
+Oposición: Negarse a que sus datos se usen para fines de publicidad o perfiles automáticos.
+
+Derechos Específicos de California (CCPA): Usted tiene derecho a decir "No vendan mi información personal". Declaramos expresamente que no vendemos sus datos a terceros.
+
+6. Protección de Menores de Edad
+
+De acuerdo con los estándares internacionales (COPPA y RGPD) y la protección constitucional en Colombia, no permitimos el registro de menores de 14 años. Si descubrimos datos de un menor de 14 años sin consentimiento parental verificable, procederemos a la eliminación inmediata de la información.
+
+7. Seguridad de la Información
+
+Implementamos medidas técnicas de cifrado y protocolos de seguridad para proteger sus datos contra acceso no autorizado, alteración o pérdida, especialmente en debates sensibles sobre política y orden público.
+
+8. Transferencia Internacional de Datos
+
+Al usar esta red social, usted acepta que sus datos puedan ser almacenados en servidores ubicados en el extranjero (por ejemplo, en la nube de AWS o Google Cloud), garantizando siempre niveles adecuados de protección de datos.
+
+9. Modificaciones
+
+Nos reservamos el derecho de actualizar esta política. Notificaremos cualquier cambio sustancial a través de la plataforma o por correo electrónico.
+
+Términos y Condiciones de Uso
+
+1. Objeto y Alcance Global : Tricolor es una plataforma de interacción global diseñada para conectar a personas interesadas en Colombia. El contenido puede abarcar cualquier temática (social, cultural, deportiva, informativa o de entretenimiento), siempre que respete los presentes términos.
+
+2. Diversidad de Contenido y Convivencia La plataforma permite la libre expresión sobre una amplia variedad de temas, bajo las siguientes premisas:
+
+Variedad Temática: Los usuarios pueden compartir contenido sobre turismo, tradiciones, emprendimiento, vida cotidiana, actualidad, etc.
+
+Veracidad en Información de Interés: Aunque se permite el contenido de opinión y entretenimiento, se prohíbe la difusión deliberada de noticias falsas que busquen desinformar sobre la realidad del país o afectar a terceros.
+
+Respeto en Debates: En caso de discusiones sobre política o temas sensibles, se exige un lenguaje constructivo que no incite a la violencia o al delito.
+
+3. Respeto a la Identidad Regional Siendo una red enfocada en Colombia, se promueve el orgullo por todas sus regiones.
+
+Tolerancia Cero a la Discriminación: Queda prohibida cualquier burla, estigmatización o discurso de odio basado en el origen regional, acento o pertenencia a grupos étnicos (afrocolombianos, indígenas, raizales, etc.).
+
+Promoción Cultural: Se incentiva la creación de contenido que resalte la riqueza multicultural de cada departamento del país.
+
+4. Responsabilidad del Usuario y Moderación
+
+Responsabilidad Civil/Penal: El usuario es el único responsable legal de sus opiniones sobre orden público. La plataforma cooperará con las autoridades judiciales colombianas e internacionales mediante orden legal si se detectan delitos.
+
+Herramientas de Reporte: Los usuarios cuentan con una función de "Reporte por Odio Regional" o "Información Falsa" para alertar al equipo de moderación.
+
+5. Privacidad y Tratamiento de Datos (Ley 1581 y RGPD)
+
+Habeas Data: En cumplimiento de la Ley 1581 de 2012, el usuario autoriza el tratamiento de sus datos para el funcionamiento de la red.
+
+Geolocalización: Si el usuario activa su ubicación para interactuar con contenido regional, estos datos serán cifrados y no se compartirán con terceros sin consentimiento expreso.
+
+Derecho al Olvido: Cualquier usuario, sin importar su país, puede solicitar la eliminación total de sus datos y rastro digital en la plataforma.
+
+6. Propiedad Intelectual, Usted es dueño del contenido que publica (fotos de paisajes, recetas, opiniones, etc.). Al compartirlo, garantiza que posee los derechos necesarios y otorga a la plataforma una licencia para mostrarlo a otros usuarios según su configuración de privacidad.
+
+7. Jurisdicción y Resolución de Conflictos
+
+Cualquier controversia se someterá a los centros de conciliación de la Cámara de Comercio de Bogotá. Para usuarios internacionales, se buscarán mecanismos de arbitraje virtual antes de escalar a instancias judiciales.
+
+8. Socialización y Disponibilidad: La presente Política de Privacidad, uso de datos y los Términos y Condiciones de Uso se encuentran a disposición de todos los usuarios para su consulta permanente en el formulario de registro de la aplicación. Cualquier modificación o actualización será comunicada a través de estos mismos canales.
+
+Para la atención de peticiones, consultas o reclamos relacionados con el tratamiento de datos personales o el uso de la plataforma, el usuario podrá dirigirse a los siguientes canales de atención:
+
+Correo electrónico: soytricolorapp@gmail.com

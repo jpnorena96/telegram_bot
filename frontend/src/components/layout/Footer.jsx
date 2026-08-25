@@ -30,6 +30,7 @@ const Footer = () => {
               <li><Link to="/#inicio" style={linkStyle}>Inicio</Link></li>
               <li><Link to="/#servicios" style={linkStyle}>Servicios</Link></li>
               <li><Link to="/#proceso" style={linkStyle}>Proceso</Link></li>
+              <li><Link to="/terms" style={linkStyle}>Términos y Privacidad</Link></li>
               <li><Link to="/#contacto" style={linkStyle}>Contacto</Link></li>
             </ul>
           </div>

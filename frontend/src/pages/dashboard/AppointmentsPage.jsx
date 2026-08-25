@@ -423,16 +423,21 @@ const CreateWizard = ({ onClose, onCreated }) => {
               </div>
 
               {COUNTRY_CONSULATES[formData.country] && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'var(--bg)', padding: '0.875rem 1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', marginTop: '0.5rem' }}>
-                  <input type="checkbox" id="needs_cas" checked={formData.needs_cas} onChange={e => setFormData({ ...formData, needs_cas: e.target.checked })} style={{ width: '16px', height: '16px', accentColor: 'var(--lime)', cursor: 'pointer' }} />
-                  <div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'var(--bg)', padding: '0.875rem 1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', marginTop: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <input type="checkbox" id="needs_cas" checked={formData.needs_cas} onChange={e => setFormData({ ...formData, needs_cas: e.target.checked })} style={{ width: '16px', height: '16px', accentColor: 'var(--lime)', cursor: 'pointer' }} />
                     <label htmlFor="needs_cas" style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-1)', cursor: 'pointer' }}>Requiere cita en Centro Externo (CAS/ASC)</label>
-                    {formData.needs_cas && (
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', marginTop: '0.1rem' }}>
-                        Sede CAS asignada: {formData.consulate_asc}
-                      </div>
-                    )}
                   </div>
+                  {formData.needs_cas && (
+                    <div className="input-group" style={{ marginBottom: 0, marginTop: '0.25rem' }}>
+                      <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Globe size={11} /> SEDE CAS / ASC</label>
+                      <select className="input-field" style={{ appearance: 'none', background: 'rgba(255,255,255,0.02) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23A1A1AA\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M8 11L3 6h10l-5 5z\'/%3E%3C/svg%3E") no-repeat calc(100% - 1rem) center' }} value={formData.consulate_asc} onChange={e => setFormData({ ...formData, consulate_asc: e.target.value })} required>
+                        {COUNTRY_CONSULATES[formData.country].filter(c => c.asc_facility_id).map(c => (
+                          <option key={c.name} value={c.asc_facility_id} style={{ background: 'var(--surface-2)', color: 'var(--text-1)' }}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
