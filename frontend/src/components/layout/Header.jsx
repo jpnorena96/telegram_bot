@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Bell, X, Search, CheckCircle2, AlertCircle, Info, ShieldAlert, Menu } from 'lucide-react';
 import { api } from '../../services/api';
 
@@ -16,6 +17,7 @@ const PAGE_LABELS = {
 const Header = ({ role, userName, onMenuClick }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [showN, setShowN] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -63,6 +65,10 @@ const Header = ({ role, userName, onMenuClick }) => {
         console.error('Error marking notifications as read:', e);
       }
     }
+  };
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
   };
 
   const formatTime = (dateStr) => {
@@ -164,6 +170,16 @@ const Header = ({ role, userName, onMenuClick }) => {
           </form>
 
           <div style={{ width: '1px', height: '24px', background: 'var(--border)' }} />
+
+          {/* Language Switcher */}
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }} className="hide-on-mobile">
+            <button onClick={() => changeLanguage('en')} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: i18n.language === 'en' ? 'bold' : 'normal', color: i18n.language === 'en' ? 'var(--lime)' : 'var(--text-3)' }}>EN</button>
+            <span style={{ color: 'var(--border)' }}>|</span>
+            <button onClick={() => changeLanguage('es')} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: i18n.language === 'es' ? 'bold' : 'normal', color: i18n.language === 'es' ? 'var(--lime)' : 'var(--text-3)' }}>ES</button>
+            <span style={{ color: 'var(--border)' }}>|</span>
+            <button onClick={() => changeLanguage('pt')} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: i18n.language === 'pt' ? 'bold' : 'normal', color: i18n.language === 'pt' ? 'var(--lime)' : 'var(--text-3)' }}>PT</button>
+          </div>
+          <div style={{ width: '1px', height: '24px', background: 'var(--border)' }} className="hide-on-mobile" />
 
           {/* Notifications */}
           <div ref={ref} style={{ position: 'relative' }}>

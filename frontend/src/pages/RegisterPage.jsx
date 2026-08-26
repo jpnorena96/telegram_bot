@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../services/api';
-import { ShieldCheck, UserPlus, FileText, CalendarClock } from 'lucide-react';
+import { ShieldCheck, UserPlus, FileText, CalendarClock, Globe } from 'lucide-react';
 import logoImg from '../assets/Logo.jpeg';
 import toast from 'react-hot-toast';
 
