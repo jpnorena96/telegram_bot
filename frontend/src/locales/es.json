@@ -8,37 +8,37 @@
   },
   "hero": {
     "badge": "Trámite Seguro y Garantizado",
-    "title": "Tu visa americana,",
-    "title_highlight": "gestionada por expertos globales.",
-    "desc": "Tecnología de punta y acompañamiento profesional para adelantar tu cita consular y garantizar la presentación perfecta de tu DS-160.",
-    "cta_primary": "Evaluar mi Perfil",
-    "cta_secondary": "Conocer el Proceso",
-    "trust_text": "+5,000 clientes satisfechos a nivel mundial."
+    "title": "Automatiza la gestión de visas para tu Agencia,",
+    "title_highlight": "desde el DS-160 hasta el adelanto de cita.",
+    "desc": "Infraestructura B2B y tecnología de punta para que agencias de viajes escalen su operación, optimizando el llenado del DS-160 y asegurando adelantos de citas consulares automáticamente.",
+    "cta_primary": "Ver Planes para Agencias",
+    "cta_secondary": "Descubrir la Plataforma",
+    "trust_text": "Más de 500 agencias confían en nuestra tecnología."
   },
   "stats": {
-    "visas": "Visas Gestionadas",
-    "days": "Días Ahorrados Promedio",
-    "success": "Tasa de Éxito",
-    "countries": "Países Soportados"
+    "visas": "Trámites Automatizados",
+    "days": "Horas Ahorradas por Cliente",
+    "success": "Tasa de Adelantos Exitosos",
+    "countries": "Agencias Aliadas"
   },
   "process": {
-    "title": "Nuestra Metodología",
-    "desc": "Un marco de trabajo riguroso diseñado para minimizar rechazos y acelerar tiempos de espera dramáticamente.",
+    "title": "Automatización End-to-End",
+    "desc": "Un flujo de trabajo diseñado específicamente para agencias: centraliza clientes, automatiza el DS-160 y delega el rastreo de citas a nuestros bots.",
     "step_label": "PASO",
-    "step1_title": "Análisis DS-160",
-    "step1_desc": "Expertos revisan cada detalle de tu perfil para maximizar la probabilidad de aprobación.",
-    "step2_title": "Monitoreo 24/7",
-    "step2_desc": "El algoritmo escanea los consulados globales buscando los primeros espacios disponibles.",
-    "step3_title": "Aseguramiento Automático",
-    "step3_desc": "Al detectar cancelaciones, aseguramos tu cita en milisegundos sin intervención humana.",
-    "step4_title": "Preparación Final",
-    "step4_desc": "Recibe simulacros de entrevista y acompañamiento hasta que salgas con tu visa aprobada."
+    "step1_title": "Gestión del DS-160",
+    "step1_desc": "Recopila datos de tus clientes fácilmente a través del portal y centraliza la información sin fricciones ni errores manuales.",
+    "step2_title": "Monitoreo Bot 24/7",
+    "step2_desc": "Nuestra red de bots escanea los sistemas consulares ininterrumpidamente buscando los primeros espacios para tus clientes.",
+    "step3_title": "Adelanto Automático",
+    "step3_desc": "Al detectar espacios disponibles, reprogramamos las citas de tus clientes en milisegundos de forma totalmente desatendida.",
+    "step4_title": "Marca Blanca (White-label)",
+    "step4_desc": "Ofrece todo este ecosistema tecnológico bajo la marca de tu propia agencia, fidelizando a tus clientes y aumentando tus ventas."
   },
   "agency": {
-    "badge": "Soluciones B2B",
-    "title": "Potencia tu agencia con tecnología global.",
-    "desc": "Ofrecemos un portal marca blanca (white-label) para que agencias de viajes y gestores de visas brinden el servicio de adelanto de citas bajo su propia marca, con nuestra infraestructura técnica detrás.",
-    "cta": "Ver Planes para Agencias"
+    "badge": "Exclusivo para Agencias",
+    "title": "Escala tu negocio de visados sin límites.",
+    "desc": "Centraliza la operación de tu agencia. Desde la recolección de datos para el DS-160 hasta la cacería de citas, todo en un solo portal marca blanca diseñado para multiplicar tu rentabilidad.",
+    "cta": "Comenzar Prueba B2B"
   },
   "pricing": {
     "title": "Planes y Licencias",
@@ -75,11 +75,11 @@
     "t3_role": "Agencia Aliada, Perú"
   },
   "cta": {
-    "title1": "Tu visa está lista.",
-    "title2": "Solo falta tu decisión.",
-    "desc": "Inicia tu proceso hoy y únete a los miles de clientes y agencias que confían en nuestra infraestructura global.",
-    "btn_primary": "Iniciar Proceso Ahora",
-    "btn_secondary": "Contactar Ventas B2B"
+    "title1": "La plataforma definitiva para tu agencia.",
+    "title2": "Empieza a automatizar hoy.",
+    "desc": "Únete a las agencias de viajes más innovadoras que ya están multiplicando su capacidad operativa con AdelantaVisa.",
+    "btn_primary": "Crear Cuenta de Agencia",
+    "btn_secondary": "Hablar con un Asesor"
   },
   "footer": {
     "desc": "Infraestructura corporativa para gestión y aseguramiento de citas consulares B1/B2 a nivel mundial.",
