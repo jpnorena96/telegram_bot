@@ -352,6 +352,11 @@ a:hover { color: var(--text-2); }
 
 .hide-on-desktop { display: none !important; }
 
+/* Responsive Section Paddings */
+.section-padding { padding: 7rem 2rem; }
+.hero-padding { padding: 8rem 1.5rem 4rem; }
+.banner-padding { padding: 6rem 4rem; }
+
 @media (max-width: 1024px) {
   .grid-2-tablet { grid-template-columns: 1fr !important; }
 }
@@ -387,6 +392,11 @@ a:hover { color: var(--text-2); }
   .text-center-mobile { text-align: center !important; }
   .w-full-mobile { width: 100% !important; }
   .stack-grid-mobile { grid-template-columns: 1fr !important; }
+  
+  /* Responsive Paddings Mobile Override */
+  .section-padding { padding: 4rem 1.25rem !important; }
+  .hero-padding { padding: 6rem 1.25rem 3rem !important; }
+  .banner-padding { padding: 3rem 1.5rem !important; }
   
   /* Buttons */
   .btn { width: 100%; justify-content: center; }

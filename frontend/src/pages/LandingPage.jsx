@@ -187,7 +187,7 @@ const LandingPage = () => {
       )}
 
       {/* ── HERO (SPLIT LAYOUT) ── */}
-      <section ref={heroRef} className="hero-section" style={{ position: "relative", zIndex: 1, padding: "8rem 1.5rem 4rem", background: "var(--surface)" }}>
+      <section ref={heroRef} className="hero-section hero-padding" style={{ position: "relative", zIndex: 1, background: "var(--surface)" }}>
         <div className="flex-col-mobile" style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", gap: "3rem", flexWrap: "wrap" }}>
           <div className="w-full-mobile text-center-mobile" style={{ flex: "1 1 400px", ...S.reveal(heroInView, 0) }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 1rem", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, color: "var(--lime)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.02)" }}>
@@ -227,7 +227,7 @@ const LandingPage = () => {
       </section>
 
       {/* ── STATS BAND ── */}
-      <section ref={statsRef} style={{ padding: "4rem 2rem", background: "var(--bg)", borderBottom: "1px solid var(--border)" }}>
+      <section ref={statsRef} className="section-padding" style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)", paddingTop: '4rem', paddingBottom: '4rem' }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "2rem", textAlign: "center" }}>
           {STATS.map((s, i) => (
             <div key={i} style={{ opacity: statsInView ? 1 : 0, transition: `opacity 0.7s ease ${i * 0.1}s` }}>
@@ -241,7 +241,7 @@ const LandingPage = () => {
       </section>
 
       {/* ── PROCESO ── */}
-      <section id="proceso" ref={processRef} style={{ padding: "7rem 2rem", background: "var(--surface-2)" }}>
+      <section id="proceso" ref={processRef} className="section-padding" style={{ background: "var(--surface-2)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "5rem" }}>
             <h2 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "1rem", ...S.reveal(processInView, 0) }}>{t('process.title')}</h2>
@@ -266,11 +266,11 @@ const LandingPage = () => {
 
       {/* ── AGENCY BANNER (IMAGE INTEGRATION) ── */}
       <section id="agencias" ref={agencyRef} style={{ padding: "0", background: "var(--bg)" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))" }}>
-          <div style={{ position: "relative", minHeight: 400 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}>
+          <div style={{ position: "relative", minHeight: 300 }}>
             <img src="/images/business.png" alt="Corporate Team" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
-          <div style={{ padding: "6rem 4rem", display: "flex", flexDirection: "column", justifyContent: "center", background: "var(--text-1)", color: "#fff" }}>
+          <div className="banner-padding" style={{ display: "flex", flexDirection: "column", justifyContent: "center", background: "var(--text-1)", color: "#fff" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 1rem", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem", alignSelf: "flex-start" }}>
               <Building2 size={14} /> {t('agency.badge')}
             </div>
@@ -290,7 +290,7 @@ const LandingPage = () => {
       </section>
 
       {/* ── PRICING ── */}
-      <section id="planes" ref={pricingRef} style={{ padding: "7rem 2rem", background: "var(--surface)" }}>
+      <section id="planes" ref={pricingRef} className="section-padding" style={{ background: "var(--surface)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "4rem" }}>
             <h2 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "1rem", ...S.reveal(pricingInView, 0) }}>{t('pricing.title')}</h2>
@@ -336,7 +336,7 @@ const LandingPage = () => {
       </section>
 
       {/* ── TESTIMONIALS ── */}
-      <section ref={testRef} style={{ padding: "7rem 2rem", background: "var(--bg)" }}>
+      <section ref={testRef} className="section-padding" style={{ background: "var(--bg)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "4rem" }}>
             <h2 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 800, letterSpacing: "-0.03em", ...S.reveal(testInView, 0) }}>{t('testimonials.title')}</h2>
@@ -364,7 +364,7 @@ const LandingPage = () => {
       </section>
 
       {/* ── CTA FINAL ── */}
-      <section style={{ padding: "6rem 2rem", background: "var(--surface-2)" }}>
+      <section className="section-padding" style={{ background: "var(--surface-2)", paddingBottom: '6rem', paddingTop: '6rem' }}>
         <div style={{ maxWidth: 820, margin: "0 auto", textAlign: "center", background: "var(--lime)", borderRadius: 32, padding: "clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem)", boxShadow: "0 20px 40px rgba(37, 99, 235, 0.2)" }}>
           <h2 style={{ fontSize: "clamp(2rem, 4vw, 3.25rem)", fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: "1.25rem", color: "#fff" }}>
             {t('cta.title1')}<br />{t('cta.title2')}
@@ -384,7 +384,7 @@ const LandingPage = () => {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer style={{ borderTop: "1px solid var(--border)", padding: "4rem 2rem", background: "var(--bg)" }}>
+      <footer className="section-padding" style={{ borderTop: "1px solid var(--border)", background: "var(--bg)", paddingTop: '4rem', paddingBottom: '4rem' }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "3rem", marginBottom: "3rem" }}>
             <div>
