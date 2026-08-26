@@ -15,7 +15,7 @@ const NAV = [
   { to: '/dashboard', label: 'Resumen', icon: LayoutGrid, roles: ['ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER', 'TRAVEL_AGENCY', 'NATURAL_PERSON'] },
   { to: '/dashboard/visa-processes', label: 'Mis Trámites & Expedientes', icon: FolderOpen, roles: ['ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER', 'TRAVEL_AGENCY', 'NATURAL_PERSON'] },
   { to: '/dashboard/citas', label: 'Adelantar Cita', icon: CalendarCheck, roles: ['ADMINISTRATOR', 'AUDITOR', 'VISA_MANAGER', 'TRAVEL_AGENCY', 'NATURAL_PERSON'] },
-  { to: '/dashboard/billetera', label: 'Billetera & Pagos', icon: CreditCard, roles: ['NATURAL_PERSON', 'TRAVEL_AGENCY'] },
+  // { to: '/dashboard/billetera', label: 'Billetera & Pagos', icon: CreditCard, roles: ['NATURAL_PERSON', 'TRAVEL_AGENCY'] },
   { to: '/dashboard/agencia-perfil', label: 'Mi Agencia', icon: Store, roles: ['TRAVEL_AGENCY'] },
   { to: '/dashboard/usuarios', label: 'Usuarios', icon: Users, roles: ['ADMINISTRATOR', 'AUDITOR'] },
   { to: '/dashboard/admin-agencias', label: 'Agencias (Admin)', icon: Store, roles: ['ADMINISTRATOR', 'AUDITOR'] },

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, CheckCircle2, Loader2 } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
 import logoImg from '../assets/Logo.jpeg';
