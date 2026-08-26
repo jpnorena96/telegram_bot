@@ -1,6 +1,7 @@
 import React from 'react';
 import { Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import logoImg from '../../assets/Logo.jpeg';
 
 const linkStyle = { color: 'var(--text-2)', textDecoration: 'none' };
 
@@ -16,8 +17,7 @@ const Footer = () => {
           
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-              <Globe size={24} color="var(--lime)" strokeWidth={2.5} />
-              <h3 style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--text-1)' }}>AdelantaVisa</h3>
+              <img src={logoImg} alt="AdelantaVisa" style={{ height: '32px', width: 'auto', borderRadius: '4px' }} />
             </div>
             <p style={{ color: 'var(--text-3)', fontSize: '0.9rem', lineHeight: 1.6 }}>
               Especialistas en procesos migratorios. Facilitamos tu camino hacia nuevas oportunidades globales con tecnología y experiencia.
@@ -39,8 +39,8 @@ const Footer = () => {
             <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-1)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Contacto</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem', color: 'var(--text-3)', fontSize: '0.9rem' }}>
               <li>📍 Business Center, Bogotá</li>
-              <li>✉️ contacto@adelantavisa.com</li>
-              <li>📞 +57 (300) 123-4567</li>
+              <li>✉️ info@adelantavisa.com</li>
+              <li>📞 +57 3053574923</li>
             </ul>
           </div>
         </div>

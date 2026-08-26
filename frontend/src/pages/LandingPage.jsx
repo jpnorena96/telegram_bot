@@ -5,6 +5,7 @@ import {
   ArrowRight, Shield, Calendar, Bell, Star,
   Globe, FileText, MessageCircle, Building2, CheckCircle2, Menu, X
 } from "lucide-react";
+import logoImg from "../assets/Logo.jpeg";
 
 /* ─── Intersection Observer Hook ─── */
 const useInView = (threshold = 0.15) => {
@@ -43,7 +44,6 @@ const LandingPage = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
-  const [agencyTab, setAgencyTab] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [heroRef, heroInView] = useInView(0.1);
@@ -77,23 +77,6 @@ const LandingPage = () => {
     { icon: Shield, step: "04", title: t('process.step4_title'), desc: t('process.step4_desc') },
   ];
 
-  const PLANS_CLIENT = [
-    {
-      name: t('pricing.b2c_basic_name'), price: "$19", originalPrice: "$39", period: "persona", desc: t('pricing.b2c_basic_desc'), highlight: false, badge: "50% OFF",
-      features: ["Análisis de perfil DS-160", "Revisión experta de respuestas", "Guía de entrevista consular", "Soporte vía chat"],
-      cta: t('pricing.cta_b2c'),
-    },
-    {
-      name: t('pricing.b2c_std_name'), price: "$44", originalPrice: "$89", period: "persona", desc: t('pricing.b2c_std_desc'), highlight: true, badge: "50% OFF",
-      features: ["Todo del plan Básico", "Cita en menos de 3 meses", "Bot rastreador 24/7", "Alertas SMS / Email en vivo", "Prioridad en agendamiento"],
-      cta: t('pricing.cta_b2c'),
-    },
-    {
-      name: t('pricing.b2c_pro_name'), price: "$74", originalPrice: "$149", period: "persona", desc: t('pricing.b2c_pro_desc'), highlight: false, badge: "50% OFF",
-      features: ["Todo del plan Estándar", "Cita garantizada < 30 días", "Motor de rastreo VIP", "Simulacro de entrevista (1h)", "Atención telefónica dedicada"],
-      cta: t('pricing.cta_b2c'),
-    },
-  ];
 
   const PLANS_AGENCY = [
     {
@@ -148,8 +131,7 @@ const LandingPage = () => {
       {/* ── NAVBAR ── */}
       <nav style={S.nav}>
         <div style={S.logo} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-          <Globe size={24} style={S.logoIcon} strokeWidth={2.5} />
-          <span>AdelantaVisa</span>
+          <img src={logoImg} alt="AdelantaVisa" style={{ height: 32, width: 'auto', borderRadius: '4px' }} />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "2.5rem" }} className="hide-on-mobile">
           {NAV_LINKS.map(l => (
@@ -299,7 +281,7 @@ const LandingPage = () => {
               {t('agency.desc')}
             </p>
             <div>
-              <button onClick={() => { setAgencyTab(true); document.getElementById("planes")?.scrollIntoView(); }} className="btn" style={{ background: "#fff", color: "var(--text-1)", border: "none", padding: "1rem 2rem" }}>
+              <button onClick={() => { document.getElementById("planes")?.scrollIntoView(); }} className="btn" style={{ background: "#fff", color: "var(--text-1)", border: "none", padding: "1rem 2rem" }}>
                 {t('agency.cta')}
               </button>
             </div>
@@ -317,52 +299,7 @@ const LandingPage = () => {
             </p>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: "3.5rem", ...S.reveal(pricingInView, 0.2) }}>
-            <div style={{ display: "inline-flex", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 99, padding: 6, gap: 4, boxShadow: "0 2px 10px rgba(0,0,0,0.02)" }}>
-              {[t('pricing.tab_b2c'), t('pricing.tab_b2b')].map((label, i) => (
-                <button key={i} onClick={() => setAgencyTab(i === 1)} style={{ padding: "0.6rem 1.75rem", borderRadius: 99, fontSize: "0.9rem", fontWeight: 600, border: "none", cursor: "pointer", transition: "all 0.25s ease", background: agencyTab === (i === 1) ? "var(--lime)" : "transparent", color: agencyTab === (i === 1) ? "#fff" : "var(--text-2)" }}>
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {!agencyTab ? (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", alignItems: "stretch" }}>
-              {PLANS_CLIENT.map((plan, i) => (
-                <div key={i} className="panel" style={{ padding: "2.5rem", position: "relative", border: plan.highlight ? "2px solid var(--lime)" : "1px solid var(--border)", transform: plan.highlight ? "scale(1.03)" : "none", boxShadow: plan.highlight ? "0 20px 40px rgba(79, 70, 229, 0.1)" : "0 4px 10px rgba(0,0,0,0.02)", ...S.reveal(pricingInView, 0.1 + i * 0.1) }}>
-                  {plan.badge && (
-                    <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", padding: "4px 16px", borderRadius: 99, fontSize: "0.75rem", fontWeight: 800, letterSpacing: "0.06em", background: "var(--lime)", color: "#000", whiteSpace: "nowrap" }}>
-                      {plan.badge}
-                    </div>
-                  )}
-                  <div style={{ marginBottom: "0.5rem", fontSize: "0.9rem", fontWeight: 700, color: plan.highlight ? "var(--lime)" : "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
-                    <span style={{ fontSize: "1.2rem", color: "var(--text-3)", textDecoration: "line-through", fontWeight: 600 }}>
-                      ${parseInt(plan.price.replace('$', '')) * 2}
-                    </span>
-                    <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem" }}>
-                      <div style={{ fontSize: "3rem", fontWeight: 800, color: "var(--text-1)", lineHeight: 1 }}>{plan.price}</div>
-                      <div style={{ fontSize: "0.875rem", color: "var(--text-3)", marginBottom: "0.5rem", fontWeight: 500, textTransform: "uppercase" }}>/ {plan.period}</div>
-                    </div>
-                  </div>
-                  <div style={{ fontSize: "0.95rem", color: "var(--text-2)", marginBottom: "2rem", lineHeight: 1.6, minHeight: 48 }}>{plan.desc}</div>
-                  <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem 0", flex: 1 }}>
-                    {plan.features.map((f, j) => (
-                      <li key={j} style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem", alignItems: "flex-start" }}>
-                        <CheckCircle2 size={18} color={plan.highlight ? "var(--lime)" : "var(--text-3)"} style={{ flexShrink: 0, marginTop: 2 }} />
-                        <span style={{ color: "var(--text-2)", fontSize: "0.9rem", lineHeight: 1.4, fontWeight: plan.highlight ? 500 : 400 }}>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <button onClick={() => navigate("/register")} className={plan.highlight ? "btn btn-lime" : "btn btn-outline"} style={{ width: "100%", padding: "1rem", justifyContent: "center", fontSize: "1rem" }}>
-                    {plan.cta}
-                  </button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "2rem", maxWidth: 900, margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "2rem", maxWidth: 900, margin: "0 auto", marginTop: "3rem" }}>
               {PLANS_AGENCY.map((plan, i) => (
                 <div key={i} className="panel" style={{ padding: "3rem", position: "relative", border: plan.highlight ? "2px solid var(--lime)" : "1px solid var(--border)", boxShadow: plan.highlight ? "0 20px 40px rgba(79, 70, 229, 0.1)" : "0 4px 10px rgba(0,0,0,0.02)", ...S.reveal(true, i * 0.1) }}>
                   {plan.badge && (
@@ -395,7 +332,6 @@ const LandingPage = () => {
                 </div>
               ))}
             </div>
-          )}
         </div>
       </section>
 
@@ -453,8 +389,7 @@ const LandingPage = () => {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "3rem", marginBottom: "3rem" }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "1.1rem", fontWeight: 800, marginBottom: "1rem", color: "var(--text-1)" }}>
-                <Globe size={20} color="var(--lime)" strokeWidth={2.5} />
-                AdelantaVisa
+                <img src={logoImg} alt="AdelantaVisa" style={{ height: 32, width: 'auto', borderRadius: '4px' }} />
               </div>
               <p style={{ color: "var(--text-3)", fontSize: "0.9rem", lineHeight: 1.7 }}>
                 {t('footer.desc')}
@@ -475,8 +410,8 @@ const LandingPage = () => {
             <div>
               <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>{t('footer.contact')}</div>
               <div style={{ color: "var(--text-2)", fontSize: "0.95rem", lineHeight: "1.8" }}>
-                <div>+1 (555) 123-4567</div>
-                <div>contacto@adelantavisa.com</div>
+                <div>+573053574923</div>
+                <div>info@adelantavisa.com</div>
                 <div>Lunes - Viernes, 9:00 - 18:00 EST</div>
                 <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", gap: "0.4rem", color: "var(--lime)", fontWeight: 600 }}>
                   <MessageCircle size={16} /> {t('footer.c_portal')}

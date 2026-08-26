@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../services/api';
-import { Globe, ShieldCheck, UserPlus, FileText, CalendarClock } from 'lucide-react';
+import { ShieldCheck, UserPlus, FileText, CalendarClock } from 'lucide-react';
+import logoImg from '../assets/Logo.jpeg';
 import toast from 'react-hot-toast';
 
 const RegisterPage = () => {
@@ -50,10 +51,7 @@ const RegisterPage = () => {
 
         {/* Header / Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }} onClick={() => navigate('/')}>
-          <Globe size={28} color="var(--lime)" strokeWidth={2.5} />
-          <span style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--text-1)' }}>
-            AdelantaVisa
-          </span>
+          <img src={logoImg} alt="AdelantaVisa" style={{ height: 32, width: 'auto', borderRadius: '4px' }} />
         </div>
 
         {/* Form Container */}

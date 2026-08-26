@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import logoImg from '../../assets/Logo.jpeg';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutGrid, CalendarCheck, Users, Settings, LogOut, ChevronLeft, ChevronRight, Shield, FolderOpen, Store, CreditCard } from 'lucide-react';
 import { api } from '../../services/api';
@@ -43,9 +45,7 @@ const Sidebar = ({ role, userName, isMobileOpen, closeMobile }) => {
       {/* Brand */}
       <div style={{ padding: collapsed ? '1.5rem 0' : '1.5rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'flex-start', minHeight: '80px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ width: '28px', height: '28px', background: 'var(--text-1)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <div style={{ width: '12px', height: '12px', background: 'var(--bg)', borderRadius: '3px' }} />
-          </div>
+          <img src={logoImg} alt="AdelantaVisa" style={{ height: '32px', width: 'auto', borderRadius: '4px' }} />
           {!collapsed && (
             <span style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--text-1)', letterSpacing: '-0.02em', lineHeight: 1 }}>
               AdelantaVisa

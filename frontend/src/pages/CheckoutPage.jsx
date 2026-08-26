@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { Globe, ArrowRight, ShieldCheck, CheckCircle2, Loader2 } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, Loader2 } from 'lucide-react';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
+import logoImg from '../assets/Logo.jpeg';
 
 const PLANS_CLIENT = [
   {
@@ -165,8 +166,7 @@ const CheckoutPage = () => {
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '3rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.2rem', fontWeight: 800 }}>
-            <Globe size={24} style={{ color: 'var(--lime)' }} />
-            <span>AdelantaVisa</span>
+            <img src={logoImg} alt="AdelantaVisa" style={{ height: '32px', width: 'auto', borderRadius: '4px' }} />
           </div>
           <Link to="/login" style={{ color: 'var(--text-3)', textDecoration: 'none', fontSize: '0.9rem' }}>Volver al login</Link>
         </div>

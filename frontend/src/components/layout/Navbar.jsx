@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import logoImg from '../../assets/Logo.jpeg';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -23,10 +24,7 @@ const Navbar = () => {
 
         {/* Logo */}
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', zIndex: 100 }}>
-          <Globe size={24} color="var(--lime)" strokeWidth={2.5} />
-          <span style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--text-1)' }}>
-            AdelantaVisa
-          </span>
+          <img src={logoImg} alt="AdelantaVisa" style={{ height: 32, width: 'auto', borderRadius: '4px' }} />
         </Link>
 
         {/* Links */}
