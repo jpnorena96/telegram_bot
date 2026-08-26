@@ -11,7 +11,7 @@ const RegisterPage = () => {
     full_name: '',
     email: '',
     password: '',
-    role: 'NATURAL_PERSON',
+    role: 'TRAVEL_AGENCY',
     whatsapp_number: '',
     module_visa_enabled: true,
     module_appointments_enabled: true
@@ -69,30 +69,7 @@ const RegisterPage = () => {
 
             <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
-              <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
-                {/* Tipo de Cuenta */}
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-1)', marginBottom: '0.5rem' }}>
-                    Tipo de Cuenta
-                  </label>
-                  <select
-                    value={form.role}
-                    onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
-                    style={{
-                      width: '100%', padding: '0.85rem 1rem', borderRadius: '10px',
-                      border: '1px solid var(--border-2)', background: 'var(--bg)',
-                      color: 'var(--text-1)', fontSize: '0.95rem', transition: 'all 0.2s',
-                      outline: 'none', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.01)',
-                      appearance: 'none', cursor: 'pointer'
-                    }}
-                    onFocus={e => { e.target.style.borderColor = 'var(--lime)'; e.target.style.boxShadow = '0 0 0 3px var(--lime-subtle)'; }}
-                    onBlur={e => { e.target.style.borderColor = 'var(--border-2)'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.01)'; }}
-                  >
-                    <option value="NATURAL_PERSON">Solicitante Individual (B2C)</option>
-                    <option value="TRAVEL_AGENCY">Agencia / Gestor (B2B)</option>
-                  </select>
-                </div>
-              </div>
+              {/* Account type is fixed to TRAVEL_AGENCY for B2B */}
 
               {/* Module Interest Selection */}
               <div>
@@ -280,7 +257,8 @@ const RegisterPage = () => {
       </div>
 
       {/* ── RIGHT: Visual / Trust Section ── */}
-      <div style={{ flex: '1 1 50%', position: 'relative', background: 'var(--lime)', overflow: 'hidden' }} className="hide-on-mobile">
+      <div style={{ flex: '1 1 50%', position: 'relative', background: '#0F172A', overflow: 'hidden' }} className="hide-on-mobile">
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%)' }} />
 
         {/* Modern glowing background blobs */}
         <div style={{ position: 'absolute', top: '10%', left: '20%', width: '400px', height: '400px', borderRadius: '50%', background: 'var(--lime)', filter: 'blur(120px)', opacity: 0.15, animation: 'pulse 8s infinite alternate' }} />
