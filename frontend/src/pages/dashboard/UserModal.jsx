@@ -11,7 +11,8 @@ const UserModal = ({ isOpen, onClose, user, onSuccess }) => {
     password: '',
     role: 'NATURAL_PERSON',
     plan: 'platino',
-    is_authorized: true
+    is_authorized: true,
+    balance: 0
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -24,7 +25,8 @@ const UserModal = ({ isOpen, onClose, user, onSuccess }) => {
         password: '',
         role: user.role || 'NATURAL_PERSON',
         plan: user.plan || 'platino',
-        is_authorized: user.status === 'Activo'
+        is_authorized: user.status === 'Activo' || user.is_authorized === 1,
+        balance: user.balance || 0
       });
     } else {
       setFormData({
@@ -34,7 +36,8 @@ const UserModal = ({ isOpen, onClose, user, onSuccess }) => {
         password: '',
         role: 'NATURAL_PERSON',
         plan: 'platino',
-        is_authorized: true
+        is_authorized: true,
+        balance: 0
       });
     }
   }, [user, isOpen]);
@@ -139,6 +142,20 @@ const UserModal = ({ isOpen, onClose, user, onSuccess }) => {
                 <option value="diamante">Diamante</option>
               </select>
             </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <label style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>Monto a Delegar (Balance USD)</label>
+            <input 
+              type="number" 
+              name="balance" 
+              className="input-field" 
+              value={formData.balance} 
+              onChange={handleChange} 
+              placeholder="0.00" 
+              step="0.01" 
+              min="0"
+            />
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>

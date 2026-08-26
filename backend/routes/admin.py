@@ -175,6 +175,7 @@ class CreateUserRequest(BaseModel):
     role: str = "NATURAL_PERSON"
     plan: str = "platino"
     is_authorized: bool = True
+    balance: Optional[float] = 0
 
 
 @router.post("/users")
@@ -186,11 +187,18 @@ def create_user(req: CreateUserRequest, current_user: dict = Depends(require_adm
         raise HTTPException(status_code=400, detail="Email ya registrado")
     hashed = get_password_hash(req.password)
     cur.execute(
-        "INSERT INTO users (full_name, email, password, role, plan, is_authorized, country) VALUES (%s,%s,%s,%s,%s,%s,'co')",
-        (req.full_name, req.email, hashed, req.role, req.plan, 1 if req.is_authorized else 0)
+        "INSERT INTO users (full_name, email, password, role, plan, is_authorized, country, balance) VALUES (%s,%s,%s,%s,%s,%s,'co',%s)",
+        (req.full_name, req.email, hashed, req.role, req.plan, 1 if req.is_authorized else 0, req.balance or 0)
     )
-    db.commit()
     new_id = cur.lastrowid
+    
+    if req.balance and req.balance > 0:
+        cur.execute(
+            "INSERT INTO balance_history (user_id, amount, type, description) VALUES (%s, %s, %s, %s)",
+            (new_id, req.balance, 'deposit', 'Saldo inicial asignado por Administrador')
+        )
+        
+    db.commit()
     cur.close()
     return {"status": "ok", "id": new_id}
 
@@ -201,6 +209,7 @@ class UpdateUserRequest(BaseModel):
     role: Optional[str] = None
     plan: Optional[str] = None
     full_name: Optional[str] = None
+    balance: Optional[float] = None
 
 
 @router.put("/users/{user_id}")
@@ -215,6 +224,23 @@ def update_user(user_id: int, req: UpdateUserRequest, current_user: dict = Depen
         fields.append("plan=%s"); vals.append(req.plan)
     if req.full_name:
         fields.append("full_name=%s"); vals.append(req.full_name)
+    
+    # Handle balance updates
+    if req.balance is not None:
+        # Get old balance to compute the difference for the history log
+        cur.execute("SELECT balance FROM users WHERE id=%s", (user_id,))
+        row = cur.fetchone()
+        old_balance = row[0] if row else 0
+        diff = req.balance - old_balance
+        if diff != 0:
+            fields.append("balance=%s")
+            vals.append(req.balance)
+            desc = "Recarga por Administrador" if diff > 0 else "Ajuste por Administrador"
+            cur.execute(
+                "INSERT INTO balance_history (user_id, amount, type, description) VALUES (%s, %s, %s, %s)",
+                (user_id, diff, 'deposit' if diff > 0 else 'withdrawal', desc)
+            )
+
     if not fields:
         cur.close(); return {"status": "no_changes"}
     vals.append(user_id)

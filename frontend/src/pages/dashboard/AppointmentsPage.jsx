@@ -583,7 +583,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
                   </div>
                   <div>
                     <h4 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-1)' }}>Agendamiento Creado con Éxito!</h4>
-                    <p style={{ fontSize: '0.82rem', color: 'var(--text-3)', marginTop: '0.35rem', maxWidth: '460px', margin: '0.35rem auto 0' }}>El script del agendamiento ha sido creado e inicializado correctamente en el servidor mediante el gestor de procesos PM2.</p>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-3)', marginTop: '0.35rem', maxWidth: '460px', margin: '0.35rem auto 0' }}>El agendamiento ha sido creado e inicializado correctamente.</p>
                   </div>
 
                   <div style={{ width: '100%', maxWidth: '420px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '0.875rem', marginTop: '0.5rem' }}>
@@ -654,7 +654,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
               type="button"
               className="btn btn-lime"
               onClick={currentStep === 5 ? handleFinish : handleNextStep}
-              disabled={loading || discovering || (currentStep === 4 && mode === 'discover' && !selectedScheduleId)}
+              disabled={loading || (currentStep === 4 && (discovering || (mode === 'discover' && !selectedScheduleId)))}
               style={{
                 minWidth: '160px',
                 background: currentStep === 5 ? 'linear-gradient(135deg, var(--lime), var(--accent-2))' : 'var(--surface-3)',
@@ -669,7 +669,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
               {loading ? (
                 'DESPLEGANDO...'
               ) : currentStep === 5 ? (
-                <>INICIAR AGENTE PM2 <CheckCircle2 size={12} /></>
+                <>INICIAR <CheckCircle2 size={12} /></>
               ) : (
                 <>CONTINUAR <ArrowRight size={12} /></>
               )}
@@ -1019,7 +1019,7 @@ const AppointmentsPage = () => {
                                       <button onClick={() => openConfig(apt.id)} className="btn btn-icon btn-sm" title="Editar Configuración">
                                         <Settings size={14} />
                                       </button>
-                                      <button onClick={() => handleRestartPm2(apt.id)} className="btn btn-icon btn-sm" style={{ color: 'var(--lime)' }} title="Reiniciar PM2">
+                                      <button onClick={() => handleRestartPm2(apt.id)} className="btn btn-icon btn-sm" style={{ color: 'var(--lime)' }} title="Reiniciar agendamiento">
                                         <RefreshCw size={14} />
                                       </button>
                                     </>
@@ -1058,12 +1058,12 @@ const AppointmentsPage = () => {
 
       {/* Logs Modal */}
       {logsModal.open && createPortal(
-        <BotStatusViewer 
-          aptId={logsModal.aptId} 
-          rawLogs={logsModal.data} 
-          loading={logsModal.loading} 
-          onClose={() => setLogsModal({ ...logsModal, open: false })} 
-          onRefresh={openLogs} 
+        <BotStatusViewer
+          aptId={logsModal.aptId}
+          rawLogs={logsModal.data}
+          loading={logsModal.loading}
+          onClose={() => setLogsModal({ ...logsModal, open: false })}
+          onRefresh={openLogs}
         />,
         document.body
       )}
@@ -1080,7 +1080,7 @@ const AppointmentsPage = () => {
                 <X size={20} />
               </button>
             </div>
-            
+
             <div style={{ padding: '1.5rem', flex: 1, overflowY: 'auto', background: 'var(--bg)' }}>
               {configModal.loading ? (
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
@@ -1098,21 +1098,21 @@ const AppointmentsPage = () => {
                     if (!line.includes('=')) return null;
                     const [key, ...rest] = line.split('=');
                     const val = rest.join('=');
-                    
+
                     // Ocultar credenciales de base de datos y tokens por seguridad
                     if (key.startsWith('DB_') || key === 'TELEGRAM_BOT_TOKEN') return null;
-                    
+
                     return (
                       <div key={i} className="input-group" style={{ marginBottom: 0 }}>
                         <label className="input-label" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-2)' }}>{key}</label>
-                        <input 
-                          type="text" 
-                          className="input-field" 
+                        <input
+                          type="text"
+                          className="input-field"
                           value={val}
                           onChange={(e) => {
                             const lines = configModal.data.split('\n');
                             lines[i] = `${key}=${e.target.value}`;
-                            setConfigModal({...configModal, data: lines.join('\n')});
+                            setConfigModal({ ...configModal, data: lines.join('\n') });
                           }}
                           style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}
                         />
@@ -1122,7 +1122,7 @@ const AppointmentsPage = () => {
                 </div>
               )}
             </div>
-            
+
             <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border)', backgroundColor: 'var(--surface)', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
               <button onClick={() => setConfigModal({ open: false, data: '', loading: false, aptId: null })} className="btn btn-outline">Cancelar</button>
               <button onClick={saveConfig} disabled={configModal.loading} className="btn btn-lime">
