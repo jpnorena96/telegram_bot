@@ -84,9 +84,10 @@ def create_appointment(apt: AppointmentCreate, background_tasks: BackgroundTasks
         price_usd = calculate_price_usd(role, apt.max_consulate_date, apt.group_size)
 
         # 1. Check and deduct balance
-        is_admin = role in ["ADMINISTRATOR", "AUDITOR"]
+        # Temporarily agencies do not pay
+        requires_payment = role not in ["ADMINISTRATOR", "AUDITOR", "AGENCY"]
         
-        if not is_admin:
+        if requires_payment:
             cursor.execute("SELECT balance FROM users WHERE id = %s", (current_user["id"],))
             user_balance = cursor.fetchone()
             if not user_balance or user_balance["balance"] < price_usd:
@@ -452,9 +453,10 @@ def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest,
             
         # 0. Check Balance for Natural Person (and now Agencies too if they use discover-direct, though typically they don't, but let's calculate for everyone to be safe)
         price_usd = calculate_price_usd(role, apt["max_consulate_date"], apt["group_size"] or 1)
-        is_admin = role in ["ADMINISTRATOR", "AUDITOR"]
+        # Temporarily agencies do not pay
+        requires_payment = role not in ["ADMINISTRATOR", "AUDITOR", "AGENCY"]
         
-        if not is_admin:
+        if requires_payment:
             cursor.execute("SELECT balance FROM users WHERE id = %s", (current_user["id"],))
             u_row = cursor.fetchone()
             if not u_row or u_row["balance"] < price_usd:
@@ -475,7 +477,7 @@ def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest,
                 (req.schedule_id, req.schedule_names, appointment_id)
             )
             # Deduct balance
-            if not is_admin:
+            if requires_payment:
                 cursor.execute("UPDATE users SET balance = balance - %s WHERE id = %s", (price_usd, current_user["id"]))
                 cursor.execute("""
                     INSERT INTO balance_history (user_id, amount, type, description)
