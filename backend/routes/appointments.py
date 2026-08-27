@@ -85,7 +85,7 @@ def create_appointment(apt: AppointmentCreate, background_tasks: BackgroundTasks
 
         # 1. Check and deduct balance
         # Temporarily agencies do not pay
-        requires_payment = role not in ["ADMINISTRATOR", "AUDITOR", "AGENCY"]
+        requires_payment = role not in ["ADMINISTRATOR", "AUDITOR", "AGENCY", "TRAVEL_AGENCY"]
         
         if requires_payment:
             cursor.execute("SELECT balance FROM users WHERE id = %s", (current_user["id"],))
@@ -454,7 +454,7 @@ def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest,
         # 0. Check Balance for Natural Person (and now Agencies too if they use discover-direct, though typically they don't, but let's calculate for everyone to be safe)
         price_usd = calculate_price_usd(role, apt["max_consulate_date"], apt["group_size"] or 1)
         # Temporarily agencies do not pay
-        requires_payment = role not in ["ADMINISTRATOR", "AUDITOR", "AGENCY"]
+        requires_payment = role not in ["ADMINISTRATOR", "AUDITOR", "AGENCY", "TRAVEL_AGENCY"]
         
         if requires_payment:
             cursor.execute("SELECT balance FROM users WHERE id = %s", (current_user["id"],))
