@@ -657,7 +657,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
               disabled={loading || (currentStep === 4 && (discovering || (mode === 'discover' && !selectedScheduleId)))}
               style={{
                 minWidth: '160px',
-                background: currentStep === 5 ? 'linear-gradient(135deg, var(--lime), var(--accent-2))' : 'var(--surface-3)',
+                background: currentStep === 5 ? 'var(--green)' : 'var(--surface-3)',
                 color: currentStep === 5 ? '#fff' : 'var(--text-1)',
                 border: currentStep === 5 ? 'none' : '1px solid var(--border)',
                 display: 'flex',
