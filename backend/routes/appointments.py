@@ -463,11 +463,12 @@ def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest,
                 raise HTTPException(status_code=402, detail=f"Saldo insuficiente. Costo: ${price_usd} USD. Por favor recarga tu balance.")
 
             
-        # 1. Validar que no esté duplicado
-        cursor.execute("SELECT id FROM user_appointments WHERE schedule_id = %s", (req.schedule_id,))
-        existing = cursor.fetchone()
-        if existing:
-            raise HTTPException(status_code=400, detail="Este Schedule ID ya se encuentra registrado.")
+        # 1. Validar que no esté duplicado (agencias y admins pueden reagendar)
+        if role not in ["ADMINISTRATOR", "AUDITOR", "AGENCY", "TRAVEL_AGENCY"]:
+            cursor.execute("SELECT id FROM user_appointments WHERE schedule_id = %s", (req.schedule_id,))
+            existing = cursor.fetchone()
+            if existing:
+                raise HTTPException(status_code=400, detail="Este Schedule ID ya se encuentra registrado.")
             
         # 2. Guardar e iniciar PM2
         success = vps.set_schedule_id_and_start(apt["email"], req.schedule_id, appointment_id)

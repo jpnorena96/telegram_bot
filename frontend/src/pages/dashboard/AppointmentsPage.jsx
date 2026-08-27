@@ -738,8 +738,19 @@ const AppointmentsPage = () => {
       }
     }
 
-    // Filtrar duplicados por schedule_id (mantener el primero, que es el más reciente)
+    // Filtrar duplicados por schedule_id y contar repeticiones para admins
+    const scheduleCounts = {};
     const seenSchedules = new Set();
+    
+    r.forEach(a => {
+      if (a.schedule_id) {
+        const sid = String(a.schedule_id).trim();
+        if (sid) {
+          scheduleCounts[sid] = (scheduleCounts[sid] || 0) + 1;
+        }
+      }
+    });
+
     r = r.filter(a => {
       if (a.schedule_id) {
         const sid = String(a.schedule_id).trim();
@@ -748,6 +759,7 @@ const AppointmentsPage = () => {
             return false;
           }
           seenSchedules.add(sid);
+          a.rebookCount = scheduleCounts[sid];
         }
       }
       return true;
@@ -983,7 +995,14 @@ const AppointmentsPage = () => {
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div style={{ width: '6px', height: '6px', background: 'var(--lime)', flexShrink: 0 }} />
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                              <span style={{ fontWeight: 600 }}>{apt.client}</span>
+                              <span style={{ fontWeight: 600 }}>
+                                {apt.client}
+                                {isAdmin && apt.rebookCount > 1 && (
+                                  <span style={{ marginLeft: '0.5rem', fontSize: '0.65rem', background: 'var(--orange)', color: '#fff', padding: '0.1rem 0.4rem', borderRadius: 'var(--radius-sm)' }}>
+                                    Reagendado {apt.rebookCount} veces
+                                  </span>
+                                )}
+                              </span>
                               {apt.schedule_names && (
                                 <span style={{ fontSize: '0.68rem', color: 'var(--text-3)' }}>
                                   👥 {formatNames(apt.schedule_names)}
