@@ -151,7 +151,7 @@ const TopUpModal = ({ isOpen, onClose, wompiPubKey, email, onTopUpSuccess }) => 
               }}
             >
               {pkg.highlight && (
-                <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: 'var(--lime)', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '12px' }}>
+                <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: 'var(--lime)', color: 'var(--text-on-lime, #fff)', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '12px' }}>
                   RECOMENDADO
                 </div>
               )}

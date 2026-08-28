@@ -17,10 +17,19 @@
   --black-3:     #27272A;
 
   /* Accent default (Agency Brand Color will override this in inline styles) */
-  --lime:        #000000;
-  --lime-dim:    #27272A;
-  --lime-glow:   rgba(0, 0, 0, 0.05);
-  --lime-subtle: rgba(0, 0, 0, 0.02);
+  --lime-r: 0;
+  --lime-g: 0;
+  --lime-b: 0;
+  --lime:        rgb(var(--lime-r), var(--lime-g), var(--lime-b));
+  
+  /* Automatic Contrast Calculation for text over --lime */
+  --lime-lightness: calc((var(--lime-r) * 299 + var(--lime-g) * 587 + var(--lime-b) * 114) / 1000);
+  --lime-contrast: calc((128 - var(--lime-lightness)) * 1000);
+  --text-on-lime: rgb(var(--lime-contrast), var(--lime-contrast), var(--lime-contrast));
+
+  --lime-dim:    rgba(var(--lime-r), var(--lime-g), var(--lime-b), 0.85);
+  --lime-glow:   rgba(var(--lime-r), var(--lime-g), var(--lime-b), 0.05);
+  --lime-subtle: rgba(var(--lime-r), var(--lime-g), var(--lime-b), 0.02);
 
   /* Status Colors (Subtle, Premium) */
   --orange:      #F59E0B;
@@ -142,7 +151,7 @@ a:hover { color: var(--text-2); }
 
 .btn-lime {
   background: var(--lime);
-  color: #FFFFFF;
+  color: var(--text-on-lime, #FFFFFF);
   border-color: transparent;
   box-shadow: 0 4px 12px var(--lime-glow);
 }
@@ -150,7 +159,7 @@ a:hover { color: var(--text-2); }
   background: var(--lime-dim); 
   transform: translateY(-1px);
   box-shadow: 0 6px 16px var(--lime-glow);
-  color: #FFFFFF;
+  color: var(--text-on-lime, #FFFFFF);
 }
 
 .btn-outline {
