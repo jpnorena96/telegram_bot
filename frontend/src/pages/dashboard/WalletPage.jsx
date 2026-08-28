@@ -198,7 +198,7 @@ const WalletPage = () => {
                   }}
                 >
                   {pkg.highlight && (
-                    <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'var(--lime)', color: '#000', fontSize: '0.7rem', fontWeight: 800, padding: '4px 12px', borderRadius: '20px', letterSpacing: '0.05em' }}>
+                    <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'var(--lime)', color: '#fff', fontSize: '0.7rem', fontWeight: 800, padding: '4px 12px', borderRadius: '20px', letterSpacing: '0.05em' }}>
                       MÁS POPULAR
                     </div>
                   )}

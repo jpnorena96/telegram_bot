@@ -231,7 +231,7 @@ const RegisterPage = () => {
                 disabled={loading}
                 style={{
                   width: '100%', padding: '1rem', borderRadius: '10px',
-                  background: 'var(--lime)', color: '#000', fontSize: '1.05rem',
+                  background: 'var(--lime)', color: '#fff', fontSize: '1.05rem',
                   fontWeight: 700, border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                   marginTop: '0.5rem', transition: 'all 0.2s',
