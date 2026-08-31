@@ -3,7 +3,7 @@ import os
 import logging
 
 # Set your bot token in the environment variables or replace here for testing.
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8451235369:AAHhokjI65kP9o_mFvj6UW7LsVWh8Z-vl3s")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8451235369:AAFeoGdbIHfRyxAyaBgnV300V91zs-CbtMo")
 # You can set a global chat ID or pass it per message
 DEFAULT_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "7568579919")
 

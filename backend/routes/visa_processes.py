@@ -115,11 +115,20 @@ def mark_process_ready(process_id: int, background_tasks: BackgroundTasks, curre
     # Launch automation script based on country
     if process_row["target_country"] == "Estados Unidos" and process_row["purpose"] == "Turismo / Negocios":
         try:
-            from backend.script_visas.usa.b1_b2 import USAB1B2Script
+            import sys
+            import traceback
+            try:
+                from backend.script_visas.usa.b1_b2 import USAB1B2Script
+            except ImportError:
+                from script_visas.usa.b1_b2 import USAB1B2Script
+            
             script = USAB1B2Script(process_id, process_row)
             background_tasks.add_task(script.run)
-        except ImportError:
-            pass
+            print(f"✅ Script de automatización iniciado para el proceso {process_id}")
+        except Exception as e:
+            print(f"❌ Error al iniciar el script de automatización: {e}")
+            import traceback
+            traceback.print_exc()
 
     return {"status": "ok", "message": "Expediente marcado como Listo para Alta. Automatización iniciada."}
 

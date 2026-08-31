@@ -32,7 +32,7 @@ function App() {
         toastOptions={{
           style: {
             background: 'var(--black-2)',
-            color: 'var(--text-1)',
+            color: 'var(--surface)',
             border: '1px solid var(--border)',
             fontFamily: 'var(--font-mono)',
             fontSize: '0.8rem',

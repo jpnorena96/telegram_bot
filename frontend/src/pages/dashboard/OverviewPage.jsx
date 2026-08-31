@@ -158,10 +158,10 @@ const OverviewPage = () => {
           </div>
 
           <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button onClick={() => navigate('/dashboard/appointments')} className="btn btn-primary" style={{ background: '#10B981', borderRadius: '10px', fontSize: '0.85rem' }}>
+            <button onClick={() => navigate('/dashboard/citas')} className="btn btn-primary" style={{ background: '#10B981', borderRadius: '10px', fontSize: '0.85rem' }}>
               <Zap size={16} /> Nuevo Agendamiento
             </button>
-            <button onClick={() => navigate('/dashboard/documents')} className="btn btn-outline" style={{ borderRadius: '10px', fontSize: '0.85rem', borderColor: '#CBD5E1' }}>
+            <button onClick={() => navigate('/dashboard/visa-processes')} className="btn btn-outline" style={{ borderRadius: '10px', fontSize: '0.85rem', borderColor: '#CBD5E1' }}>
               <FileText size={16} /> Expedientes Digitales
             </button>
           </div>
@@ -169,10 +169,10 @@ const OverviewPage = () => {
 
         {/* METRICS CARDS FOR AGENCY */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
-          <StatCard label="Citas en Búsqueda Bot" value={buscandoApts} icon={Search} color="#F59E0B" badge="Scraper 24/7 PM2" onClick={() => navigate('/dashboard/appointments')} />
-          <StatCard label="Citas Adelantadas Exitosas" value={adelantadasApts} icon={CheckCircle} color="#10B981" badge="Adelantadas" onClick={() => navigate('/dashboard/appointments')} />
-          <StatCard label="Expedientes de Visas" value={totalExpedientes} icon={FileText} color="#8B5CF6" badge="Data Room" onClick={() => navigate('/dashboard/documents')} />
-          <StatCard label="Total Citas Gestionadas" value={totalApts} icon={CalendarCheck} color="#3B82F6" badge="Consular" onClick={() => navigate('/dashboard/appointments')} />
+          <StatCard label="Citas en Búsqueda Bot" value={buscandoApts} icon={Search} color="#F59E0B" badge="Scraper 24/7 PM2" onClick={() => navigate('/dashboard/citas')} />
+          <StatCard label="Citas Adelantadas Exitosas" value={adelantadasApts} icon={CheckCircle} color="#10B981" badge="Adelantadas" onClick={() => navigate('/dashboard/citas')} />
+          <StatCard label="Expedientes de Visas" value={totalExpedientes} icon={FileText} color="#8B5CF6" badge="Data Room" onClick={() => navigate('/dashboard/visa-processes')} />
+          <StatCard label="Total Citas Gestionadas" value={totalApts} icon={CalendarCheck} color="#3B82F6" badge="Consular" onClick={() => navigate('/dashboard/citas')} />
         </div>
 
         {/* ── CALCULADOR Y ESQUEMA DE PRECIOS PARA AGENCIA ── */}
@@ -272,7 +272,7 @@ const OverviewPage = () => {
           <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0F172A' }}>Expedientes de Visas</h3>
-              <button onClick={() => navigate('/dashboard/documents')} className="btn btn-outline btn-sm" style={{ fontSize: '0.75rem', borderColor: '#E2E8F0' }}>
+              <button onClick={() => navigate('/dashboard/visa-processes')} className="btn btn-outline btn-sm" style={{ fontSize: '0.75rem', borderColor: '#E2E8F0' }}>
                 Ver Todos
               </button>
             </div>
