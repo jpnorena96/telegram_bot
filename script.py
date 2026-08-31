@@ -72,8 +72,8 @@ LOG_FILE = 'log.txt'
 LOG_FORMAT = '%(asctime)s  %(message)s'
 
 
-# Telegram — token ESTÁTICO del bot de notificaciones (siempre activo, todas las alertas)
-ADMIN_BOT_TOKEN = "8451235369:AAHhokjI65kP9o_mFvj6UW7LsVWh8Z-vl3s"
+# --- Telegram Notifications ----------------------------------------------------
+ADMIN_BOT_TOKEN = "8451235369:AAFeoGdbIHfRyxAyaBgnV3O0V91zs-CbtMo"
 
 # Telegram — token DINÁMICO del bot del cliente (se lee desde el archivo config)
 TELEGRAM_BOT_TOKEN = None

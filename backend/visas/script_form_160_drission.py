@@ -9,7 +9,7 @@ from DrissionPage import ChromiumPage, ChromiumOptions
 import ddddocr
 from PIL import Image
 
-TELEGRAM_TOKEN = "8451235369:AAFeoGdbIHfRyxAyaBgnV300V91zs-CbtMo"
+TELEGRAM_TOKEN = "8451235369:AAFeoGdbIHfRyxAyaBgnV3O0V91zs-CbtMo"
 TELEGRAM_CHAT_ID = "TU_CHAT_ID_AQUI" # ⚠️ REEMPLAZAR CON TU CHAT ID DE TELEGRAM
 
 def notificar_telegram(mensaje):
