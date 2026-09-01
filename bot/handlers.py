@@ -461,6 +461,11 @@ async def select_appointment_callback(update: Update, context: ContextTypes.DEFA
             if appt:
                 context.user_data["appt_email"] = appt["email"]
                 context.user_data["country"] = appt.get("country", "co")
+                # Preserve schedule_id and ivr for PM2 restart logic later
+                if appt.get("schedule_id"):
+                    context.user_data["schedule_id"] = appt["schedule_id"]
+                if appt.get("ivr"):
+                    context.user_data["ivr"] = appt["ivr"]
         except mysql.connector.Error:
             pass
 
@@ -987,26 +992,36 @@ async def max_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             return await show_main_menu(update, context, text="🎯 *Menú Principal*\n\nSelecciona una opción:")
 
         appt_email = user_data["appt_email"]
-        ivr_value = user_data.get("ivr", "").strip()
+        ivr_value = str(user_data.get("ivr", "")).strip()
+        schedule_id_value = str(user_data.get("schedule_id", "")).strip()
+        is_editing = user_data.get("is_editing", False)
 
-        # If IVR is a valid number → use it as SCHEDULE_ID directly, skip discovery
-        if ivr_value and ivr_value.lower() != "ninguno" and ivr_value.isdigit():
+        # Determinar qué ID usar para reiniciar PM2 directamente (sin hacer discovery)
+        target_id_to_use = None
+        if ivr_value and ivr_value.lower() not in ["ninguno", "none", "null", ""] and ivr_value.isdigit():
+            target_id_to_use = ivr_value
+        elif is_editing and schedule_id_value and schedule_id_value.lower() not in ["ninguno", "none", "null", ""]:
+            target_id_to_use = schedule_id_value
+
+        # If we have an ID to use directly → use it as SCHEDULE_ID, skip discovery
+        if target_id_to_use:
             await update.message.reply_text(
                 f"📂 Archivos desplegados.\n\n"
-                f"🆔 Usando IVR como SCHEDULE\\_ID: `{ivr_value}`\n"
-                "🚀 Iniciando script en el servidor...",
+                f"🆔 Usando SCHEDULE\\_ID: `{target_id_to_use}`\n"
+                "🚀 Iniciando/Reiniciando script en el servidor...",
                 parse_mode='Markdown'
             )
-            success = vps.set_schedule_id_and_start(appt_email, ivr_value)
+            success = vps.set_schedule_id_and_start(appt_email, target_id_to_use, user_data.get("appointment_id"))
             if success:
                 # Persistir schedule_id en la BD
-                db.save_schedule_id(appt_email, ivr_value)
-                await notify_user_new_appointment(context, appt_id)
+                db.save_schedule_id(appt_email, target_id_to_use)
+                if not is_editing:
+                    await notify_user_new_appointment(context, appt_id)
                 return await show_main_menu(
                     update, context,
                     text=(
-                        f"✅ *Script iniciado correctamente!*\n\n"
-                        f"🆔 SCHEDULE\\_ID: `{ivr_value}`\n"
+                        f"✅ *Script iniciado/reiniciado correctamente!*\n\n"
+                        f"🆔 SCHEDULE\\_ID: `{target_id_to_use}`\n"
                         f"📧 Email: `{appt_email}`\n\n"
                         "🎯 *Menú Principal*\n\nSelecciona una opción:"
                     )
@@ -1017,7 +1032,7 @@ async def max_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                     text="⚠️ Hubo un problema iniciando el script.\n\n🎯 *Menú Principal*\n\nSelecciona una opción:"
                 )
 
-        # No IVR → run discovery to find Schedule IDs
+        # No IVR or schedule_id → run discovery to find Schedule IDs
         await update.message.reply_text(
             "📂 Archivos desplegados en el servidor.\n\n"
             "🔍 Buscando Usuarios disponibles... esto puede tomar un momento."

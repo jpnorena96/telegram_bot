@@ -165,7 +165,10 @@ def create_vps_config(user_data: dict) -> bool:
             # Si no hay fecha máxima, establecer como None string para script.py
             max_date_fmt = "None"
 
-        # Config WITHOUT SCHEDULE_ID (will be set after discovery)
+        # Extract schedule_id if it exists (e.g. during an edit of an active appointment)
+        schedule_id_val = str(user_data.get("schedule_id", "")).strip()
+
+        # Config WITH SCHEDULE_ID if available
         config_content = f"""EMAIL={email}
 PASSWORD={user_data["appt_password"]}
 COUNTRY={user_data.get("country", "co")}
@@ -174,7 +177,7 @@ MIN_DATE={min_date_fmt}
 MAX_DATE={max_date_fmt}
 NEED_ASC={need_cas}
 ASC_FACILITY_ID={asc_facility_id}
-SCHEDULE_ID=
+SCHEDULE_ID={schedule_id_val}
 APPOINTMENT_ID={appointment_id or ''}
 TELEGRAM_BOT_TOKEN={os.getenv('TELEGRAM_BOT_TOKEN', '8451235369:AAFeoGdbIHfRyxAyaBgnV3O0V91zs-CbtMo')}
 TELEGRAM_CHAT_ID={user_data.get("telegram_user_id") or user_data.get("telegram_chat_id", "")}
