@@ -33,6 +33,16 @@ class AppointmentCreate(BaseModel):
     group_size: int = 1
 
 
+class AppointmentUpdate(BaseModel):
+    password: Optional[str] = None
+    country: Optional[str] = None
+    consulate: Optional[str] = None
+    consulate_asc: Optional[str] = None
+    min_consulate_date: Optional[date] = None
+    max_consulate_date: Optional[date] = None
+    ivr: Optional[str] = None
+
+
 def calculate_price_usd(role: str, max_consulate_date: date, group_size: int = 1) -> int:
     import datetime
     today = datetime.date.today()
@@ -273,8 +283,84 @@ def get_appointment(appointment_id: int, current_user: dict = Depends(get_curren
     role = current_user["roles"][0]
     if role not in ["ADMINISTRATOR", "AUDITOR"] and apt["user_id"] != current_user["id"]:
         raise HTTPException(status_code=403, detail="Not authorized to access this appointment")
+    
+    # Format dates
+    if apt.get("min_consulate_date"):
+        apt["min_consulate_date"] = apt["min_consulate_date"].strftime('%Y-%m-%d')
+    if apt.get("max_consulate_date"):
+        apt["max_consulate_date"] = apt["max_consulate_date"].strftime('%Y-%m-%d')
         
     return apt
+
+@router.put("/{appointment_id}")
+def update_appointment(appointment_id: int, apt_update: AppointmentUpdate, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    try:
+        # Check ownership
+        cursor.execute("SELECT * FROM user_appointments WHERE id = %s", (appointment_id,))
+        apt = cursor.fetchone()
+        if not apt:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+            
+        role = current_user["roles"][0]
+        if role not in ["ADMINISTRATOR", "AUDITOR"] and apt["user_id"] != current_user["id"]:
+            raise HTTPException(status_code=403, detail="Not authorized to update this appointment")
+            
+        # Build update query
+        update_fields = []
+        update_values = []
+        for key, value in apt_update.dict(exclude_unset=True).items():
+            if value is not None:
+                update_fields.append(f"{key} = %s")
+                update_values.append(value)
+                
+        if update_fields:
+            update_query = f"UPDATE user_appointments SET {', '.join(update_fields)} WHERE id = %s"
+            update_values.append(appointment_id)
+            cursor.execute(update_query, tuple(update_values))
+            db.commit()
+            
+        # Fetch the updated appointment to recreate config
+        cursor.execute("SELECT * FROM user_appointments WHERE id = %s", (appointment_id,))
+        updated_apt = cursor.fetchone()
+        
+        # Prepare user_data for vps.py
+        user_data = {
+            "appt_email": updated_apt["email"],
+            "appt_password": updated_apt["password"],
+            "country": updated_apt["country"] or "co",
+            "consulate": updated_apt["consulate"],
+            "consulate_asc": updated_apt["consulate_asc"],
+            "min_consulate_date": updated_apt["min_consulate_date"].strftime('%Y-%m-%d') if updated_apt.get("min_consulate_date") else None,
+            "max_consulate_date": updated_apt["max_consulate_date"].strftime('%Y-%m-%d') if updated_apt.get("max_consulate_date") else None,
+            "need_cas": True if updated_apt["consulate_asc"] and str(updated_apt["consulate_asc"]).lower() not in ['ninguno', 'null', 'none', ''] else False,
+            "schedule_id": updated_apt.get("schedule_id"),
+            "ivr": updated_apt.get("ivr"),
+            "appointment_id": appointment_id,
+            "telegram_user_id": updated_apt.get("telegram_user_id", "")
+        }
+        
+        # 1. Update config on VPS
+        vps_success = vps.create_vps_config(user_data)
+        if not vps_success:
+            raise HTTPException(status_code=500, detail="Failed to deploy config to VPS")
+            
+        # 2. Restart PM2 if it has a schedule_id or ivr
+        ivr_value = str(user_data.get("ivr", "")).strip()
+        schedule_id_value = str(user_data.get("schedule_id", "")).strip()
+        
+        target_id_to_use = None
+        if ivr_value and ivr_value.lower() not in ["ninguno", "none", "null", ""] and ivr_value.isdigit():
+            target_id_to_use = ivr_value
+        elif schedule_id_value and schedule_id_value.lower() not in ["ninguno", "none", "null", ""]:
+            target_id_to_use = schedule_id_value
+            
+        if target_id_to_use:
+            vps.set_schedule_id_and_start(user_data["appt_email"], target_id_to_use, appointment_id)
+            
+        return {"status": "ok", "message": "Appointment updated and process restarted"}
+    finally:
+        cursor.close()
 
 @router.get("/{appointment_id}/logs")
 def get_appointment_logs(appointment_id: int, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
