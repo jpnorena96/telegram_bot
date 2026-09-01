@@ -1057,15 +1057,26 @@ class Bot:
                                     u_info = cursor.fetchone()
                                     if u_info and u_info[0]:
                                         whatsapp_number = u_info[0]
-                                        client_name = u_info[1] or self.config.email
-                                        date_str = f"{self.appointment_datetime.strftime('%Y-%m-%d')} a las {self.appointment_datetime.strftime('%H:%M')}"
+                                        
+                                        # Construir mensaje natural para WhatsApp
+                                        wa_msg = f"¡Hola! Te traigo excelentes noticias 🥳 🎉\n\n"
+                                        wa_msg += f"Acabamos de *adelantar exitosamente* tu cita de la visa. Aquí te dejo cómo quedaron las nuevas fechas para tu cuenta (`{self.config.email}`):\n\n"
+                                        
+                                        if asc_available_date_str and asc_available_time_str:
+                                            wa_msg += f"🏢 *Huellas y Fotografía (CAS):*\n"
+                                            wa_msg += f"📅 {asc_available_date_str} a las {asc_available_time_str}\n\n"
+                                            
+                                        wa_msg += f"🏛️ *Entrevista Consular:*\n"
+                                        wa_msg += f"📅 {self.appointment_datetime.strftime('%Y-%m-%d')} a las {self.appointment_datetime.strftime('%H:%M')}\n\n"
+                                        wa_msg += f"Ya actualizamos todo en el sistema y tu estado es oficialmente 'agendado'. ¡Mucho éxito en tu entrevista! ✅"
+
                                         try:
-                                            from backend.whatsapp_service import notify_appointment_scheduled
+                                            from backend.whatsapp_service import send_whatsapp_message
                                             import asyncio
                                             # Create new event loop for async call since this is sync context
                                             loop = asyncio.new_event_loop()
                                             asyncio.set_event_loop(loop)
-                                            loop.run_until_complete(notify_appointment_scheduled(whatsapp_number, client_name, date_str))
+                                            loop.run_until_complete(send_whatsapp_message(whatsapp_number, wa_msg))
                                             loop.close()
                                         except Exception as wa_err:
                                             self.logger(f"Error enviando WhatsApp: {wa_err}")
