@@ -155,7 +155,7 @@ const UsersPage = () => {
 
       {/* ── TABLE ── */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
+        <div className="table-responsive">
           <table className="data-table">
             <thead>
               <tr>

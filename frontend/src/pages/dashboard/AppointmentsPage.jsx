@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { useOutletContext } from 'react-router-dom';
-import { Search, RefreshCw, Plus, X, ChevronUp, ChevronDown, Eye, ArrowLeft, ArrowRight, Lock, Globe, Calendar, CheckCircle2, AlertTriangle, User, Trash2, Terminal, Settings } from 'lucide-react';
+import { Search, RefreshCw, Plus, X, ChevronUp, ChevronDown, Eye, ArrowLeft, ArrowRight, Lock, Globe, Calendar, CheckCircle2, AlertTriangle, User, Trash2, Terminal, Settings, Edit2 } from 'lucide-react';
 import { api } from '../../services/api';
 
 const STATUS_MAP = {
@@ -699,6 +699,7 @@ const AppointmentsPage = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [logsModal, setLogsModal] = useState({ open: false, data: '', loading: false, aptId: null });
   const [configModal, setConfigModal] = useState({ open: false, data: '', loading: false, aptId: null });
+  const [editModal, setEditModal] = useState({ open: false, loading: false, data: {} });
 
   // Filtros de fecha para administrador
   const [startDate, setStartDate] = useState('');
@@ -817,6 +818,37 @@ const AppointmentsPage = () => {
     } catch (err) {
       toast.error('Error al guardar config');
       setConfigModal(prev => ({ ...prev, loading: false }));
+    }
+  };
+
+  const openEdit = (apt) => {
+    setEditModal({
+      open: true,
+      loading: false,
+      data: {
+        id: apt.id,
+        password: '', // Dejar vacío por seguridad, solo enviar si el usuario lo llena
+        min_consulate_date: apt.min_consulate_date ? apt.min_consulate_date.substring(0, 10) : '',
+        max_consulate_date: apt.max_consulate_date ? apt.max_consulate_date.substring(0, 10) : ''
+      }
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      setEditModal(prev => ({ ...prev, loading: true }));
+      const payload = {};
+      if (editModal.data.password) payload.password = editModal.data.password;
+      if (editModal.data.min_consulate_date) payload.min_consulate_date = editModal.data.min_consulate_date;
+      if (editModal.data.max_consulate_date) payload.max_consulate_date = editModal.data.max_consulate_date;
+      
+      await api.updateAppointment(editModal.data.id, payload);
+      toast.success('Cita editada y proceso PM2 reiniciado correctamente.');
+      setEditModal({ open: false, data: {}, loading: false });
+      load();
+    } catch (err) {
+      toast.error(err.message || 'Error al editar la cita');
+      setEditModal(prev => ({ ...prev, loading: false }));
     }
   };
 
@@ -945,7 +977,7 @@ const AppointmentsPage = () => {
 
       {/* ── TABLE ── */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', overflow: 'hidden' }}>
-        <div className="table-responsive-wrapper">
+        <div className="table-responsive">
           <table className="data-table">
             <thead>
               <tr>
@@ -1046,9 +1078,14 @@ const AppointmentsPage = () => {
                                 </>
                               )}
                               {apt.status !== 'agendado' && (
-                                <button onClick={() => handleDelete(apt.id)} className="btn btn-icon btn-sm" style={{ color: '#F87171' }} title="Eliminar agendamiento">
-                                  <Trash2 size={14} />
-                                </button>
+                                <>
+                                  <button onClick={() => openEdit(apt)} className="btn btn-icon btn-sm" style={{ color: 'var(--lime)' }} title="Editar agendamiento">
+                                    <Edit2 size={14} />
+                                  </button>
+                                  <button onClick={() => handleDelete(apt.id)} className="btn btn-icon btn-sm" style={{ color: '#F87171' }} title="Eliminar agendamiento">
+                                    <Trash2 size={14} />
+                                  </button>
+                                </>
                               )}
                             </div>
                           </td>
@@ -1146,6 +1183,66 @@ const AppointmentsPage = () => {
               <button onClick={() => setConfigModal({ open: false, data: '', loading: false, aptId: null })} className="btn btn-outline">Cancelar</button>
               <button onClick={saveConfig} disabled={configModal.loading} className="btn btn-lime">
                 {configModal.loading ? 'Guardando...' : 'Guardar y Reiniciar PM2'}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Edit Modal para Agencias */}
+      {editModal.open && createPortal(
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div className="panel" style={{ width: '100%', maxWidth: '500px', backgroundColor: 'var(--bg)', borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--surface)' }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0, color: 'var(--text-1)' }}>
+                Editar Agendamiento
+              </h2>
+              <button onClick={() => setEditModal({ open: false, loading: false, data: {} })} className="btn btn-icon btn-outline" style={{ border: 'none' }}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={{ padding: '1.5rem', flex: 1, overflowY: 'auto', background: 'var(--bg)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div className="input-group">
+                  <label className="input-label">Contraseña del Portal (Opcional)</label>
+                  <input
+                    type="password"
+                    className="input-field"
+                    placeholder="Dejar en blanco si no cambió"
+                    value={editModal.data.password || ''}
+                    onChange={(e) => setEditModal(prev => ({ ...prev, data: { ...prev.data, password: e.target.value } }))}
+                  />
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>Solo llénalo si la contraseña de la cuenta ha cambiado.</p>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className="input-group">
+                    <label className="input-label">Fecha Mínima (Opcional)</label>
+                    <input
+                      type="date"
+                      className="input-field"
+                      value={editModal.data.min_consulate_date || ''}
+                      onChange={(e) => setEditModal(prev => ({ ...prev, data: { ...prev.data, min_consulate_date: e.target.value } }))}
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label className="input-label">Fecha Máxima</label>
+                    <input
+                      type="date"
+                      className="input-field"
+                      value={editModal.data.max_consulate_date || ''}
+                      onChange={(e) => setEditModal(prev => ({ ...prev, data: { ...prev.data, max_consulate_date: e.target.value } }))}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border)', backgroundColor: 'var(--surface)', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+              <button onClick={() => setEditModal({ open: false, loading: false, data: {} })} className="btn btn-outline">Cancelar</button>
+              <button onClick={handleSaveEdit} disabled={editModal.loading} className="btn btn-lime">
+                {editModal.loading ? 'Guardando...' : 'Guardar y Reiniciar PM2'}
               </button>
             </div>
           </div>

@@ -136,6 +136,15 @@ export const api = {
     });
     return handleResponse(response);
   },
+
+  async updateAppointment(id, data) {
+    const response = await fetch(`${API_URL}/appointments/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
   async getLogs(id) {
     const response = await fetch(`${API_URL}/appointments/${id}/logs`, {
       headers: getHeaders(),
