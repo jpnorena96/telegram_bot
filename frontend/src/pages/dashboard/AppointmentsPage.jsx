@@ -742,7 +742,7 @@ const AppointmentsPage = () => {
     // Filtrar duplicados por schedule_id y contar repeticiones para admins
     const scheduleCounts = {};
     const seenSchedules = new Set();
-    
+
     r.forEach(a => {
       if (a.schedule_id) {
         const sid = String(a.schedule_id).trim();
@@ -841,7 +841,7 @@ const AppointmentsPage = () => {
       if (editModal.data.password) payload.password = editModal.data.password;
       if (editModal.data.min_consulate_date) payload.min_consulate_date = editModal.data.min_consulate_date;
       if (editModal.data.max_consulate_date) payload.max_consulate_date = editModal.data.max_consulate_date;
-      
+
       await api.updateAppointment(editModal.data.id, payload);
       toast.success('Cita editada y proceso PM2 reiniciado correctamente.');
       setEditModal({ open: false, data: {}, loading: false });
@@ -1182,7 +1182,7 @@ const AppointmentsPage = () => {
             <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border)', backgroundColor: 'var(--surface)', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
               <button onClick={() => setConfigModal({ open: false, data: '', loading: false, aptId: null })} className="btn btn-outline">Cancelar</button>
               <button onClick={saveConfig} disabled={configModal.loading} className="btn btn-lime">
-                {configModal.loading ? 'Guardando...' : 'Guardar y Reiniciar PM2'}
+                {configModal.loading ? 'Guardando...' : 'Guardar y Reiniciar'}
               </button>
             </div>
           </div>
@@ -1202,7 +1202,7 @@ const AppointmentsPage = () => {
                 <X size={20} />
               </button>
             </div>
-            
+
             <div style={{ padding: '1.5rem', flex: 1, overflowY: 'auto', background: 'var(--bg)' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 <div className="input-group">
@@ -1242,7 +1242,7 @@ const AppointmentsPage = () => {
             <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border)', backgroundColor: 'var(--surface)', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
               <button onClick={() => setEditModal({ open: false, loading: false, data: {} })} className="btn btn-outline">Cancelar</button>
               <button onClick={handleSaveEdit} disabled={editModal.loading} className="btn btn-lime">
-                {editModal.loading ? 'Guardando...' : 'Guardar y Reiniciar PM2'}
+                {editModal.loading ? 'Guardando...' : 'Guardar y Reiniciar'}
               </button>
             </div>
           </div>

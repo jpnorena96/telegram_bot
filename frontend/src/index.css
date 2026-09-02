@@ -784,31 +784,67 @@ a:hover { color: var(--text-2); }
 .heatmap-level-3 { background: #30a14e; }
 .heatmap-level-4 { background: #216e39; }
 
-/* 4. Live Feed Ticker */
+/* 4. Live Feed Ticker - Expert Mode */
 .live-feed-container {
   overflow: hidden;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #0F172A;
+  border: 1px solid #1E293B;
   border-radius: 8px;
   padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
   gap: 1rem;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.1);
+  font-family: 'Consolas', 'Courier New', monospace;
+  position: relative;
+}
+.live-feed-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, #0F172A 0%, transparent 5%, transparent 95%, #0F172A 100%);
+  pointer-events: none;
+  z-index: 2;
 }
 .live-feed-content {
   display: flex;
-  gap: 3rem;
-  animation: scrollTicker 30s linear infinite;
+  gap: 4rem;
+  animation: scrollTicker 35s linear infinite;
   white-space: nowrap;
+  position: relative;
+  z-index: 1;
 }
 .live-feed-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-mono);
+  gap: 0.75rem;
   font-size: 0.85rem;
-  color: #475569;
+  color: #94A3B8;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
+.live-feed-item strong {
+  color: #E2E8F0;
+}
+.live-feed-item .tag-expert {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.live-feed-item .tag-search {
+  background: rgba(245, 158, 11, 0.15);
+  color: #F59E0B;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
 @keyframes scrollTicker {
   0% { transform: translateX(0%); }
   100% { transform: translateX(-50%); }

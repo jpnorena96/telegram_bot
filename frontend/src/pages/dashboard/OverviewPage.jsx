@@ -466,27 +466,34 @@ const OverviewPage = () => {
 
         {/* Live Ticker */}
         <div className="live-feed-container">
-          <div style={{ fontWeight: 700, color: '#3B82F6', fontSize: '0.85rem', paddingRight: '1rem', borderRight: '1px solid #E2E8F0' }}>ACTIVIDAD RECIENTE</div>
+          <div style={{ fontWeight: 800, color: '#38BDF8', fontSize: '0.8rem', paddingRight: '1rem', borderRight: '1px solid #1E293B', letterSpacing: '1px' }}>SYS.LOG_</div>
           <div className="live-feed-content">
             {adminStats?.recent_appointments?.length > 0 ? (
               adminStats.recent_appointments.map((apt, idx) => (
                 <div key={idx} className="live-feed-item">
                   {apt.status === 'agendado' || apt.status === 'Adelantada' ? (
-                    <CheckCircle size={14} color="#10B981" />
+                    <>
+                      <span className="tag-expert">EXITO</span>
+                      <span>Cita asegurada para <strong>{apt.email}</strong> en <strong>{apt.consulate}</strong></span>
+                    </>
                   ) : apt.status === 'pending' || apt.status === 'Buscando' ? (
-                    <Search size={14} color="#F59E0B" />
+                    <>
+                      <span className="tag-search">SCAN</span>
+                      <span>Rastreando fechas para <strong>{apt.email}</strong> en <strong>{apt.consulate}</strong></span>
+                    </>
                   ) : (
-                    <Activity size={14} color="#3B82F6" />
+                    <>
+                      <span style={{ color: '#38BDF8' }}>[{apt.status.toUpperCase()}]</span>
+                      <span>Actualización de proceso para <strong>{apt.email}</strong></span>
+                    </>
                   )}
-                  {apt.status === 'agendado' || apt.status === 'Adelantada' 
-                    ? `Cita asegurada para ${apt.email} en ${apt.consulate}`
-                    : apt.status === 'pending' || apt.status === 'Buscando'
-                    ? `Buscando adelanto para ${apt.email} en ${apt.consulate}`
-                    : `Trámite de ${apt.email} actualizado (${apt.status})`}
                 </div>
               ))
             ) : (
-              <div className="live-feed-item"><Server size={14} color="#94A3B8" /> Esperando actividad del sistema...</div>
+              <div className="live-feed-item">
+                <span className="tag-search">WAIT</span>
+                <span>Esperando actividad en los nodos...</span>
+              </div>
             )}
           </div>
         </div>

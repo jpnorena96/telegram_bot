@@ -86,6 +86,9 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 # In-memory blacklist for MVP: { user_id: timestamp_revoked }
 revoked_users = {}
 
+# In-memory login attempts tracker: { email: { 'attempts': int, 'block_until': datetime } }
+login_attempts = {}
+
 security = HTTPBearer()
 
 # --- Dependencies ---
@@ -123,6 +126,21 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Security(securi
 # --- Routes ---
 @router.post("/login", response_model=Token)
 def login(request: LoginRequest, db = Depends(get_db)):
+    email = request.email.lower().strip()
+    now = datetime.utcnow()
+    
+    # Check if user is currently blocked
+    if email in login_attempts:
+        block_until = login_attempts[email].get('block_until')
+        if block_until and now < block_until:
+            remaining_mins = int((block_until - now).total_seconds() / 60) + 1
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Cuenta bloqueada por múltiples intentos fallidos. Intente nuevamente en {remaining_mins} minutos."
+            )
+        elif block_until and now >= block_until:
+            login_attempts[email] = {'attempts': 0, 'block_until': None}
+
     cursor = db.cursor(dictionary=True)
     # Include role and full_name once added to DB schema
     try:
@@ -135,11 +153,34 @@ def login(request: LoginRequest, db = Depends(get_db)):
     cursor.close()
 
     if not user or not verify_password(request.password, user['password']):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        if email not in login_attempts:
+            login_attempts[email] = {'attempts': 0, 'block_until': None}
+            
+        login_attempts[email]['attempts'] += 1
+        attempts = login_attempts[email]['attempts']
+        
+        if attempts > 5:
+            login_attempts[email]['block_until'] = now + timedelta(minutes=15)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Cuenta bloqueada por múltiples intentos fallidos. Intente nuevamente en 15 minutos."
+            )
+        elif attempts == 3:
+            login_attempts[email]['block_until'] = now + timedelta(minutes=5)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Cuenta bloqueada por 3 intentos fallidos. Intente nuevamente en 5 minutos."
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Correo o contraseña incorrectos",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+            
+    # Clear attempts on success
+    if email in login_attempts:
+        del login_attempts[email]
     
     # Check authorization for non-admin/natural person roles
     role = user.get('role') or 'NATURAL_PERSON'
