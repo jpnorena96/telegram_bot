@@ -300,32 +300,17 @@ const RegisterPage = () => {
 
       {/* ── RIGHT: Visual / Trust Section ── */}
       <div style={{ flex: '1 1 50%', position: 'relative', background: '#0F172A', overflow: 'hidden' }} className="hide-on-mobile">
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%)' }} />
-
-        {/* Modern glowing background blobs */}
-        <div style={{ position: 'absolute', top: '10%', left: '20%', width: '400px', height: '400px', borderRadius: '50%', background: 'var(--lime)', filter: 'blur(120px)', opacity: 0.15, animation: 'pulse 8s infinite alternate' }} />
-        <div style={{ position: 'absolute', bottom: '10%', right: '10%', width: '500px', height: '500px', borderRadius: '50%', background: '#3B82F6', filter: 'blur(120px)', opacity: 0.15, animation: 'pulse 10s infinite alternate-reverse' }} />
-
-        {/* Floating cards / UI abstract elements */}
-        <div style={{ position: 'absolute', right: '-5%', top: '25%', width: '300px', height: '150px', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', transform: 'rotate(-5deg)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--lime)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <CalendarClock size={20} color="#000" />
-          </div>
-          <div>
-            <div style={{ height: '8px', width: '60%', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', marginBottom: '8px' }} />
-            <div style={{ height: '8px', width: '40%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }} />
-          </div>
-        </div>
-
-        <div style={{ position: 'absolute', left: '10%', bottom: '20%', width: '250px', height: '120px', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', transform: 'rotate(5deg)', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <FileText size={20} color="#fff" />
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ height: '8px', width: '80%', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', marginBottom: '8px' }} />
-            <div style={{ height: '8px', width: '50%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }} />
-          </div>
-        </div>
+        <div style={{ position: 'absolute', inset: 0, background: '#0F172A' }} />
+        
+        {/* Subtle professional grid pattern */}
+        <div style={{ 
+          position: 'absolute', inset: 0, opacity: 0.4,
+          backgroundImage: 'radial-gradient(#334155 1px, transparent 1px)',
+          backgroundSize: '24px 24px'
+        }} />
+        
+        {/* Bottom fade for cleaner text readability */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 0%, #0F172A 100%)' }} />
 
         <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '4rem', color: '#fff' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>

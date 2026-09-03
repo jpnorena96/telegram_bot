@@ -612,7 +612,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
                       <span style={{ fontSize: '0.85rem', color: 'var(--text-1)', fontWeight: 600 }}>{formData.email}</span>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                      <span style={{ fontSize: '0.62rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>SCHEDULE ID VINCULADO</span>
+                      <span style={{ fontSize: '0.62rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>ID VINCULADO</span>
                       <span style={{ fontSize: '0.85rem', color: 'var(--lime)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
                         {mode === 'discover' ? selectedScheduleId : formData.schedule_id}
                       </span>

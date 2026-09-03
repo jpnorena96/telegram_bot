@@ -300,38 +300,38 @@ const LandingPage = () => {
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "2rem", maxWidth: 900, margin: "0 auto", marginTop: "3rem" }}>
-              {PLANS_AGENCY.map((plan, i) => (
-                <div key={i} className="panel" style={{ padding: "3rem", position: "relative", border: plan.highlight ? "2px solid var(--lime)" : "1px solid var(--border)", boxShadow: plan.highlight ? "0 20px 40px rgba(79, 70, 229, 0.1)" : "0 4px 10px rgba(0,0,0,0.02)", ...S.reveal(true, i * 0.1) }}>
-                  {plan.badge && (
-                    <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", padding: "4px 16px", borderRadius: 99, fontSize: "0.75rem", fontWeight: 800, letterSpacing: "0.06em", background: "var(--lime)", color: "#000", whiteSpace: "nowrap" }}>
-                      {plan.badge}
-                    </div>
-                  )}
-                  <div style={{ marginBottom: "0.5rem", fontSize: "0.9rem", fontWeight: 700, color: plan.highlight ? "var(--lime)" : "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
-                    <span style={{ fontSize: "1.5rem", color: "var(--text-3)", textDecoration: "line-through", fontWeight: 600 }}>
-                      ${parseInt(plan.price.replace('$', '')) * 2}
-                    </span>
-                    <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem", marginBottom: "0.25rem" }}>
-                      <span style={{ fontSize: "3.5rem", fontFamily: "var(--font-heading)", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1, color: "var(--text-1)" }}>{plan.price}</span>
-                      <span style={{ fontSize: "0.85rem", color: "var(--text-3)", paddingBottom: "0.6rem", fontWeight: 600, textTransform: "uppercase" }}>/ {plan.period}</span>
-                    </div>
+            {PLANS_AGENCY.map((plan, i) => (
+              <div key={i} className="panel" style={{ padding: "3rem", position: "relative", border: plan.highlight ? "2px solid var(--lime)" : "1px solid var(--border)", boxShadow: plan.highlight ? "0 20px 40px rgba(79, 70, 229, 0.1)" : "0 4px 10px rgba(0,0,0,0.02)", ...S.reveal(true, i * 0.1) }}>
+                {plan.badge && (
+                  <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", padding: "4px 16px", borderRadius: 99, fontSize: "0.75rem", fontWeight: 800, letterSpacing: "0.06em", background: "var(--lime)", color: "#000", whiteSpace: "nowrap" }}>
+                    {plan.badge}
                   </div>
-                  <p style={{ color: "var(--text-3)", fontSize: "0.95rem", marginBottom: "2.5rem", lineHeight: 1.6, minHeight: 48 }}>{plan.desc}</p>
-                  <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2.5rem 0", flex: 1 }}>
-                    {plan.features.map((f, j) => (
-                      <li key={j} style={{ display: "flex", gap: "0.85rem", marginBottom: "1.25rem", alignItems: "flex-start" }}>
-                        <CheckCircle2 size={20} color={i === 1 ? "var(--lime)" : "var(--text-3)"} style={{ flexShrink: 0, marginTop: 1 }} />
-                        <span style={{ color: "var(--text-2)", fontSize: "1rem", lineHeight: 1.5, fontWeight: i === 1 ? 500 : 400 }}>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <button onClick={() => navigate("/register")} className={i === 1 ? "btn btn-lime" : "btn btn-outline"} style={{ width: "100%", padding: "1rem", justifyContent: "center", fontSize: "1rem" }}>
-                    {plan.cta}
-                  </button>
+                )}
+                <div style={{ marginBottom: "0.5rem", fontSize: "0.9rem", fontWeight: 700, color: plan.highlight ? "var(--lime)" : "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{plan.name}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
+                  <span style={{ fontSize: "1.5rem", color: "var(--text-3)", textDecoration: "line-through", fontWeight: 600 }}>
+                    ${parseInt(plan.price.replace('$', '')) * 2}
+                  </span>
+                  <div style={{ display: "flex", alignItems: "flex-end", gap: "0.3rem", marginBottom: "0.25rem" }}>
+                    <span style={{ fontSize: "3.5rem", fontFamily: "var(--font-heading)", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1, color: "var(--text-1)" }}>{plan.price}</span>
+                    <span style={{ fontSize: "0.85rem", color: "var(--text-3)", paddingBottom: "0.6rem", fontWeight: 600, textTransform: "uppercase" }}>/ {plan.period}</span>
+                  </div>
                 </div>
-              ))}
-            </div>
+                <p style={{ color: "var(--text-3)", fontSize: "0.95rem", marginBottom: "2.5rem", lineHeight: 1.6, minHeight: 48 }}>{plan.desc}</p>
+                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2.5rem 0", flex: 1 }}>
+                  {plan.features.map((f, j) => (
+                    <li key={j} style={{ display: "flex", gap: "0.85rem", marginBottom: "1.25rem", alignItems: "flex-start" }}>
+                      <CheckCircle2 size={20} color={i === 1 ? "var(--lime)" : "var(--text-3)"} style={{ flexShrink: 0, marginTop: 1 }} />
+                      <span style={{ color: "var(--text-2)", fontSize: "1rem", lineHeight: 1.5, fontWeight: i === 1 ? 500 : 400 }}>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <button onClick={() => navigate("/register")} className={i === 1 ? "btn btn-lime" : "btn btn-outline"} style={{ width: "100%", padding: "1rem", justifyContent: "center", fontSize: "1rem" }}>
+                  {plan.cta}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -410,7 +410,7 @@ const LandingPage = () => {
             <div>
               <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>{t('footer.contact')}</div>
               <div style={{ color: "var(--text-2)", fontSize: "0.95rem", lineHeight: "1.8" }}>
-                <div>+573053574923</div>
+                <div>+57 316 8310692</div>
                 <div>info@adelantavisa.com</div>
                 <div>Lunes - Viernes, 9:00 - 18:00 EST</div>
                 <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", gap: "0.4rem", color: "var(--lime)", fontWeight: 600 }}>
