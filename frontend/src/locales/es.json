@@ -23,7 +23,7 @@
   },
   "process": {
     "title": "Automatización End-to-End",
-    "desc": "Un flujo de trabajo diseñado específicamente para agencias: centraliza clientes, automatiza el DS-160 y delega el rastreo de citas a nuestros bots.",
+    "desc": "Un flujo de trabajo diseñado específicamente para agencias: centraliza clientes, automatiza el DS-160 y delega el rastreo de citas a nuestros agentes.",
     "step_label": "PASO",
     "step1_title": "Gestión del DS-160",
     "step1_desc": "Recopila datos de tus clientes fácilmente a través del portal y centraliza la información sin fricciones ni errores manuales.",

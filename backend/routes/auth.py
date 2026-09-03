@@ -40,6 +40,7 @@ class RegisterRequest(BaseModel):
     whatsapp_number: Optional[str] = None
     module_visa_enabled: Optional[bool] = True
     module_appointments_enabled: Optional[bool] = True
+    country: Optional[str] = None
 
 # --- Security Utilities ---
 def verify_password(plain_password, hashed_password):
@@ -243,9 +244,9 @@ def register(request: RegisterRequest, db = Depends(get_db)):
             plan = "platino"
 
         cursor.execute("""
-            INSERT INTO users (email, password, full_name, role, whatsapp_number, is_authorized, plan, module_visa_enabled, module_appointments_enabled)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (request.email, hashed_password, request.full_name, request.role, request.whatsapp_number, is_authorized, plan, request.module_visa_enabled, request.module_appointments_enabled))
+            INSERT INTO users (email, password, full_name, role, whatsapp_number, is_authorized, plan, module_visa_enabled, module_appointments_enabled, country)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (request.email, hashed_password, request.full_name, request.role, request.whatsapp_number, is_authorized, plan, request.module_visa_enabled, request.module_appointments_enabled, request.country))
         
         db.commit()
     except mysql.connector.Error as err:

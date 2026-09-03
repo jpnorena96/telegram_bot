@@ -9,13 +9,13 @@ async def main():
     phone = "+573114526128"
     msg = """¡Hola! Te traigo excelentes noticias 🥳 🎉 
 
-Acabamos de *adelantar exitosamente* tu cita de la visa. Aquí te dejo cómo quedaron las nuevas fechas para tu cuenta (`ramirobahamon203@gmail.com`):
+Acabamos de adelantar exitosamente tu cita de la visa. Aquí te dejo cómo quedaron las nuevas fechas para tu cuenta (Sofiavaloyes711@gmail.com):
 
 🏢 *Huellas y Fotografía (CAS):* 
-📅 5 de Octubre de 2026 a las 04:15 PM
+📅 14 de Septiembre de 2026 a las 07:15 AM
 
 🏛️ *Entrevista Consular:* 
-📅 16 de Octubre de 2026 a las 07:45 AM
+📅 23 de Septiembre de 2026 a las 07:30 AM
 
 Ya actualizamos todo en el sistema y tu estado es oficialmente 'agendado'. ¡Mucho éxito en tu entrevista! ✅"""
     

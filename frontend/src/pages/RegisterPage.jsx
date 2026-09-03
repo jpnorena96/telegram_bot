@@ -13,6 +13,7 @@ const RegisterPage = () => {
     password: '',
     role: 'TRAVEL_AGENCY',
     whatsapp_number: '',
+    country: 'co',
     module_visa_enabled: true,
     module_appointments_enabled: true
   });
@@ -136,6 +137,47 @@ const RegisterPage = () => {
                   onFocus={e => { e.target.style.borderColor = 'var(--lime)'; e.target.style.boxShadow = '0 0 0 3px var(--lime-subtle)'; }}
                   onBlur={e => { e.target.style.borderColor = 'var(--border-2)'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.01)'; }}
                 />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-1)', marginBottom: '0.5rem' }}>
+                  País de Residencia
+                </label>
+                <select
+                  value={form.country}
+                  onChange={e => setForm(f => ({ ...f, country: e.target.value }))}
+                  required
+                  style={{
+                    width: '100%', padding: '0.85rem 1rem', borderRadius: '10px',
+                    border: '1px solid var(--border-2)', background: 'var(--bg)',
+                    color: 'var(--text-1)', fontSize: '0.95rem', transition: 'all 0.2s',
+                    outline: 'none', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.01)',
+                    cursor: 'pointer', appearance: 'auto'
+                  }}
+                  onFocus={e => { e.target.style.borderColor = 'var(--lime)'; e.target.style.boxShadow = '0 0 0 3px var(--lime-subtle)'; }}
+                  onBlur={e => { e.target.style.borderColor = 'var(--border-2)'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.01)'; }}
+                >
+                  <option value="" disabled>Seleccione un país</option>
+                  <option value="ar">🇦🇷 Argentina</option>
+                  <option value="bo">🇧🇴 Bolivia</option>
+                  <option value="cl">🇨🇱 Chile</option>
+                  <option value="co">🇨🇴 Colombia</option>
+                  <option value="cr">🇨🇷 Costa Rica</option>
+                  <option value="ec">🇪🇨 Ecuador</option>
+                  <option value="sv">🇸🇻 El Salvador</option>
+                  <option value="es">🇪🇸 España</option>
+                  <option value="us">🇺🇸 Estados Unidos</option>
+                  <option value="gt">🇬🇹 Guatemala</option>
+                  <option value="hn">🇭🇳 Honduras</option>
+                  <option value="mx">🇲🇽 México</option>
+                  <option value="ni">🇳🇮 Nicaragua</option>
+                  <option value="pa">🇵🇦 Panamá</option>
+                  <option value="py">🇵🇾 Paraguay</option>
+                  <option value="pe">🇵🇪 Perú</option>
+                  <option value="do">🇩🇴 República Dominicana</option>
+                  <option value="uy">🇺🇾 Uruguay</option>
+                  <option value="ve">🇻🇪 Venezuela</option>
+                </select>
               </div>
 
               <div>
