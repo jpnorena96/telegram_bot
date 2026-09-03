@@ -327,6 +327,7 @@ const RegisterPage = () => {
           </div>
         </div>
 
+        <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '4rem', color: '#fff' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--lime)', boxShadow: '0 0 10px var(--lime)' }} />
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--lime)', letterSpacing: '0.1em' }}>SISTEMA_B2B_ACTIVO</span>
