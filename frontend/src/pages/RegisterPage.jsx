@@ -327,23 +327,26 @@ const RegisterPage = () => {
           </div>
         </div>
 
-        <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '4rem', color: '#fff' }}>
-          <Globe size={48} color="var(--lime)" style={{ marginBottom: '2rem' }} />
-          <h2 style={{ fontSize: '4rem', fontFamily: 'var(--font-heading)', fontWeight: 800, lineHeight: 1.1, marginBottom: '1.5rem', letterSpacing: '-0.03em' }}>
-            Acelera<br /><span style={{ color: 'var(--lime)' }}>tu futuro.</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--lime)', boxShadow: '0 0 10px var(--lime)' }} />
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--lime)', letterSpacing: '0.1em' }}>SISTEMA_B2B_ACTIVO</span>
+          </div>
+          
+          <h2 style={{ fontSize: '3.5rem', fontFamily: 'var(--font-heading)', fontWeight: 700, lineHeight: 1.1, marginBottom: '1.5rem', letterSpacing: '-0.02em', color: '#F8FAFC' }}>
+            Infraestructura<br /><span style={{ color: '#94A3B8' }}>Consular.</span>
           </h2>
-          <p style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.7)', maxWidth: '420px', lineHeight: 1.7, fontWeight: 300 }}>
-            Plataforma premium para agencias y particulares. Automatiza tus citas B1/B2 y gestiona trámites en un solo lugar.
+          <p style={{ fontSize: '1.1rem', color: '#CBD5E1', maxWidth: '450px', lineHeight: 1.6, fontWeight: 300 }}>
+            Acceso exclusivo a herramientas de rastreo algorítmico y automatización de flujos de trabajo para agencias profesionales.
           </p>
 
-          <div style={{ display: 'flex', gap: '3rem', marginTop: '4rem' }}>
+          <div style={{ display: 'flex', gap: '3rem', marginTop: '4rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2rem' }}>
             <div>
-              <div style={{ fontSize: '2.5rem', fontWeight: 800, fontFamily: 'var(--font-heading)', color: '#fff' }}>+5k</div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--lime)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Citas Adelantadas</div>
+              <div style={{ fontSize: '1.75rem', fontWeight: 700, fontFamily: 'var(--font-heading)', color: '#F8FAFC' }}>24/7</div>
+              <div style={{ fontSize: '0.75rem', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600, marginTop: '0.25rem' }}>MONITOREO DE NODOS</div>
             </div>
             <div>
-              <div style={{ fontSize: '2.5rem', fontWeight: 800, fontFamily: 'var(--font-heading)', color: '#fff' }}>100%</div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--lime)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Garantizado</div>
+              <div style={{ fontSize: '1.75rem', fontWeight: 700, fontFamily: 'var(--font-heading)', color: '#F8FAFC' }}>&lt; 50ms</div>
+              <div style={{ fontSize: '0.75rem', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600, marginTop: '0.25rem' }}>LATENCIA DE ESCANEO</div>
             </div>
           </div>
         </div>
