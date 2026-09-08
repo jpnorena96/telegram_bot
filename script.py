@@ -1071,13 +1071,26 @@ class Bot:
                                         wa_msg += f"Ya actualizamos todo en el sistema y tu estado es oficialmente 'agendado'. ¡Mucho éxito en tu entrevista! ✅"
 
                                         try:
-                                            from backend.whatsapp_service import send_whatsapp_message
-                                            import asyncio
-                                            # Create new event loop for async call since this is sync context
-                                            loop = asyncio.new_event_loop()
-                                            asyncio.set_event_loop(loop)
-                                            loop.run_until_complete(send_whatsapp_message(whatsapp_number, wa_msg))
-                                            loop.close()
+                                            import requests
+                                            phone_clean = "".join([c for c in whatsapp_number if c.isdigit() or c == "+"])
+                                            if phone_clean.startswith("+"):
+                                                phone_clean = phone_clean[1:]
+                                                
+                                            url = "https://bot-evolution-api.gnuu1e.easypanel.host/message/sendText/test"
+                                            headers = {
+                                                "apikey": "BE0DD94EFEF7-4E20-B115-8115FAEA8F98",
+                                                "Content-Type": "application/json"
+                                            }
+                                            payload = {
+                                                "number": phone_clean,
+                                                "options": {
+                                                    "delay": 1200,
+                                                    "presence": "composing",
+                                                    "linkPreview": False
+                                                },
+                                                "text": wa_msg
+                                            }
+                                            requests.post(url, headers=headers, json=payload, timeout=30)
                                         except Exception as wa_err:
                                             self.logger(f"Error enviando WhatsApp: {wa_err}")
                                             

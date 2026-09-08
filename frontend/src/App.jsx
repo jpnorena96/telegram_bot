@@ -22,6 +22,7 @@ import VisaProcessesPage from './pages/dashboard/VisaProcessesPage';
 import VisaProcessDetailsPage from './pages/dashboard/VisaProcessDetailsPage';
 import WalletPage from './pages/dashboard/WalletPage';
 import ClientPortalPage from './pages/ClientPortalPage';
+import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -55,8 +56,8 @@ function App() {
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/client-portal/:id" element={<ClientPortalPage />} />
 
-        {/* Dashboard Routes */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
+        {/* Dashboard Routes (Protected) */}
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           <Route index element={<OverviewPage />} />
           <Route path="citas" element={<AppointmentsPage />} />
           <Route path="documentos" element={<VisaProcessesPage />} />

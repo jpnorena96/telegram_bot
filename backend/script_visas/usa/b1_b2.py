@@ -12,3 +12,5 @@ class USAB1B2Script(BaseVisaScript):
         time.sleep(2)
         self.log("Automation completed successfully.")
         return True
+
+

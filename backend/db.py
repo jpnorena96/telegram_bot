@@ -21,6 +21,21 @@ def verify_user(email: str, password: str) -> Optional[dict]:
         logger.error(f"Database Error in verify_user: {err}")
         raise
 
+def update_telegram_id(user_id: int, telegram_id: int) -> bool:
+    """Binds a Telegram user ID to an account."""
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+        sql = "UPDATE users SET telegram_user_id = %s WHERE id = %s"
+        cursor.execute(sql, (telegram_id, user_id))
+        conn.commit()
+        success = cursor.rowcount > 0
+        cursor.close()
+        conn.close()
+        return success
+    except mysql.connector.Error as err:
+        logger.error(f"Database Error in update_telegram_id: {err}")
+        return False
 
 def check_existing_appointment(user_id: int, email: str, consulate: str = None) -> Optional[dict]:
     """Checks if an appointment with this email (and optionally consulate) already exists for the user.

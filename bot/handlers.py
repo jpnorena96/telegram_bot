@@ -551,8 +551,29 @@ async def email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return PASSWORD
 
 
+from datetime import timedelta
+
+# Diccionario para trackear intentos fallidos: {telegram_id: [intentos, lockout_until]}
+FAILED_LOGIN_ATTEMPTS = {}
+MAX_FAILED_ATTEMPTS = 5
+LOCKOUT_MINUTES = 15
+
 async def password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Stores the password, validates against DB, shows main menu, and deletes password msg."""
+    telegram_id = update.effective_user.id
+    now = datetime.now()
+    
+    # Verificar si está bloqueado por fuerza bruta
+    if telegram_id in FAILED_LOGIN_ATTEMPTS:
+        attempts, lock_time = FAILED_LOGIN_ATTEMPTS[telegram_id]
+        if lock_time and now < lock_time:
+            mins_left = (lock_time - now).seconds // 60 + 1
+            await update.message.reply_text(f"🚫 *Cuenta bloqueada temporalmente.*\nHas excedido el límite de intentos fallidos. Intenta de nuevo en {mins_left} minutos.", parse_mode='Markdown')
+            return ConversationHandler.END
+        elif lock_time and now >= lock_time:
+            # Reset
+            FAILED_LOGIN_ATTEMPTS[telegram_id] = [0, None]
+
     password_message = update.message
     password_text = password_message.text
     email_text = context.user_data["email"]
@@ -567,9 +588,27 @@ async def password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         user = db.verify_user(email_text, password_text)
 
         if user:
+            # Check Telegram Device Binding (Security Feature)
+            db_telegram_id = user.get("telegram_user_id")
+            
+            if db_telegram_id and str(db_telegram_id) != str(telegram_id):
+                await update.message.reply_text(
+                    "❌ *Acceso Denegado*\n\nEsta cuenta ya se encuentra vinculada a otro dispositivo de Telegram por seguridad. No puedes iniciar sesión desde este usuario.",
+                    parse_mode='Markdown'
+                )
+                return ConversationHandler.END
+                
+            if not db_telegram_id:
+                # Bind the account for the first time
+                db.update_telegram_id(user["id"], telegram_id)
+                
+            # Reset failed attempts on success
+            if telegram_id in FAILED_LOGIN_ATTEMPTS:
+                FAILED_LOGIN_ATTEMPTS.pop(telegram_id)
+
             context.user_data["user_id"] = user["id"]
             context.user_data["plan"] = user.get("plan", "platino")
-            context.user_data["db_telegram_user_id"] = user.get("telegram_user_id")
+            context.user_data["db_telegram_user_id"] = telegram_id
             context.user_data["role"] = user.get("role", "NATURAL_PERSON")
             # Split comma-separated countries (e.g., 'co,mx') into a list
             countries_str = user.get("country", "co")
@@ -579,13 +618,28 @@ async def password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 update, context,
                 text=(
                     "¡Login exitoso! ✅\n\n"
+                    "🔒 _Este dispositivo de Telegram ha sido vinculado a tu cuenta por seguridad._\n\n"
                     "🎯 *Menú Principal*\n\n"
                     "Selecciona una opción:"
                 )
             )
         else:
+            # Update failed attempts
+            if telegram_id not in FAILED_LOGIN_ATTEMPTS:
+                FAILED_LOGIN_ATTEMPTS[telegram_id] = [0, None]
+            
+            FAILED_LOGIN_ATTEMPTS[telegram_id][0] += 1
+            attempts = FAILED_LOGIN_ATTEMPTS[telegram_id][0]
+            
+            if attempts >= MAX_FAILED_ATTEMPTS:
+                FAILED_LOGIN_ATTEMPTS[telegram_id][1] = now + timedelta(minutes=LOCKOUT_MINUTES)
+                await update.message.reply_text(
+                    f"🚫 Has fallado {MAX_FAILED_ATTEMPTS} veces seguidas. Por tu seguridad, no podrás intentar de nuevo durante {LOCKOUT_MINUTES} minutos."
+                )
+                return ConversationHandler.END
+            
             await update.message.reply_text(
-                "❌ Credenciales incorrectas.\n\n"
+                f"❌ Credenciales incorrectas. (Intento {attempts}/{MAX_FAILED_ATTEMPTS})\n\n"
                 "Por favor intenta nuevamente ingresando tu correo de usuario del bot:"
             )
             return EMAIL
