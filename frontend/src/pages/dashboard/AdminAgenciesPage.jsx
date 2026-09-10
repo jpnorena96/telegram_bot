@@ -69,7 +69,7 @@ const AdminAgenciesPage = () => {
     <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
       {/* ── COMMAND CENTER HEADER ── */}
-      <div style={{ padding: '2rem', background: '#09090B', borderRadius: 'var(--radius-lg)', color: '#FFFFFF', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ padding: '2rem', background: '#09090B', borderRadius: 'var(--radius-lg)', color: 'var(--surface)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', right: '-10%', top: '-50%', opacity: 0.05, transform: 'scale(2)' }}>
           <ShieldAlert size={400} />
         </div>
@@ -81,7 +81,7 @@ const AdminAgenciesPage = () => {
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: '#A1A1AA', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>
               SECURE SYSTEM // ADMINISTRATION
             </div>
-            <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em', color: '#FFFFFF' }}>
+            <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em', color: 'var(--surface)' }}>
               Network Onboarding
             </h1>
             <p style={{ color: '#A1A1AA', fontSize: '0.95rem', marginTop: '0.5rem', maxWidth: '600px' }}>
@@ -152,7 +152,7 @@ const AdminAgenciesPage = () => {
                 {/* Actions Terminal */}
                 <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', gap: '0.5rem' }}>
                   {a.status !== 'approved' && (
-                    <button onClick={() => handleStatus(a.id, 'approved')} className="btn btn-primary btn-terminal" style={{ background: '#059669', color: '#fff' }}>
+                    <button onClick={() => handleStatus(a.id, 'approved')} className="btn btn-primary btn-terminal" style={{ background: '#059669', color: 'var(--surface)' }}>
                       <Check size={14} /> Authorize
                     </button>
                   )}

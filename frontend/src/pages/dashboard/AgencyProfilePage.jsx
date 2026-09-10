@@ -275,7 +275,7 @@ const AgencyProfilePage = () => {
           <div style={{ 
             width: '375px', // iPhone Width
             height: '812px',
-            background: '#ffffff', // Light bg for the secure main
+            background: 'var(--surface)', // Light bg for the secure main
             borderRadius: '40px', 
             border: '12px solid #18181b', 
             overflow: 'hidden',
@@ -330,7 +330,7 @@ const AgencyProfilePage = () => {
                 <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div>
                     <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '0.25rem' }}>Nombre Completo *</label>
-                    <div style={{ height: '36px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '6px' }}></div>
+                    <div style={{ height: '36px', background: 'var(--surface)', border: '1px solid #cbd5e1', borderRadius: '6px' }}></div>
                   </div>
                   <div>
                     <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '0.25rem' }}>Pasaporte (PDF/JPG) *</label>
@@ -357,7 +357,7 @@ const AgencyProfilePage = () => {
               <div style={{ 
                 padding: '1rem', 
                 background: formData.brand_color, 
-                color: '#fff', 
+                color: 'var(--surface)', 
                 fontWeight: 700,
                 fontSize: '0.9rem',
                 textAlign: 'center',

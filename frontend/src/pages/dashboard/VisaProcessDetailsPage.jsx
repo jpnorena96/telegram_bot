@@ -140,7 +140,7 @@ const VisaProcessDetailsPage = () => {
           {/* Header & Controls */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem' }}>
             <div>
-              <button onClick={() => navigate('/dashboard/visa-processes')} className="btn btn-outline btn-sm" style={{ marginBottom: '1.25rem', color: '#4B5563', borderColor: '#D1D5DB' }}>
+              <button onClick={() => navigate('/dashboard/visa-processes')} className="btn btn-outline btn-sm" style={{ marginBottom: '1.25rem', color: 'var(--text-2)', borderColor: 'var(--border)' }}>
                 <ArrowLeft size={14} /> Volver a Lista
               </button>
               <h1 className="official-title" style={{ margin: 0, textAlign: 'left', borderBottom: 'none', paddingBottom: 0 }}>
@@ -152,7 +152,7 @@ const VisaProcessDetailsPage = () => {
             </div>
             
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button onClick={() => window.open(`/client-portal/${process.id}`, '_blank')} className="btn btn-outline btn-sm" style={{ borderColor: '#E5E7EB', color: '#4B5563' }} title="Portal del Cliente">
+              <button onClick={() => window.open(`/client-portal/${process.id}`, '_blank')} className="btn btn-outline btn-sm" style={{ borderColor: 'var(--border)', color: 'var(--text-2)' }} title="Portal del Cliente">
                 <Globe size={14} /> Portal Formulario
               </button>
               <button onClick={handleDelete} className="btn btn-outline btn-sm" style={{ color: '#DC2626', borderColor: '#FCA5A5' }} title="Eliminar Expediente">
@@ -210,7 +210,7 @@ const VisaProcessDetailsPage = () => {
           </h2>
 
           {applicants.length > 1 && (
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid #E5E7EB', paddingBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
               {applicants.map((app, idx) => (
                 <button
                   key={app.id}
@@ -219,7 +219,7 @@ const VisaProcessDetailsPage = () => {
                   style={{
                     borderRadius: '4px',
                     background: activeTab === idx ? '#111827' : '#F3F4F6',
-                    color: activeTab === idx ? '#FFFFFF' : '#4B5563',
+                    color: activeTab === idx ? 'var(--surface)' : 'var(--text-2)',
                     border: 'none',
                     fontWeight: 600
                   }}
@@ -231,7 +231,7 @@ const VisaProcessDetailsPage = () => {
           )}
 
           {applicants.length === 0 ? (
-            <div style={{ padding: '3rem', textAlign: 'center', color: '#9CA3AF', fontStyle: 'italic', border: '1px dashed #D1D5DB' }}>
+            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-3)', fontStyle: 'italic', border: '1px dashed var(--border)' }}>
               No se han recibido respuestas o anexos para este expediente aún.
             </div>
           ) : (
@@ -242,10 +242,10 @@ const VisaProcessDetailsPage = () => {
                 const diag = calculateVisaApprovalScore(fd);
 
                 return (
-                  <div key={app.id} style={{ padding: '1.5rem', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '8px' }}>
+                  <div key={app.id} style={{ padding: '1.5rem', background: '#F9FAFB', border: '1px solid var(--border)', borderRadius: '8px' }}>
                     
                     {/* Header del Solicitante */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #D1D5DB', paddingBottom: '0.75rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
                       <div>
                         <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#111827', textTransform: 'uppercase' }}>
                           {app.full_name || `${fd.given_names || ''} ${fd.surname || ''}`.trim() || 'Solicitante'}
@@ -254,23 +254,23 @@ const VisaProcessDetailsPage = () => {
                           Rol: {index === 0 ? 'Titular Principal' : (app.relationship || 'Acompañante')}
                         </div>
                       </div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', background: '#F3F4F6', padding: '0.35rem 0.6rem', border: '1px solid #D1D5DB', color: '#111827', fontWeight: 700 }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', background: '#F3F4F6', padding: '0.35rem 0.6rem', border: '1px solid var(--border)', color: '#111827', fontWeight: 700 }}>
                         PASAPORTE: {app.passport_number || fd.passport_number || 'N/A'}
                       </div>
                     </div>
 
                     {/* ── CARD DIAGNÓSTICO IA DE PORCENTAJE DE APROBACIÓN DE VISA AMERICANA ── */}
-                    <div style={{ background: '#FFFFFF', border: `1px solid ${diag.color}40`, borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem', borderBottom: '1px solid #F1F5F9', paddingBottom: '0.75rem' }}>
+                    <div style={{ background: 'var(--surface)', border: `1px solid ${diag.color}40`, borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem', borderBottom: '1px solid var(--surface-2)', paddingBottom: '0.75rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                           <div style={{ width: 40, height: 40, borderRadius: '50%', background: `${diag.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Sparkles size={20} color={diag.color} />
                           </div>
                           <div>
-                            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0F172A' }}>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-1)' }}>
                               Diagnóstico de Probabilidad de Aprobación (Visa Americana B1/B2)
                             </div>
-                            <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>
                               Evaluación automatizada basada en arraigo, solvencia e historial migratorio.
                             </div>
                           </div>
@@ -313,11 +313,11 @@ const VisaProcessDetailsPage = () => {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
                       
                       {/* IDENTIDAD */}
-                      <div style={{ background: '#FFFFFF', padding: '1rem', border: '1px solid #E5E7EB', borderRadius: '6px' }}>
+                      <div style={{ background: 'var(--surface)', padding: '1rem', border: '1px solid var(--border)', borderRadius: '6px' }}>
                         <div style={{ fontWeight: 700, fontSize: '0.82rem', color: '#374151', textTransform: 'uppercase', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                           <User size={14} color="#10B981" /> 1. Datos Personales
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: '#4B5563', lineHeight: 1.6 }}>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-2)', lineHeight: 1.6 }}>
                           <div><strong>Nombres:</strong> {fd.given_names || app.full_name}</div>
                           <div><strong>Apellidos:</strong> {fd.surname || '—'}</div>
                           <div><strong>DNI / Cédula:</strong> {fd.national_id || '—'}</div>
@@ -328,11 +328,11 @@ const VisaProcessDetailsPage = () => {
                       </div>
 
                       {/* PASAPORTE Y CONTACTO */}
-                      <div style={{ background: '#FFFFFF', padding: '1rem', border: '1px solid #E5E7EB', borderRadius: '6px' }}>
+                      <div style={{ background: 'var(--surface)', padding: '1rem', border: '1px solid var(--border)', borderRadius: '6px' }}>
                         <div style={{ fontWeight: 700, fontSize: '0.82rem', color: '#374151', textTransform: 'uppercase', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                           <FileText size={14} color="#10B981" /> 2. Pasaporte & Contacto
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: '#4B5563', lineHeight: 1.6 }}>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-2)', lineHeight: 1.6 }}>
                           <div><strong>Nº Pasaporte:</strong> {app.passport_number || fd.passport_number || '—'}</div>
                           <div><strong>País Emisión:</strong> {fd.passport_country || '—'}</div>
                           <div><strong>Emisión/Expiración:</strong> {fd.passport_issue_date || '—'} al {fd.passport_expiry_date || '—'}</div>
@@ -343,11 +343,11 @@ const VisaProcessDetailsPage = () => {
                       </div>
 
                       {/* LABORAL Y PLANES */}
-                      <div style={{ background: '#FFFFFF', padding: '1rem', border: '1px solid #E5E7EB', borderRadius: '6px' }}>
+                      <div style={{ background: 'var(--surface)', padding: '1rem', border: '1px solid var(--border)', borderRadius: '6px' }}>
                         <div style={{ fontWeight: 700, fontSize: '0.82rem', color: '#374151', textTransform: 'uppercase', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                           <Briefcase size={14} color="#10B981" /> 3. Laboral & Viaje
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: '#4B5563', lineHeight: 1.6 }}>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-2)', lineHeight: 1.6 }}>
                           <div><strong>Ocupación:</strong> {fd.occupation || '—'}</div>
                           <div><strong>Empresa:</strong> {fd.employer_name || '—'} ({fd.job_title || ''})</div>
                           <div><strong>Ingreso Aprox.:</strong> {fd.monthly_income || '—'}</div>
@@ -367,7 +367,7 @@ const VisaProcessDetailsPage = () => {
                     {app.documents && app.documents.length > 0 ? (
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.75rem' }}>
                         {app.documents.map(doc => (
-                          <div key={doc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.8rem', background: '#FFFFFF', border: '1px solid #D1D5DB', borderRadius: '6px' }}>
+                          <div key={doc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.8rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
                               <FileText size={16} color="#10B981" />
                               <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -388,7 +388,7 @@ const VisaProcessDetailsPage = () => {
                         ))}
                       </div>
                     ) : (
-                      <div style={{ padding: '0.75rem', background: '#FFFFFF', border: '1px dotted #D1D5DB', color: '#9CA3AF', fontSize: '0.78rem', fontStyle: 'italic', borderRadius: '6px' }}>
+                      <div style={{ padding: '0.75rem', background: 'var(--surface)', border: '1px dotted var(--border)', color: 'var(--text-3)', fontSize: '0.78rem', fontStyle: 'italic', borderRadius: '6px' }}>
                         Sin archivos adjuntos para este integrante.
                       </div>
                     )}

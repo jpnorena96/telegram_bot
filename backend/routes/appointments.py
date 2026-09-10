@@ -210,6 +210,8 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
                 a.email as client, 
                 'B1/B2 Turista' as type, 
                 a.min_consulate_date as originalDate,
+                a.min_consulate_date,
+                a.max_consulate_date,
                 a.status as newDate,
                 a.status as status,
                 a.date_created,
@@ -233,6 +235,8 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
                 email as client, 
                 'B1/B2 Turista' as type, 
                 min_consulate_date as originalDate,
+                min_consulate_date,
+                max_consulate_date,
                 status as newDate,
                 status as status,
                 date_created,
@@ -255,6 +259,10 @@ def get_user_appointments(current_user: dict = Depends(get_current_user), db = D
     for apt in appointments:
         if apt["originalDate"]:
             apt["originalDate"] = apt["originalDate"].strftime('%Y-%m-%d')
+        if apt.get("min_consulate_date"):
+            apt["min_consulate_date"] = apt["min_consulate_date"].strftime('%Y-%m-%d')
+        if apt.get("max_consulate_date"):
+            apt["max_consulate_date"] = apt["max_consulate_date"].strftime('%Y-%m-%d')
         if apt.get("date_created"):
             apt["date_created"] = apt["date_created"].strftime('%Y-%m-%d %H:%M:%S')
         if apt.get("date_booked"):

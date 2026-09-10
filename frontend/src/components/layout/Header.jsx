@@ -107,13 +107,13 @@ const Header = ({ role, userName, onMenuClick }) => {
 
   return (
     <header style={{ 
-      background: 'rgba(255, 255, 255, 0.9)', 
-      borderBottom: '1px solid var(--border)', 
+      background: 'rgba(17, 24, 39, 0.4)', 
+      borderBottom: '1px solid rgba(255, 255, 255, 0.05)', 
       position: 'sticky', 
       top: 0, 
       zIndex: 50, 
-      backdropFilter: 'blur(12px)',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+      backdropFilter: 'blur(20px)',
+      boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)'
     }}>
       <style>{`
         @keyframes ringing {
@@ -155,10 +155,10 @@ const Header = ({ role, userName, onMenuClick }) => {
 
           {/* Search */}
           <form className="hide-on-mobile" onSubmit={(e) => { e.preventDefault(); if (searchQuery.trim()) navigate(`/dashboard/buscar?q=${encodeURIComponent(searchQuery)}`); }} 
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '99px', padding: '0.4rem 1rem', color: 'var(--text-3)', transition: 'all 0.2s', cursor: 'text' }}
-                onMouseOver={e => e.currentTarget.style.borderColor = 'var(--border-2)'}
-                onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border)'}>
-            <Search size={14} />
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '99px', padding: '0.4rem 1rem', color: 'var(--text-3)', transition: 'all 0.3s ease', cursor: 'text', boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.2)' }}
+                onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--cyan)'; e.currentTarget.style.boxShadow = '0 0 10px rgba(6,182,212,0.2)'; }}
+                onMouseOut={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.boxShadow = 'inset 0 1px 4px rgba(0,0,0,0.2)'; }}>
+            <Search size={14} color="var(--cyan)" />
             <input 
               type="text" 
               placeholder="Buscar..." 

@@ -29,18 +29,20 @@ const Sidebar = ({ role, userName, isMobileOpen, closeMobile }) => {
   const links = NAV.filter(n => n.roles.includes(role));
 
   return (
-    <aside 
-      className={`layout-sidebar ${isMobileOpen ? 'open' : ''}`}
-      style={{
-        width: collapsed ? '80px' : 'var(--sidebar-w)',
-        background: 'var(--bg)',
-        borderRight: '1px solid var(--border)',
-        display: 'flex', flexDirection: 'column',
-        height: '100vh', position: 'sticky', top: 0,
-        flexShrink: 0, transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-        overflow: 'hidden', zIndex: 100,
-      }}
-    >
+    <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', height: '100vh', position: 'sticky', top: 0, zIndex: 100 }}>
+      <aside 
+        className={`layout-sidebar glass-panel ${isMobileOpen ? 'open' : ''}`}
+        style={{
+          width: collapsed ? '80px' : 'var(--sidebar-w)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-xl)',
+          display: 'flex', flexDirection: 'column',
+          flex: 1,
+          flexShrink: 0, transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          overflow: 'hidden',
+          boxShadow: '0 10px 40px -10px rgba(0,0,0,0.5)'
+        }}
+      >
 
       {/* Brand */}
       <div style={{ padding: collapsed ? '1.5rem 0' : '1.5rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'flex-start', minHeight: '80px' }}>
@@ -80,8 +82,16 @@ const Sidebar = ({ role, userName, isMobileOpen, closeMobile }) => {
           </NavLink>
         ))}
         <style>{`
-          .nav-link:hover { background: rgba(255,255,255,0.03); color: var(--text-1) !important; }
-          .nav-link.active { background: rgba(255,255,255,0.06); }
+          .nav-link:hover { background: rgba(255,255,255,0.05); color: var(--text-1) !important; }
+          .nav-link.active { 
+            background: linear-gradient(90deg, rgba(6,182,212,0.15) 0%, transparent 100%); 
+            border-left: 3px solid var(--cyan);
+            color: var(--text-1) !important; 
+          }
+          .nav-link.active svg {
+            filter: drop-shadow(0 0 8px rgba(6,182,212,0.6));
+            color: var(--cyan) !important;
+          }
         `}</style>
       </nav>
 
@@ -119,7 +129,8 @@ const Sidebar = ({ role, userName, isMobileOpen, closeMobile }) => {
           </button>
         </div>
       </div>
-    </aside>
+      </aside>
+    </div>
   );
 };
 

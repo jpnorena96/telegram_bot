@@ -6,20 +6,20 @@
 ═══════════════════════════════════ */
 
 :root {
-  /* Core Light Palette */
-  --bg:          #FAFAFA;
-  --surface:     #FFFFFF;
-  --surface-2:   #F4F4F5;
-  --surface-3:   #E4E4E7;
+  /* Core Dark Palette - Exotic Tech / Glassmorphism */
+  --bg:          #030712; /* Deep dark blue/black */
+  --surface:     rgba(17, 24, 39, 0.65); /* Translucent surface */
+  --surface-2:   rgba(31, 41, 55, 0.75);
+  --surface-3:   rgba(55, 65, 81, 0.85);
 
-  --black:       #09090B;
-  --black-2:     #18181B;
-  --black-3:     #27272A;
+  --black:       #000000;
+  --black-2:     #030712;
+  --black-3:     #111827;
 
-  /* Accent default (Agency Brand Color will override this in inline styles) */
-  --lime-r: 0;
-  --lime-g: 0;
-  --lime-b: 0;
+  /* Accent default (Neon Cyan/Lime blend for exotic feel) */
+  --lime-r: 6;
+  --lime-g: 182;
+  --lime-b: 212;
   --lime:        rgb(var(--lime-r), var(--lime-g), var(--lime-b));
   
   /* Automatic Contrast Calculation for text over --lime */
@@ -28,25 +28,25 @@
   --text-on-lime: rgb(var(--lime-contrast), var(--lime-contrast), var(--lime-contrast));
 
   --lime-dim:    rgba(var(--lime-r), var(--lime-g), var(--lime-b), 0.85);
-  --lime-glow:   rgba(var(--lime-r), var(--lime-g), var(--lime-b), 0.05);
-  --lime-subtle: rgba(var(--lime-r), var(--lime-g), var(--lime-b), 0.02);
+  --lime-glow:   rgba(var(--lime-r), var(--lime-g), var(--lime-b), 0.15);
+  --lime-subtle: rgba(var(--lime-r), var(--lime-g), var(--lime-b), 0.05);
 
-  /* Status Colors (Subtle, Premium) */
+  /* Status Colors (Vibrant Neons) */
   --orange:      #F59E0B;
   --cyan:        #06B6D4;
-  --gold:        #D97706;
+  --gold:        #FBBF24;
   --green:       #10B981;
   --red:         #EF4444;
 
-  /* Text Colors */
-  --text-1:      #09090B;
-  --text-2:      #52525B;
-  --text-3:      #71717A;
-  --text-muted:  #A1A1AA;
+  /* Text Colors (Light for dark mode) */
+  --text-1:      #F8FAFC;
+  --text-2:      #CBD5E1;
+  --text-3:      #94A3B8;
+  --text-muted:  #64748B;
   
   /* Borders */
-  --border:      #E4E4E7;
-  --border-2:    #D4D4D8;
+  --border:      rgba(255, 255, 255, 0.1);
+  --border-2:    rgba(255, 255, 255, 0.15);
 
   /* Corporate Typographic Scale */
   --font-sans:   'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -103,12 +103,29 @@ a:hover { color: var(--text-2); }
 
 .spinner {
   width: 18px; height: 18px;
-  border: 2px solid var(--border);
-  border-top-color: currentColor;
+  border: 2px solid var(--border-2);
+  border-top-color: var(--lime);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Ultra-Premium Glassmorphism Utilities */
+.glass-panel {
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 24px -1px rgba(0,0,0,0.4);
+}
+
+.glow-hover {
+  transition: all 0.3s ease;
+}
+.glow-hover:hover {
+  box-shadow: 0 0 20px var(--lime-glow);
+  border-color: var(--lime-dim);
+}
 
 /* ═══════════════════════════════════
    BUTTONS (Ultra-Premium)
@@ -125,27 +142,28 @@ a:hover { color: var(--text-2); }
   cursor: pointer;
   transition: all var(--t-fast);
   border-radius: var(--radius-md);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  backdrop-filter: blur(4px);
 }
 .btn:hover:not(:disabled) { 
   background: var(--surface-2); 
   border-color: var(--border-2); 
+  box-shadow: 0 0 15px rgba(255,255,255,0.05);
 }
 .btn:disabled {
-  opacity: 0.6;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
 .btn-primary {
-  background: var(--text-1);
+  background: linear-gradient(135deg, var(--lime), #3B82F6);
   color: #FFFFFF;
   border-color: transparent;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
 }
 .btn-primary:hover:not(:disabled) { 
-  background: var(--text-2); 
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5);
   color: #FFFFFF;
 }
 

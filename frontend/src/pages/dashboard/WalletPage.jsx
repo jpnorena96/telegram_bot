@@ -198,7 +198,7 @@ const WalletPage = () => {
                   }}
                 >
                   {pkg.highlight && (
-                    <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'var(--lime)', color: 'var(--text-on-lime, #fff)', fontSize: '0.7rem', fontWeight: 800, padding: '4px 12px', borderRadius: '20px', letterSpacing: '0.05em' }}>
+                    <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'var(--lime)', color: 'var(--text-on-lime, var(--surface))', fontSize: '0.7rem', fontWeight: 800, padding: '4px 12px', borderRadius: '20px', letterSpacing: '0.05em' }}>
                       MÁS POPULAR
                     </div>
                   )}
@@ -296,7 +296,7 @@ const WalletPage = () => {
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>{tx.date} · {tx.id}</div>
                     </div>
                   </div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: tx.amount > 0 ? '#10B981' : '#0F172A' }}>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: tx.amount > 0 ? '#10B981' : 'var(--text-1)' }}>
                     {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
                   </div>
                 </div>

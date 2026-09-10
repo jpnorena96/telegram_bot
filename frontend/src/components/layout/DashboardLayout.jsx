@@ -71,7 +71,16 @@ const DashboardLayout = () => {
   );
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)', position: 'relative', overflow: 'hidden' }}>
+      {/* EXOTIC ANIMATED BACKGROUND */}
+      <div style={{ position: 'fixed', top: '-10%', left: '-10%', width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(6,182,212,0.15) 0%, transparent 70%)', filter: 'blur(80px)', animation: 'float 20s infinite alternate', zIndex: 0, pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', bottom: '-20%', right: '-10%', width: '50vw', height: '50vw', background: 'radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%)', filter: 'blur(100px)', animation: 'float 25s infinite alternate-reverse', zIndex: 0, pointerEvents: 'none' }} />
+      <style>{`
+        @keyframes float {
+          0% { transform: translate(0, 0) scale(1); }
+          100% { transform: translate(50px, 50px) scale(1.1); }
+        }
+      `}</style>
       {/* Mobile Overlay */}
       <div 
         className={`sidebar-overlay ${mobileMenuOpen ? 'open' : ''}`}
@@ -80,18 +89,19 @@ const DashboardLayout = () => {
       
       <Sidebar role={role} userName={userName} isMobileOpen={mobileMenuOpen} closeMobile={() => setMobileMenuOpen(false)} />
       
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0, background: 'var(--surface-2)', position: 'relative' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0, position: 'relative', zIndex: 1, padding: '1rem', paddingLeft: 0 }}>
         
-        {/* Subtle background glow */}
-        <div style={{ position: 'absolute', top: 0, left: '20%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 60%)', pointerEvents: 'none', zIndex: 0 }} />
-
-        <Header role={role} userName={userName} onMenuClick={() => setMobileMenuOpen(true)} />
-        
-        <main className="main-content" style={{ flex: 1, overflowY: 'auto', position: 'relative', zIndex: 1 }}>
+        {/* Floating Glass Container for the main content area */}
+        <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', borderRadius: 'var(--radius-xl)', overflow: 'hidden', position: 'relative' }}>
+          
+          <Header role={role} userName={userName} onMenuClick={() => setMobileMenuOpen(true)} />
+          
+          <main className="main-content" style={{ flex: 1, overflowY: 'auto', position: 'relative', zIndex: 1, padding: '1.5rem' }}>
           <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
             <Outlet context={{ role, userName }} />
           </div>
         </main>
+        </div>
       </div>
     </div>
   );

@@ -122,10 +122,10 @@ const VisaProcessesPage = () => {
   if (role === 'AGENCY' || role === 'TRAVEL_AGENCY') {
     return (
       <div className="animate-in" style={{ padding: '0', maxWidth: '1200px', margin: '0 auto', textAlign: 'center', marginTop: '4rem' }}>
-        <div style={{ background: '#FFF', padding: '3rem', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+        <div style={{ background: 'var(--surface)', padding: '3rem', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
           <FolderOpen size={48} style={{ color: '#8B5CF6', marginBottom: '1rem' }} />
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.5rem' }}>Sección en Construcción</h2>
-          <p style={{ color: '#64748B', fontSize: '1rem' }}>Esta sección de Mis Trámites y Expedientes estará habilitada muy pronto para tu rol de agencia. ¡Estamos trabajando en ello!</p>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-1)', marginBottom: '0.5rem' }}>Sección en Construcción</h2>
+          <p style={{ color: 'var(--text-2)', fontSize: '1rem' }}>Esta sección de Mis Trámites y Expedientes estará habilitada muy pronto para tu rol de agencia. ¡Estamos trabajando en ello!</p>
         </div>
       </div>
     );
@@ -171,32 +171,32 @@ const VisaProcessesPage = () => {
       {/* ── KPI METRICS DE TRÁMITES ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
         
-        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '14px', padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <div style={{ width: 44, height: 44, borderRadius: '10px', background: '#F5F3FF', color: '#8B5CF6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <FolderOpen size={22} />
           </div>
           <div>
-            <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600, textTransform: 'uppercase' }}>Total Expedientes</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0F172A' }}>{totalCount}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase' }}>Total Expedientes</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-1)' }}>{totalCount}</div>
           </div>
         </div>
 
-        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '14px', padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <div style={{ width: 44, height: 44, borderRadius: '10px', background: '#FEF3C7', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Clock size={22} />
           </div>
           <div>
-            <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600, textTransform: 'uppercase' }}>En Recolección Cliente</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase' }}>En Recolección Cliente</div>
             <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#D97706' }}>{inProgressCount}</div>
           </div>
         </div>
 
-        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '14px', padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <div style={{ width: 44, height: 44, borderRadius: '10px', background: '#DCFCE7', color: '#15803D', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <UserCheck size={22} />
           </div>
           <div>
-            <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600, textTransform: 'uppercase' }}>Listos para DS-160</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase' }}>Listos para DS-160</div>
             <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#15803D' }}>{readyCount}</div>
           </div>
         </div>
@@ -205,19 +205,19 @@ const VisaProcessesPage = () => {
 
       {/* ── WIZARD DE CREACIÓN MODERNIZADO ── */}
       {creating && (
-        <div className="panel animate-in" style={{ padding: '2rem', borderRadius: '16px', marginBottom: '2rem', border: '1px solid #8B5CF6', background: '#FFFFFF', boxShadow: '0 4px 12px rgba(139, 92, 246, 0.08)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #F1F5F9', paddingBottom: '1rem' }}>
+        <div className="panel animate-in" style={{ padding: '2rem', borderRadius: '16px', marginBottom: '2rem', border: '1px solid #8B5CF6', background: 'var(--surface)', boxShadow: '0 4px 12px rgba(139, 92, 246, 0.08)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--surface-2)', paddingBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
               <div style={{ width: 36, height: 36, borderRadius: '10px', background: '#F5F3FF', color: '#8B5CF6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Sparkles size={18} />
               </div>
               <div>
-                <h3 style={{ margin: 0, fontWeight: 800, fontSize: '1.1rem', color: '#0F172A' }}>Apertura de Nuevo Expediente</h3>
-                <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748B' }}>Paso {wizardStep} de 4 · Configuración del formulario y cliente</p>
+                <h3 style={{ margin: 0, fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-1)' }}>Apertura de Nuevo Expediente</h3>
+                <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-2)' }}>Paso {wizardStep} de 4 · Configuración del formulario y cliente</p>
               </div>
             </div>
 
-            <button onClick={() => setCreating(false)} className="btn btn-outline btn-sm" style={{ borderColor: '#E2E8F0', color: '#64748B' }}>
+            <button onClick={() => setCreating(false)} className="btn btn-outline btn-sm" style={{ borderColor: 'var(--border)', color: 'var(--text-2)' }}>
               ✕ Cancelar
             </button>
           </div>
@@ -225,7 +225,7 @@ const VisaProcessesPage = () => {
           {/* STEP 1: PAÍS DESTINO */}
           {wizardStep === 1 && (
             <div className="animate-in">
-              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '1rem', color: '#0F172A' }}>1. Selecciona el País de Destino del Trámite</h4>
+              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-1)' }}>1. Selecciona el País de Destino del Trámite</h4>
               
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 {[
@@ -241,8 +241,8 @@ const VisaProcessesPage = () => {
                     style={{
                       padding: '1.25rem',
                       borderRadius: '12px',
-                      border: selectedCountry === item.name ? '2px solid #8B5CF6' : '1px solid #E2E8F0',
-                      background: selectedCountry === item.name ? '#F5F3FF' : '#FFFFFF',
+                      border: selectedCountry === item.name ? '2px solid #8B5CF6' : '1px solid var(--border)',
+                      background: selectedCountry === item.name ? '#F5F3FF' : 'var(--surface)',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -251,7 +251,7 @@ const VisaProcessesPage = () => {
                     }}
                   >
                     <span style={{ fontSize: '1.75rem' }}>{item.flag}</span>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 700, color: selectedCountry === item.name ? '#7C3AED' : '#0F172A' }}>{item.name}</span>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 700, color: selectedCountry === item.name ? '#7C3AED' : 'var(--text-1)' }}>{item.name}</span>
                   </div>
                 ))}
               </div>
@@ -267,7 +267,7 @@ const VisaProcessesPage = () => {
           {/* STEP 2: AGRUPACIÓN */}
           {wizardStep === 2 && (
             <div className="animate-in">
-              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '1rem', color: '#0F172A' }}>2. Modalidad de Integrantes</h4>
+              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-1)' }}>2. Modalidad de Integrantes</h4>
               
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 {[
@@ -282,14 +282,14 @@ const VisaProcessesPage = () => {
                     style={{
                       padding: '1.25rem',
                       borderRadius: '12px',
-                      border: selectedGroup === g.name ? '2px solid #8B5CF6' : '1px solid #E2E8F0',
-                      background: selectedGroup === g.name ? '#F5F3FF' : '#FFFFFF',
+                      border: selectedGroup === g.name ? '2px solid #8B5CF6' : '1px solid var(--border)',
+                      background: selectedGroup === g.name ? '#F5F3FF' : 'var(--surface)',
                       cursor: 'pointer',
                       transition: 'all 0.2s'
                     }}
                   >
-                    <div style={{ fontSize: '0.95rem', fontWeight: 700, color: selectedGroup === g.name ? '#7C3AED' : '#0F172A' }}>{g.name}</div>
-                    <div style={{ fontSize: '0.78rem', color: '#64748B', marginTop: '0.2rem' }}>{g.desc}</div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 700, color: selectedGroup === g.name ? '#7C3AED' : 'var(--text-1)' }}>{g.name}</div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-2)', marginTop: '0.2rem' }}>{g.desc}</div>
                   </div>
                 ))}
               </div>
@@ -306,7 +306,7 @@ const VisaProcessesPage = () => {
           {/* STEP 3: PROPÓSITO */}
           {wizardStep === 3 && (
             <div className="animate-in">
-              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '1rem', color: '#0F172A' }}>3. Categoría y Propósito del Visado</h4>
+              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-1)' }}>3. Categoría y Propósito del Visado</h4>
               
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 {[
@@ -321,13 +321,13 @@ const VisaProcessesPage = () => {
                     style={{
                       padding: '1.25rem',
                       borderRadius: '12px',
-                      border: selectedPurpose === p.name ? '2px solid #8B5CF6' : '1px solid #E2E8F0',
-                      background: selectedPurpose === p.name ? '#F5F3FF' : '#FFFFFF',
+                      border: selectedPurpose === p.name ? '2px solid #8B5CF6' : '1px solid var(--border)',
+                      background: selectedPurpose === p.name ? '#F5F3FF' : 'var(--surface)',
                       cursor: 'pointer'
                     }}
                   >
-                    <div style={{ fontSize: '0.95rem', fontWeight: 700, color: selectedPurpose === p.name ? '#7C3AED' : '#0F172A' }}>{p.name}</div>
-                    <div style={{ fontSize: '0.78rem', color: '#64748B', marginTop: '0.2rem' }}>{p.cat}</div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 700, color: selectedPurpose === p.name ? '#7C3AED' : 'var(--text-1)' }}>{p.name}</div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-2)', marginTop: '0.2rem' }}>{p.cat}</div>
                   </div>
                 ))}
               </div>
@@ -344,7 +344,7 @@ const VisaProcessesPage = () => {
           {/* STEP 4: EMAIL DEL CLIENTE */}
           {wizardStep === 4 && (
             <form onSubmit={handleCreate} className="animate-in">
-              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '1rem', color: '#0F172A' }}>4. Email del Cliente para el Enlace Seguro del Formulario</h4>
+              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-1)' }}>4. Email del Cliente para el Enlace Seguro del Formulario</h4>
               
               <div style={{ marginBottom: '1.5rem' }}>
                 <label className="input-label">Correo Electrónico del Cliente / Titular</label>
@@ -355,9 +355,9 @@ const VisaProcessesPage = () => {
                   value={newEmail} 
                   onChange={(e) => setNewEmail(e.target.value)} 
                   className="input-field"
-                  style={{ background: '#FFF' }}
+                  style={{ background: 'var(--surface)' }}
                 />
-                <p style={{ fontSize: '0.78rem', color: '#64748B', marginTop: '0.4rem' }}>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-2)', marginTop: '0.4rem' }}>
                   Se creará un portal interactivo para que tu cliente responda las preguntas y suba su pasaporte.
                 </p>
               </div>
@@ -386,12 +386,12 @@ const VisaProcessesPage = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="input-field"
-            style={{ paddingLeft: '2.75rem', background: '#FFFFFF', borderRadius: '10px', borderColor: '#CBD5E1' }}
+            style={{ paddingLeft: '2.75rem', background: 'var(--surface)', borderRadius: '10px', borderColor: 'var(--border)' }}
           />
         </div>
 
         {/* Filtros Tab */}
-        <div style={{ display: 'flex', background: '#FFFFFF', borderRadius: '10px', border: '1px solid #E2E8F0', padding: '0.2rem', gap: '0.2rem' }}>
+        <div style={{ display: 'flex', background: 'var(--surface)', borderRadius: '10px', border: '1px solid var(--border)', padding: '0.2rem', gap: '0.2rem' }}>
           {[
             { id: 'all', label: 'Todos' },
             { id: 'in_progress', label: 'En Recolección' },
@@ -404,8 +404,8 @@ const VisaProcessesPage = () => {
                 padding: '0.5rem 1rem',
                 borderRadius: '8px',
                 border: 'none',
-                background: statusFilter === tab.id ? '#F1F5F9' : 'transparent',
-                color: statusFilter === tab.id ? '#0F172A' : '#64748B',
+                background: statusFilter === tab.id ? 'var(--surface-2)' : 'transparent',
+                color: statusFilter === tab.id ? 'var(--text-1)' : 'var(--text-2)',
                 fontSize: '0.8rem',
                 fontWeight: 700,
                 cursor: 'pointer'
@@ -418,11 +418,11 @@ const VisaProcessesPage = () => {
       </div>
 
       {/* ── TABLA EJECUTIVA DE TRÁMITES Y EXPEDIENTES ── */}
-      <div className="panel" style={{ borderRadius: '16px', overflow: 'hidden', background: '#FFFFFF', border: '1px solid #E2E8F0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+      <div className="panel" style={{ borderRadius: '16px', overflow: 'hidden', background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
         <div style={{ overflowX: 'auto' }}>
           <table className="data-table" style={{ width: '100%', fontSize: '0.85rem' }}>
             <thead>
-              <tr style={{ background: '#F8FAFC', textAlign: 'left', color: '#64748B' }}>
+              <tr style={{ background: 'var(--surface-2)', textAlign: 'left', color: 'var(--text-2)' }}>
                 <th style={{ padding: '1rem' }}>Expediente N°</th>
                 <th style={{ padding: '1rem' }}>Cliente / Email Portal</th>
                 <th style={{ padding: '1rem' }}>Destino & Modalidad</th>
@@ -443,7 +443,7 @@ const VisaProcessesPage = () => {
                   const isReady = p.status === 'Listo para Alta' || p.status === 'Listo para Revisar';
 
                   return (
-                    <tr key={p.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                    <tr key={p.id} style={{ borderBottom: '1px solid var(--surface-2)' }}>
                       
                       {/* ID EXPEDIENTE */}
                       <td style={{ padding: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 800, color: '#8B5CF6' }}>
@@ -452,8 +452,8 @@ const VisaProcessesPage = () => {
 
                       {/* CLIENTE / EMAIL */}
                       <td style={{ padding: '1rem' }}>
-                        <div style={{ fontWeight: 700, color: '#0F172A' }}>{p.client_email}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '0.2rem' }}>
+                        <div style={{ fontWeight: 700, color: 'var(--text-1)' }}>{p.client_email}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', marginTop: '0.2rem' }}>
                           Creado: {new Date(p.created_at).toLocaleDateString()}
                         </div>
                       </td>
@@ -463,7 +463,7 @@ const VisaProcessesPage = () => {
                         <div style={{ fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                           <span>{p.target_country === 'Estados Unidos' ? '🇺🇸' : '🌎'}</span> {p.target_country}
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '0.2rem' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', marginTop: '0.2rem' }}>
                           {p.group_type} · {p.purpose}
                         </div>
                       </td>
@@ -491,7 +491,7 @@ const VisaProcessesPage = () => {
                           <button 
                             onClick={() => copyLink(p.id)} 
                             className="btn btn-sm btn-outline" 
-                            style={{ borderColor: '#CBD5E1', color: '#059669', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem' }} 
+                            style={{ borderColor: 'var(--border)', color: '#059669', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem' }} 
                             title="Copiar Enlace del Portal del Cliente"
                           >
                             <Copy size={13} /> Link Cliente

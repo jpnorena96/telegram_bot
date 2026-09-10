@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { useOutletContext } from 'react-router-dom';
-import { Search, RefreshCw, Plus, X, ChevronUp, ChevronDown, Eye, ArrowLeft, ArrowRight, Lock, Globe, Calendar, CheckCircle2, AlertTriangle, User, Trash2, Terminal, Settings, Edit2 } from 'lucide-react';
+import { Search, RefreshCw, Plus, X, ChevronUp, ChevronDown, Eye, ArrowLeft, ArrowRight, Lock, Globe, Calendar, CheckCircle2, AlertTriangle, User, Trash2, Terminal, Settings, Edit2, Info, Activity } from 'lucide-react';
 import { api } from '../../services/api';
 
 const STATUS_MAP = {
@@ -658,7 +658,7 @@ const CreateWizard = ({ onClose, onCreated }) => {
               style={{
                 minWidth: '160px',
                 background: currentStep === 5 ? 'var(--green)' : 'var(--surface-3)',
-                color: currentStep === 5 ? '#fff' : 'var(--text-1)',
+                color: currentStep === 5 ? 'var(--surface)' : 'var(--text-1)',
                 border: currentStep === 5 ? 'none' : '1px solid var(--border)',
                 display: 'flex',
                 alignItems: 'center',
@@ -700,6 +700,9 @@ const AppointmentsPage = () => {
   const [logsModal, setLogsModal] = useState({ open: false, data: '', loading: false, aptId: null });
   const [configModal, setConfigModal] = useState({ open: false, data: '', loading: false, aptId: null });
   const [editModal, setEditModal] = useState({ open: false, loading: false, data: {} });
+  const [detailsModal, setDetailsModal] = useState({ open: false, apt: null });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   // Filtros de fecha para administrador
   const [startDate, setStartDate] = useState('');
@@ -768,6 +771,7 @@ const AppointmentsPage = () => {
 
     r.sort((a, b) => sortD === 'asc' ? String(a[sortF] ?? '').localeCompare(String(b[sortF] ?? '')) : String(b[sortF] ?? '').localeCompare(String(a[sortF] ?? '')));
     setFiltered(r);
+    setCurrentPage(1);
   }, [apts, search, statusF, sortF, sortD, startDate, endDate, dateFilterType, isAdmin]);
 
   const toggleSort = f => { if (sortF === f) setSortD(d => d === 'asc' ? 'desc' : 'asc'); else { setSortF(f); setSortD('asc'); } };
@@ -870,6 +874,9 @@ const AppointmentsPage = () => {
       />
     );
   }
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
+  const currentData = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -984,8 +991,6 @@ const AppointmentsPage = () => {
                 {isAdmin && <th onClick={() => toggleSort('id')} style={{ cursor: 'pointer' }}>ID <SortIco f="id" /></th>}
                 {isAdmin && <th onClick={() => toggleSort('system_user_name')} style={{ cursor: 'pointer' }}>USUARIO_SISTEMA <SortIco f="system_user_name" /></th>}
                 <th onClick={() => toggleSort('client')} style={{ cursor: 'pointer' }}>CLIENTE <SortIco f="client" /></th>
-                <th onClick={() => toggleSort('schedule_id')} style={{ cursor: 'pointer' }}>SCHEDULE_ID <SortIco f="schedule_id" /></th>
-                <th>TIPO_VISA</th>
                 <th onClick={() => toggleSort('originalDate')} style={{ cursor: 'pointer' }}>FECHAS (OBJ / ASIGNADAS) <SortIco f="originalDate" /></th>
                 <th>{t('dashboard.appointments.status')}</th>
                 {canEdit && <th>OPS</th>}
@@ -995,7 +1000,7 @@ const AppointmentsPage = () => {
               {loading
                 ? Array.from({ length: 6 }).map((_, i) => (
                   <tr key={i}>
-                    {[isAdmin && 1, isAdmin && 1, 1, 1, 1, 1, 1, canEdit && 1].filter(Boolean).map((__, j) => (
+                    {[isAdmin && 1, isAdmin && 1, 1, 1, 1, canEdit && 1].filter(Boolean).map((__, j) => (
                       <td key={j}><div className="skeleton" style={{ height: '13px', width: `${50 + Math.random() * 40}%` }} /></td>
                     ))}
                   </tr>
@@ -1003,12 +1008,12 @@ const AppointmentsPage = () => {
                 : filtered.length === 0
                   ? (
                     <tr>
-                      <td colSpan={[isAdmin && 1, isAdmin && 1, 1, 1, 1, 1, 1, canEdit && 1].filter(Boolean).length} style={{ textAlign: 'center', padding: '3rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-3)' }}>
+                      <td colSpan={[isAdmin && 1, isAdmin && 1, 1, 1, 1, canEdit && 1].filter(Boolean).length} style={{ textAlign: 'center', padding: '3rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-3)' }}>
                         &gt; NO_RECORDS_FOUND
                       </td>
                     </tr>
                   )
-                  : filtered.map(apt => {
+                  : currentData.map(apt => {
                     const { tag, label } = getTag(apt.status, t);
                     return (
                       <tr key={apt.id}>
@@ -1030,21 +1035,14 @@ const AppointmentsPage = () => {
                               <span style={{ fontWeight: 600 }}>
                                 {apt.client}
                                 {isAdmin && apt.rebookCount > 1 && (
-                                  <span style={{ marginLeft: '0.5rem', fontSize: '0.65rem', background: 'var(--orange)', color: '#fff', padding: '0.1rem 0.4rem', borderRadius: 'var(--radius-sm)' }}>
+                                  <span style={{ marginLeft: '0.5rem', fontSize: '0.65rem', background: 'var(--orange)', color: 'var(--surface)', padding: '0.1rem 0.4rem', borderRadius: 'var(--radius-sm)' }}>
                                     Reagendado {apt.rebookCount} veces
                                   </span>
                                 )}
                               </span>
-                              {apt.schedule_names && (
-                                <span style={{ fontSize: '0.68rem', color: 'var(--text-3)' }}>
-                                  👥 {formatNames(apt.schedule_names)}
-                                </span>
-                              )}
                             </div>
                           </div>
                         </td>
-                        <td className="mono" style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>{apt.schedule_id || '—'}</td>
-                        <td className="mono" style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>{apt.type}</td>
                         <td className="mono" style={{ fontSize: '0.78rem', color: 'var(--text-2)' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                             <span style={{ color: 'var(--text-3)' }}>Obj: {apt.originalDate || '—'}</span>
@@ -1060,6 +1058,12 @@ const AppointmentsPage = () => {
                         {canEdit && (
                           <td style={{ textAlign: 'right' }}>
                             <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'flex-end' }}>
+                              <button onClick={() => setDetailsModal({ open: true, apt })} className="btn btn-icon btn-sm" title="Ver Detalles">
+                                <Info size={14} />
+                              </button>
+                              <button onClick={() => openLogs(apt.id)} className="btn btn-icon btn-sm" title="Ver Estado Visual" style={{ color: '#38BDF8' }}>
+                                <Activity size={14} />
+                              </button>
                               {(role === 'ADMINISTRATOR' || role === 'AUDITOR') && (
                                 <>
                                   <button onClick={() => openLogs(apt.id)} className="btn btn-icon btn-sm" title="Ver Logs de Consola">
@@ -1100,10 +1104,18 @@ const AppointmentsPage = () => {
 
         {/* footer */}
         {!loading && filtered.length > 0 && (
-          <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ padding: '0.75rem 1rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--text-3)' }}>
-              {filtered.length} RECORDS · SORTED BY {sortF.toUpperCase()} {sortD.toUpperCase()}
+              {filtered.length} RECORDS · PÁGINA {currentPage} DE {totalPages}
             </span>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="btn btn-sm btn-outline" style={{ height: '28px', fontSize: '0.75rem' }}>
+                <ArrowLeft size={12} /> ANT
+              </button>
+              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="btn btn-sm btn-outline" style={{ height: '28px', fontSize: '0.75rem' }}>
+                SIG <ArrowRight size={12} />
+              </button>
+            </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <span className="tag tag-lime">{apts.filter(a => a.status === 'Adelantada').length} ADELANT</span>
               <span className="tag tag-gold">{apts.filter(a => a.status === 'Buscando').length} BUSCANDO</span>
@@ -1112,12 +1124,61 @@ const AppointmentsPage = () => {
         )}
       </div>
 
+      {/* Details Modal */}
+      {detailsModal.open && detailsModal.apt && createPortal(
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
+          <div className="animate-in" style={{ width: '100%', maxWidth: '450px', backgroundColor: 'var(--bg)', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+            <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--surface)' }}>
+              <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Info size={18} color="var(--lime)" />
+                Detalles Adicionales
+              </h2>
+              <button onClick={() => setDetailsModal({ open: false, apt: null })} className="btn btn-icon btn-sm" style={{ border: 'none' }}>
+                <X size={18} />
+              </button>
+            </div>
+            <div style={{ padding: '1.5rem', background: 'var(--surface)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ padding: '1rem', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: 600 }}>Schedule ID</label>
+                  <div className="mono" style={{ fontSize: '1.1rem', color: 'var(--text-1)' }}>{detailsModal.apt.schedule_id || 'No asignado'}</div>
+                </div>
+                <div style={{ padding: '1rem', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: 600 }}>Tipo de Visa</label>
+                  <div className="mono" style={{ fontSize: '1.1rem', color: 'var(--text-1)' }}>{detailsModal.apt.type || '—'}</div>
+                </div>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <div style={{ flex: 1, padding: '1rem', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: 600 }}>Fecha Mínima</label>
+                    <div className="mono" style={{ fontSize: '1rem', color: 'var(--text-1)' }}>{detailsModal.apt.min_consulate_date ? detailsModal.apt.min_consulate_date.substring(0, 10) : 'No asignada'}</div>
+                  </div>
+                  <div style={{ flex: 1, padding: '1rem', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: 600 }}>Fecha Máxima</label>
+                    <div className="mono" style={{ fontSize: '1rem', color: 'var(--text-1)' }}>{detailsModal.apt.max_consulate_date ? detailsModal.apt.max_consulate_date.substring(0, 10) : 'No asignada'}</div>
+                  </div>
+                </div>
+                {detailsModal.apt.schedule_names && (
+                  <div style={{ padding: '1rem', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: 600 }}>Nombres Asociados</label>
+                    <div className="mono" style={{ fontSize: '0.9rem', color: 'var(--text-1)' }}>
+                      👥 {formatNames(detailsModal.apt.schedule_names)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
       {/* Logs Modal */}
       {logsModal.open && createPortal(
         <BotStatusViewer
           aptId={logsModal.aptId}
           rawLogs={logsModal.data}
           loading={logsModal.loading}
+          isAdmin={isAdmin}
           onClose={() => setLogsModal({ ...logsModal, open: false })}
           onRefresh={openLogs}
         />,

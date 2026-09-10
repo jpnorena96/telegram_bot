@@ -20,7 +20,7 @@ const parseLogs = (rawLogs) => {
     // Extract time if it exists at the start (e.g., "2024-05-12 10:20:15 - ...")
     const timeMatch = line.match(/^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s*[-:]?\s*(.*)/);
     if (timeMatch) {
-      time = timeMatch[1].split(' ')[1]; // Just keep HH:MM:SS
+      time = timeMatch[1]; // Keep full date and time
       message = timeMatch[2];
     } else {
       // Try just HH:MM:SS
@@ -62,7 +62,7 @@ const parseLogs = (rawLogs) => {
   return parsed;
 };
 
-const BotStatusViewer = ({ aptId, rawLogs, loading, onClose, onRefresh }) => {
+const BotStatusViewer = ({ aptId, rawLogs, loading, onClose, onRefresh, isAdmin = false }) => {
   const [viewMode, setViewMode] = useState('visual'); // 'visual' | 'terminal'
   const scrollRef = useRef(null);
 
@@ -106,20 +106,22 @@ const BotStatusViewer = ({ aptId, rawLogs, loading, onClose, onRefresh }) => {
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{ background: 'var(--bg)', borderRadius: '8px', padding: '0.2rem', display: 'flex', border: '1px solid var(--border)' }}>
-              <button 
-                onClick={() => setViewMode('visual')}
-                style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, border: 'none', background: viewMode === 'visual' ? 'var(--surface-2)' : 'transparent', color: viewMode === 'visual' ? 'var(--text-1)' : 'var(--text-3)', cursor: 'pointer', transition: 'all 0.2s' }}
-              >
-                Visual
-              </button>
-              <button 
-                onClick={() => setViewMode('terminal')}
-                style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, border: 'none', background: viewMode === 'terminal' ? 'var(--surface-2)' : 'transparent', color: viewMode === 'terminal' ? 'var(--text-1)' : 'var(--text-3)', cursor: 'pointer', transition: 'all 0.2s' }}
-              >
-                Consola
-              </button>
-            </div>
+            {isAdmin && (
+              <div style={{ background: 'var(--bg)', borderRadius: '8px', padding: '0.2rem', display: 'flex', border: '1px solid var(--border)' }}>
+                <button 
+                  onClick={() => setViewMode('visual')}
+                  style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, border: 'none', background: viewMode === 'visual' ? 'var(--surface-2)' : 'transparent', color: viewMode === 'visual' ? 'var(--text-1)' : 'var(--text-3)', cursor: 'pointer', transition: 'all 0.2s' }}
+                >
+                  Visual
+                </button>
+                <button 
+                  onClick={() => setViewMode('terminal')}
+                  style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, border: 'none', background: viewMode === 'terminal' ? 'var(--surface-2)' : 'transparent', color: viewMode === 'terminal' ? 'var(--text-1)' : 'var(--text-3)', cursor: 'pointer', transition: 'all 0.2s' }}
+                >
+                  Consola
+                </button>
+              </div>
+            )}
             <button onClick={onClose} className="btn btn-icon btn-sm" style={{ marginLeft: '0.5rem' }}><X size={18} /></button>
           </div>
         </div>
@@ -165,7 +167,12 @@ const BotStatusViewer = ({ aptId, rawLogs, loading, onClose, onRefresh }) => {
                           {log.time && <span style={{ fontSize: '0.75rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>{log.time}</span>}
                         </div>
                         <p style={{ fontSize: '0.9rem', color: 'var(--text-2)', margin: 0, lineHeight: 1.5 }}>
-                          {log.message}
+                          {log.type === 'error' ? 'Se ha detectado un error y el sistema está intentando recuperarse.' :
+                           log.type === 'auth' ? 'Estado activo: Conectando con los servidores consulares.' :
+                           log.type === 'calendar' ? 'Monitoreando cita: Buscando fechas disponibles en el calendario.' :
+                           log.type === 'wait' ? 'Estado activo: Pausa de seguridad entre intentos de conexión.' :
+                           log.type === 'success' ? 'Operación completada con éxito.' :
+                           'Estado activo: Operación del sistema en curso.'}
                         </p>
                       </div>
                     </div>
