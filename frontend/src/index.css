@@ -302,8 +302,6 @@ a:hover { color: var(--text-2); }
   background: var(--bg);
   border-right: 1px solid var(--border);
   height: 100vh;
-  position: fixed;
-  top: 0; left: 0;
   overflow-y: auto;
   z-index: 40;
 }
@@ -404,6 +402,9 @@ a:hover { color: var(--text-2); }
     transform: translateX(0); 
   }
   .layout-main { margin-left: 0 !important; }
+  .layout-main-wrapper.shifted {
+    transform: translateX(var(--sidebar-w));
+  }
   
   /* Layout Spacing */
   .main-header { padding: 0 1rem; }

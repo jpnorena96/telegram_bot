@@ -275,98 +275,131 @@ const AgencyProfilePage = () => {
           <div style={{ 
             width: '375px', // iPhone Width
             height: '812px',
-            background: 'var(--surface)', // Light bg for the secure main
+            background: '#ffffff', // White bg for the preview
             borderRadius: '40px', 
-            border: '12px solid #18181b', 
+            border: '12px solid #000000', 
             overflow: 'hidden',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
             position: 'relative',
             display: 'flex',
             flexDirection: 'column'
           }}>
-            {/* Mock iPhone Notch */}
-            <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '120px', height: '25px', background: '#18181b', borderBottomLeftRadius: '16px', borderBottomRightRadius: '16px', zIndex: 10 }}></div>
+            {/* Mock iPhone Notch & Status Bar */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '44px', display: 'flex', justifyContent: 'space-between', padding: '0 1.5rem', alignItems: 'center', zIndex: 10, fontSize: '0.75rem', fontWeight: 600, color: '#0f172a' }}>
+              <span>9:41</span>
+              <div style={{ display: 'flex', gap: '0.3rem' }}>
+                <div style={{ width: '16px', height: '10px', background: '#0f172a', borderRadius: '2px' }}></div>
+              </div>
+            </div>
+            <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '120px', height: '25px', background: '#000000', borderBottomLeftRadius: '16px', borderBottomRightRadius: '16px', zIndex: 11 }}></div>
 
-            {/* Mock Secure Sidebar (Collapses to Header on mobile) */}
-            <div style={{ padding: '2.5rem 1.5rem 1.5rem 1.5rem', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', borderTop: `4px solid ${formData.brand_color}` }}>
-              {fullLogoUrl ? (
-                <img src={fullLogoUrl} alt="Logo" style={{ height: '40px', objectFit: 'contain', marginBottom: '1rem' }} />
-              ) : (
-                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', fontSize: '1.2rem' }}>🏢</div>
-              )}
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
-                {formData.company_name || 'Nombre de tu Agencia'}
-              </h2>
-              <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>Data Room Legal & Consular</p>
+            {/* Premium Header */}
+            <div style={{ paddingTop: '3.5rem', paddingBottom: '1.25rem', paddingLeft: '1.5rem', paddingRight: '1.5rem', background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)', borderBottom: '1px solid rgba(0,0,0,0.05)', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: formData.brand_color }}></div>
               
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b', fontSize: '0.75rem', fontWeight: 500 }}>
-                  <Lock size={12} /> Cifrado SSL
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b', fontSize: '0.75rem', fontWeight: 500 }}>
-                  <ShieldCheck size={12} /> Privacidad
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                {fullLogoUrl ? (
+                  <img src={fullLogoUrl} alt="Logo" style={{ height: '44px', width: '44px', objectFit: 'contain', borderRadius: '12px', boxShadow: '0 4px 10px rgba(0,0,0,0.08)' }} />
+                ) : (
+                  <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(0,0,0,0.08)' }}>🏢</div>
+                )}
+                <div>
+                  <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.15rem 0', letterSpacing: '-0.02em' }}>
+                    {formData.company_name || 'Agencia Premium'}
+                  </h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#64748b', fontSize: '0.75rem', fontWeight: 500 }}>
+                    <ShieldCheck size={12} color={formData.brand_color} /> Portal Seguro
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Mock Workspace Content */}
-            <div style={{ padding: '1.5rem', flex: 1, overflowY: 'auto' }}>
+            <div style={{ flex: 1, overflowY: 'auto', background: '#f8fafc', padding: '1.5rem' }}>
               
-              <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>Expediente #0001</h1>
-              
-              {/* Security Badge */}
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, marginBottom: '1.5rem' }}>
-                ENLACE EXPIRA EN 7 DÍAS
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                <div>
+                  <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.35rem 0', letterSpacing: '-0.02em' }}>Expediente Visa</h1>
+                  <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>ID: <span style={{ fontFamily: 'monospace' }}>#4920-B1</span></p>
+                </div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.35rem 0.6rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', borderRadius: '99px', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.05em' }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981' }}></div>
+                  ACTIVO
+                </div>
               </div>
 
-              {/* Mock Applicant Card */}
-              <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden', marginBottom: '1.5rem' }}>
-                <div style={{ padding: '0.75rem 1rem', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                  <h3 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#0f172a' }}>
-                    <User size={14} color={formData.brand_color} /> Titular Principal
-                  </h3>
+              {/* Progress Steps */}
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
+                <div style={{ flex: 1, height: '4px', borderRadius: '2px', background: formData.brand_color }}></div>
+                <div style={{ flex: 1, height: '4px', borderRadius: '2px', background: formData.brand_color, opacity: 0.2 }}></div>
+                <div style={{ flex: 1, height: '4px', borderRadius: '2px', background: formData.brand_color, opacity: 0.2 }}></div>
+              </div>
+
+              {/* Sleek Form Card */}
+              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)', marginBottom: '1.5rem' }}>
+                <div style={{ padding: '1.25rem', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: `${formData.brand_color}15`, color: formData.brand_color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <User size={16} />
+                  </div>
+                  <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: '#0f172a' }}>Titular Principal</h3>
                 </div>
                 
-                <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  {/* Input Field */}
                   <div>
-                    <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '0.25rem' }}>Nombre Completo *</label>
-                    <div style={{ height: '36px', background: 'var(--surface)', border: '1px solid #cbd5e1', borderRadius: '6px' }}></div>
+                    <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nombre Completo</label>
+                    <div style={{ height: '44px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', display: 'flex', alignItems: 'center', padding: '0 1rem' }}>
+                      <div style={{ width: '40%', height: '8px', background: '#e2e8f0', borderRadius: '4px' }}></div>
+                    </div>
                   </div>
+                  
+                  {/* Modern Upload Zone */}
                   <div>
-                    <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '0.25rem' }}>Pasaporte (PDF/JPG) *</label>
+                    <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pasaporte</label>
                     <div style={{ 
-                      border: `2px dashed ${formData.brand_color}40`, 
-                      background: `${formData.brand_color}10`,
-                      borderRadius: '8px', 
+                      border: `1.5px dashed #cbd5e1`, 
+                      background: '#fafafa',
+                      borderRadius: '12px', 
                       padding: '1.5rem 1rem', 
                       display: 'flex', 
                       flexDirection: 'column',
                       alignItems: 'center', 
                       justifyContent: 'center', 
-                      color: formData.brand_color,
-                      gap: '0.5rem'
+                      gap: '0.75rem'
                     }}>
-                      <UploadCloud size={20} />
-                      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#0f172a' }}>Cargar Documento</span>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: `${formData.brand_color}15`, color: formData.brand_color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <UploadCloud size={20} />
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a', display: 'block', marginBottom: '0.15rem' }}>Subir PDF o JPG</span>
+                        <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>Máximo 5MB</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Mock Submit Button */}
+              {/* Floating Submit Action */}
               <div style={{ 
                 padding: '1rem', 
-                background: formData.brand_color, 
-                color: 'var(--surface)', 
-                fontWeight: 700,
+                background: `linear-gradient(135deg, ${formData.brand_color} 0%, ${formData.brand_color}dd 100%)`, 
+                color: '#ffffff', 
+                fontWeight: 600,
                 fontSize: '0.9rem',
                 textAlign: 'center',
-                borderRadius: '8px',
-                boxShadow: `0 8px 20px -5px ${formData.brand_color}60`
+                borderRadius: '14px',
+                boxShadow: `0 10px 25px -5px ${formData.brand_color}60`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                letterSpacing: '0.02em'
               }}>
-                FIRMAR Y ENVIAR EXPEDIENTE
+                <CheckCircle2 size={16} /> CONFIRMAR Y ENVIAR
               </div>
 
+              {/* Footer safe area */}
+              <div style={{ height: '2rem' }}></div>
             </div>
           </div>
         </div>

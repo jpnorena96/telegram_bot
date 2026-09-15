@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { useOutletContext } from 'react-router-dom';
 import { Search, RefreshCw, Plus, X, ChevronUp, ChevronDown, Eye, ArrowLeft, ArrowRight, Lock, Globe, Calendar, CheckCircle2, AlertTriangle, User, Trash2, Terminal, Settings, Edit2, Info, Activity } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { api } from '../../services/api';
 
 const STATUS_MAP = {
@@ -847,7 +848,7 @@ const AppointmentsPage = () => {
       if (editModal.data.max_consulate_date) payload.max_consulate_date = editModal.data.max_consulate_date;
 
       await api.updateAppointment(editModal.data.id, payload);
-      toast.success('Cita editada y proceso PM2 reiniciado correctamente.');
+      toast.success('Cita editada y proceso reiniciado correctamente.');
       setEditModal({ open: false, data: {}, loading: false });
       load();
     } catch (err) {
@@ -991,7 +992,6 @@ const AppointmentsPage = () => {
                 {isAdmin && <th onClick={() => toggleSort('id')} style={{ cursor: 'pointer' }}>ID <SortIco f="id" /></th>}
                 {isAdmin && <th onClick={() => toggleSort('system_user_name')} style={{ cursor: 'pointer' }}>USUARIO_SISTEMA <SortIco f="system_user_name" /></th>}
                 <th onClick={() => toggleSort('client')} style={{ cursor: 'pointer' }}>CLIENTE <SortIco f="client" /></th>
-                <th onClick={() => toggleSort('originalDate')} style={{ cursor: 'pointer' }}>FECHAS (OBJ / ASIGNADAS) <SortIco f="originalDate" /></th>
                 <th>{t('dashboard.appointments.status')}</th>
                 {canEdit && <th>OPS</th>}
               </tr>
@@ -1041,17 +1041,6 @@ const AppointmentsPage = () => {
                                 )}
                               </span>
                             </div>
-                          </div>
-                        </td>
-                        <td className="mono" style={{ fontSize: '0.78rem', color: 'var(--text-2)' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                            <span style={{ color: 'var(--text-3)' }}>Obj: {apt.originalDate || '—'}</span>
-                            {apt.assigned_consulate_date && (
-                              <span style={{ color: 'var(--lime)', fontWeight: 600 }}>C: {apt.assigned_consulate_date.substring(0, 10)}</span>
-                            )}
-                            {apt.assigned_cas_date && (
-                              <span style={{ color: 'var(--lime)', fontWeight: 600 }}>CAS: {apt.assigned_cas_date.substring(0, 10)}</span>
-                            )}
                           </div>
                         </td>
                         <td><span className={`tag ${tag}`}>{label}</span></td>
@@ -1143,9 +1132,15 @@ const AppointmentsPage = () => {
                   <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: 600 }}>Schedule ID</label>
                   <div className="mono" style={{ fontSize: '1.1rem', color: 'var(--text-1)' }}>{detailsModal.apt.schedule_id || 'No asignado'}</div>
                 </div>
-                <div style={{ padding: '1rem', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: 600 }}>Tipo de Visa</label>
-                  <div className="mono" style={{ fontSize: '1.1rem', color: 'var(--text-1)' }}>{detailsModal.apt.type || '—'}</div>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <div style={{ flex: 1, padding: '1rem', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: 600 }}>Tipo de Visa</label>
+                    <div className="mono" style={{ fontSize: '1.1rem', color: 'var(--text-1)' }}>{detailsModal.apt.type || '—'}</div>
+                  </div>
+                  <div style={{ flex: 1, padding: '1rem', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: 600 }}>Fecha de Creación</label>
+                    <div className="mono" style={{ fontSize: '1.1rem', color: 'var(--text-1)' }}>{detailsModal.apt.date_created ? detailsModal.apt.date_created.substring(0, 10) : '—'}</div>
+                  </div>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <div style={{ flex: 1, padding: '1rem', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
@@ -1157,6 +1152,18 @@ const AppointmentsPage = () => {
                     <div className="mono" style={{ fontSize: '1rem', color: 'var(--text-1)' }}>{detailsModal.apt.max_consulate_date ? detailsModal.apt.max_consulate_date.substring(0, 10) : 'No asignada'}</div>
                   </div>
                 </div>
+                {(detailsModal.apt.assigned_consulate_date || detailsModal.apt.assigned_cas_date) && (
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <div style={{ flex: 1, padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                      <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--lime)', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: 600 }}>Consular Asignada</label>
+                      <div className="mono" style={{ fontSize: '1rem', color: 'var(--text-1)' }}>{detailsModal.apt.assigned_consulate_date ? detailsModal.apt.assigned_consulate_date.substring(0, 10) : '—'}</div>
+                    </div>
+                    <div style={{ flex: 1, padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                      <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--lime)', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: 600 }}>CAS Asignada</label>
+                      <div className="mono" style={{ fontSize: '1rem', color: 'var(--text-1)' }}>{detailsModal.apt.assigned_cas_date ? detailsModal.apt.assigned_cas_date.substring(0, 10) : '—'}</div>
+                    </div>
+                  </div>
+                )}
                 {detailsModal.apt.schedule_names && (
                   <div style={{ padding: '1rem', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
                     <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: 600 }}>Nombres Asociados</label>

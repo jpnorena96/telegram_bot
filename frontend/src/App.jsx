@@ -21,6 +21,9 @@ import AgencyProfilePage from './pages/dashboard/AgencyProfilePage';
 import VisaProcessesPage from './pages/dashboard/VisaProcessesPage';
 import VisaProcessDetailsPage from './pages/dashboard/VisaProcessDetailsPage';
 import WalletPage from './pages/dashboard/WalletPage';
+import DS160FormPage from './pages/dashboard/DS160FormPage';
+import DS160PrintView from './pages/dashboard/DS160PrintView';
+
 import ClientPortalPage from './pages/ClientPortalPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
@@ -33,7 +36,7 @@ function App() {
         toastOptions={{
           style: {
             background: 'var(--black-2)',
-            color: 'var(--surface)',
+            color: 'var(--text-1)',
             border: '1px solid var(--border)',
             fontFamily: 'var(--font-mono)',
             fontSize: '0.8rem',
@@ -55,6 +58,8 @@ function App() {
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/client-portal/:id" element={<ClientPortalPage />} />
+        <Route path="/ds160/print/:id" element={<DS160PrintView />} />
+
 
         {/* Dashboard Routes (Protected) */}
         <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
@@ -71,6 +76,7 @@ function App() {
           <Route path="visa-processes" element={<VisaProcessesPage />} />
           <Route path="visa-processes/:id" element={<VisaProcessDetailsPage />} />
           <Route path="billetera" element={<WalletPage />} />
+          <Route path="ds160" element={<DS160FormPage />} />
         </Route>
       </Routes>
     </Router>

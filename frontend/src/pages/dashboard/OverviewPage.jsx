@@ -168,7 +168,7 @@ const OverviewPage = () => {
 
           {/* Card: Expedientes */}
           <BentoCard colSpan={1}>
-            <MetricBlock label="Expedientes Totales" value={totalExpedientes} subtext="Visas procesadas" color="#8B5CF6" icon={FileText} />
+            <MetricBlock label="Expedientes Totales" value={totalExpedientes} subtext="Visas procesadas" color="var(--lime)" icon={FileText} />
           </BentoCard>
 
           {/* Card Wide: Gráfico de Progreso */}
@@ -241,7 +241,7 @@ const OverviewPage = () => {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', gridAutoRows: '180px' }}>
           <BentoCard colSpan={1}>
-            <MetricBlock label="Citas Creadas" value={total} color="#3B82F6" icon={FileText} />
+            <MetricBlock label="Citas Creadas" value={total} color="var(--lime)" icon={FileText} />
           </BentoCard>
           
           <BentoCard colSpan={1} style={{ background: 'linear-gradient(135deg, rgba(17,24,39,0.8) 0%, rgba(245,158,11,0.1) 100%)' }}>
@@ -311,7 +311,7 @@ const OverviewPage = () => {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem', justifyContent: 'center', padding: '1rem' }}>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-              <div style={{ width: '4px', height: '40px', background: '#3B82F6', borderRadius: '4px' }} />
+              <div style={{ width: '4px', height: '40px', background: 'var(--lime)', borderRadius: '4px' }} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase' }}>Total Expedientes en Red</div>
                 <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-1)' }}>{adminStats?.total_appointments || 0}</div>
@@ -350,7 +350,7 @@ const OverviewPage = () => {
         </BentoCard>
 
         <BentoCard colSpan={1} rowSpan={1}>
-          <MetricBlock label="Red de Partners" value={adminStats?.total_agencies || 0} color="#8B5CF6" icon={Building2} subtext="Agencias B2B operando" />
+          <MetricBlock label="Red de Partners" value={adminStats?.total_agencies || 0} color="var(--lime)" icon={Building2} subtext="Agencias B2B operando" />
         </BentoCard>
 
         <BentoCard colSpan={1} rowSpan={1}>
@@ -358,7 +358,7 @@ const OverviewPage = () => {
         </BentoCard>
 
         <BentoCard colSpan={1} rowSpan={1}>
-          <MetricBlock label="Usuarios Totales" value={adminStats?.total_agencies ? adminStats.total_agencies * 3 : 0} color="#3B82F6" icon={Users} />
+          <MetricBlock label="Usuarios Totales" value={adminStats?.total_agencies ? adminStats.total_agencies * 3 : 0} color="var(--lime)" icon={Users} />
         </BentoCard>
 
       </div>

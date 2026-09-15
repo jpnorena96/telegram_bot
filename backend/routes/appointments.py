@@ -43,28 +43,17 @@ class AppointmentUpdate(BaseModel):
     ivr: Optional[str] = None
 
 
-def calculate_price_usd(role: str, max_consulate_date: date, group_size: int = 1) -> int:
-    import datetime
-    today = datetime.date.today()
-    is_urgent = False
-    
-    if max_consulate_date:
-        diff_days = (max_consulate_date - today).days
-        if diff_days <= 30:
-            is_urgent = True
-
+def calculate_price_usd(role: str, consulate: str, group_size: int = 1) -> int:
     extra_persons = max(0, group_size - 1)
     
-    if is_urgent:
-        if role in ["TRAVEL_AGENCY", "AGENCY"]:
+    if role in ["TRAVEL_AGENCY", "AGENCY"]:
+        if consulate and consulate.lower() == 'lima':
+            return 35 + (20 * extra_persons)
+        else:
             return 20 + (15 * extra_persons)
-        else:
-            return 60 + (10 * extra_persons)
     else:
-        if role in ["TRAVEL_AGENCY", "AGENCY"]:
-            return 15 + (13 * extra_persons)
-        else:
-            return 45 + (15 * extra_persons)
+        # Clientes Naturales
+        return 50 + (10 * extra_persons)
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
@@ -91,7 +80,7 @@ def create_appointment(apt: AppointmentCreate, background_tasks: BackgroundTasks
     try:
         # 0. Calcular precio
         role = current_user["roles"][0]
-        price_usd = calculate_price_usd(role, apt.max_consulate_date, apt.group_size)
+        price_usd = calculate_price_usd(role, apt.consulate, apt.group_size)
 
         # 1. Check and deduct balance
         # Temporarily agencies do not pay
@@ -535,7 +524,7 @@ class SelectScheduleRequest(BaseModel):
 def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     cursor = db.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT email, user_id, max_consulate_date, group_size FROM user_appointments WHERE id = %s", (appointment_id,))
+        cursor.execute("SELECT email, user_id, consulate, group_size FROM user_appointments WHERE id = %s", (appointment_id,))
         apt = cursor.fetchone()
         
         if not apt:
@@ -546,7 +535,7 @@ def select_appointment_schedule(appointment_id: int, req: SelectScheduleRequest,
             raise HTTPException(status_code=403, detail="Not authorized")
             
         # 0. Check Balance for Natural Person (and now Agencies too if they use discover-direct, though typically they don't, but let's calculate for everyone to be safe)
-        price_usd = calculate_price_usd(role, apt["max_consulate_date"], apt["group_size"] or 1)
+        price_usd = calculate_price_usd(role, apt["consulate"], apt["group_size"] or 1)
         # Temporarily agencies do not pay
         requires_payment = role not in ["ADMINISTRATOR", "AUDITOR", "AGENCY", "TRAVEL_AGENCY"]
         

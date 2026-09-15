@@ -278,3 +278,17 @@ COLLATE = utf8mb4_0900_ai_ci;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+-- -----------------------------------------------------
+-- CONSULTAS ÚTILES
+-- -----------------------------------------------------
+
+-- Ver citas que fueron agendadas (reservadas en el sistema) entre hoy y mañana:
+SELECT id, email, consulate, status, date_booked, assigned_consulate_date, assigned_cas_date 
+FROM `visa_bot_db_telegram`.`user_appointments`
+WHERE DATE(date_booked) >= CURDATE() AND DATE(date_booked) <= DATE_ADD(CURDATE(), INTERVAL 1 DAY);
+
+-- Ver citas a las que los clientes tienen que asistir hoy o mañana (fecha de consulado):
+SELECT id, email, consulate, status, date_booked, assigned_consulate_date, assigned_cas_date 
+FROM `visa_bot_db_telegram`.`user_appointments`
+WHERE DATE(assigned_consulate_date) >= CURDATE() AND DATE(assigned_consulate_date) <= DATE_ADD(CURDATE(), INTERVAL 1 DAY);

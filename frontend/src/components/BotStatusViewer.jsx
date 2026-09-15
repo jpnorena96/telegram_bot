@@ -45,11 +45,11 @@ const parseLogs = (rawLogs) => {
     } else if (lower.includes('login') || lower.includes('autenticando') || lower.includes('sesión') || lower.includes('session')) {
       type = 'auth';
       icon = Shield;
-      color = '#8b5cf6';
+      color = '#06B6D4';
     } else if (lower.includes('date') || lower.includes('fecha') || lower.includes('appointment') || lower.includes('cita')) {
       type = 'calendar';
       icon = Calendar;
-      color = '#3b82f6';
+      color = '#38BDF8';
     } else if (lower.includes('wait') || lower.includes('esperando') || lower.includes('sleep') || lower.includes('pausa')) {
       type = 'wait';
       icon = Clock;

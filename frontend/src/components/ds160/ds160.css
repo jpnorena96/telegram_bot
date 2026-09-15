@@ -1,0 +1,36 @@
+/* ds160.css */
+
+.ds160-container .tooltip_text {
+  cursor: help;
+  position: relative;
+  text-decoration: underline dotted #999;
+}
+
+.ds160-container .tooltip_text[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  font-size: 11px;
+  color: #333;
+  z-index: 10;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+}
+
+.ds160-container input:focus, .ds160-container select:focus {
+  outline: none;
+  border-color: #66afe9;
+  box-shadow: 0 0 8px rgba(102,175,233,.6);
+}
+
+@media print {
+  body { background: white !important; -webkit-print-color-adjust: exact; }
+  .no-print { display: none !important; }
+  .ds160-container { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: none !important; }
+  button { display: none !important; }
+}

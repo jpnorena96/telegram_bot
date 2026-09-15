@@ -89,7 +89,7 @@ const DashboardLayout = () => {
       
       <Sidebar role={role} userName={userName} isMobileOpen={mobileMenuOpen} closeMobile={() => setMobileMenuOpen(false)} />
       
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0, position: 'relative', zIndex: 1, padding: '1rem', paddingLeft: 0 }}>
+      <div className={`layout-main-wrapper ${mobileMenuOpen ? 'shifted' : ''}`} style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0, position: 'relative', zIndex: 1, padding: '1rem', paddingLeft: 0, transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
         
         {/* Floating Glass Container for the main content area */}
         <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', borderRadius: 'var(--radius-xl)', overflow: 'hidden', position: 'relative' }}>

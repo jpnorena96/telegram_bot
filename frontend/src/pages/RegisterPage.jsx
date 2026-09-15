@@ -277,7 +277,7 @@ const RegisterPage = () => {
                   fontWeight: 700, border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                   marginTop: '0.5rem', transition: 'all 0.2s',
-                  boxShadow: '0 4px 12px rgba(189, 255, 0, 0.25)'
+                  boxShadow: '0 4px 12px var(--lime-glow)'
                 }}
                 onMouseOver={e => !loading && (e.currentTarget.style.transform = 'translateY(-2px)')}
                 onMouseOut={e => !loading && (e.currentTarget.style.transform = 'translateY(0)')}

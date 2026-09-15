@@ -112,7 +112,7 @@ const LandingPage = () => {
       display: "flex", alignItems: "center", justifyContent: "space-between",
       padding: "0 2.5rem", height: 72,
       transition: "all 0.3s ease",
-      background: scrolled ? "rgba(255,255,255,0.95)" : "transparent",
+      background: scrolled ? "var(--surface-2)" : "transparent",
       backdropFilter: scrolled ? "blur(10px)" : "none",
       borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
       boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.03)" : "none",
@@ -270,7 +270,7 @@ const LandingPage = () => {
           <div style={{ position: "relative", minHeight: 300 }}>
             <img src="/images/business.png" alt="Corporate Team" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
-          <div className="banner-padding" style={{ display: "flex", flexDirection: "column", justifyContent: "center", background: "var(--text-1)", color: "#fff" }}>
+          <div className="banner-padding" style={{ display: "flex", flexDirection: "column", justifyContent: "center", background: "var(--surface-2)", color: "#fff" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 1rem", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 99, fontSize: "0.75rem", fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem", alignSelf: "flex-start" }}>
               <Building2 size={14} /> {t('agency.badge')}
             </div>
@@ -301,7 +301,7 @@ const LandingPage = () => {
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "2rem", maxWidth: 900, margin: "0 auto", marginTop: "3rem" }}>
             {PLANS_AGENCY.map((plan, i) => (
-              <div key={i} className="panel" style={{ padding: "3rem", position: "relative", border: plan.highlight ? "2px solid var(--lime)" : "1px solid var(--border)", boxShadow: plan.highlight ? "0 20px 40px rgba(79, 70, 229, 0.1)" : "0 4px 10px rgba(0,0,0,0.02)", ...S.reveal(true, i * 0.1) }}>
+              <div key={i} className="panel" style={{ padding: "3rem", position: "relative", border: plan.highlight ? "2px solid var(--lime)" : "1px solid var(--border)", boxShadow: plan.highlight ? "0 20px 40px var(--lime-glow)" : "0 4px 10px rgba(0,0,0,0.02)", ...S.reveal(true, i * 0.1) }}>
                 {plan.badge && (
                   <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", padding: "4px 16px", borderRadius: 99, fontSize: "0.75rem", fontWeight: 800, letterSpacing: "0.06em", background: "var(--lime)", color: "#000", whiteSpace: "nowrap" }}>
                     {plan.badge}
@@ -365,7 +365,7 @@ const LandingPage = () => {
 
       {/* ── CTA FINAL ── */}
       <section className="section-padding" style={{ background: "var(--surface-2)", paddingBottom: '6rem', paddingTop: '6rem' }}>
-        <div style={{ maxWidth: 820, margin: "0 auto", textAlign: "center", background: "var(--lime)", borderRadius: 32, padding: "clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem)", boxShadow: "0 20px 40px rgba(37, 99, 235, 0.2)" }}>
+        <div style={{ maxWidth: 820, margin: "0 auto", textAlign: "center", background: "var(--lime)", borderRadius: 32, padding: "clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem)", boxShadow: "0 20px 40px var(--lime-glow)" }}>
           <h2 style={{ fontSize: "clamp(2rem, 4vw, 3.25rem)", fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: "1.25rem", color: "#fff" }}>
             {t('cta.title1')}<br />{t('cta.title2')}
           </h2>

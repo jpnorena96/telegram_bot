@@ -122,7 +122,7 @@ const LoginPage = () => {
                   fontWeight: 600, border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                   marginTop: '0.5rem', transition: 'all 0.2s',
-                  boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)'
+                  boxShadow: '0 4px 12px var(--lime-glow)'
                 }}
                 onMouseOver={e => !loading && (e.currentTarget.style.background = 'var(--lime-dim)')}
                 onMouseOut={e => !loading && (e.currentTarget.style.background = 'var(--lime)')}
@@ -197,7 +197,7 @@ const LoginPage = () => {
         
         {/* Decorative elements */}
         <div style={{ position: 'absolute', top: '-10%', right: '-10%', width: '600px', height: '600px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', filter: 'blur(60px)' }} />
-        <div style={{ position: 'absolute', bottom: '-20%', left: '-10%', width: '500px', height: '500px', borderRadius: '50%', background: 'rgba(139, 92, 246, 0.15)', filter: 'blur(80px)' }} />
+        <div style={{ position: 'absolute', bottom: '-20%', left: '-10%', width: '500px', height: '500px', borderRadius: '50%', background: 'var(--lime-glow)', filter: 'blur(80px)' }} />
 
         <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '4rem', color: '#fff' }}>
           <ShieldCheck size={48} color="rgba(255,255,255,0.8)" style={{ marginBottom: '2rem' }} />

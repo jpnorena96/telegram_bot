@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, FileText, CheckCircle2, Loader2, Download, 
-  User, Globe, AlertCircle, Trash2, Calendar, File, 
+  ArrowLeft, FileText, CheckCircle2, Loader2, Download, Printer,
+  User, Globe, AlertCircle, Trash2, Calendar, File, Image,
   Briefcase, Plane, MapPin, DollarSign, ExternalLink,
   Sparkles, Award, ShieldCheck, Check, AlertTriangle, Send
 } from 'lucide-react';
@@ -359,39 +359,54 @@ const VisaProcessDetailsPage = () => {
 
                     </div>
 
-                    {/* DOCUMENTOS ADJUNTOS */}
-                    <h4 style={{ fontSize: '0.8rem', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>
-                      Documentos Anexos del Solicitante
-                    </h4>
-                    
-                    {app.documents && app.documents.length > 0 ? (
+                    {/* INSUMOS Y DOCUMENTOS */}
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
+                        <FileText size={16} color="#10B981" /> Insumos y Documentos
+                      </h4>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.75rem' }}>
-                        {app.documents.map(doc => (
-                          <div key={doc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.8rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px' }}>
+                        
+                        {/* Botón PDF DS-160 */}
+                        <button 
+                          onClick={() => window.open(`/ds160/print/${process.id}`, '_blank')} 
+                          className="btn btn-sm" 
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.8rem', background: '#F3F4F6', border: '1px solid var(--border)', borderRadius: '6px', color: '#111827', fontWeight: 600, width: '100%', cursor: 'pointer' }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Printer size={16} color="#2563EB" /> Formulario DS-160
+                          </div>
+                          <ExternalLink size={14} />
+                        </button>
+
+                        {/* Documentos del aplicante */}
+                        {app.documents && app.documents.map(doc => (
+                          <a 
+                            key={doc.id}
+                            href={`${(api.url || api.API_URL || '').replace('/api', '')}${doc.file_path || doc.file_url}`} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.8rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', textDecoration: 'none', color: '#111827' }}
+                          >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
-                              <FileText size={16} color="#10B981" />
-                              <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {doc.document_type}
+                              {(doc.document_type || '').toLowerCase().includes('pasaporte') ? <Globe size={16} color="#D97706" /> : ((doc.document_type || '').toLowerCase().includes('foto') || (doc.document_type || '').toLowerCase().includes('imagen') || (doc.document_type || '').toLowerCase().includes('img') ? <Image size={16} color="#8B5CF6" /> : <File size={16} color="#10B981" />)}
+                              <div style={{ fontSize: '0.78rem', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {doc.document_type || 'Documento adjunto'}
                               </div>
                             </div>
-                            <a 
-                              href={`${(api.url || api.API_URL || '').replace('/api', '')}${doc.file_path || doc.file_url}`} 
-                              target="_blank" 
-                              rel="noreferrer"
-                              className="btn btn-icon btn-sm"
-                              style={{ background: '#F3F4F6', border: 'none', color: '#111827' }}
-                              title="Ver / Descargar"
-                            >
-                              <Download size={13} />
-                            </a>
-                          </div>
+                            <Download size={13} color="#6B7280" />
+                          </a>
                         ))}
+
+                        {/* Si no hay documentos de anexos */}
+                        {(!app.documents || app.documents.length === 0) && (
+                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.8rem', background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: '6px', color: 'var(--text-3)' }}>
+                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                               <AlertCircle size={16} /> <span style={{ fontSize: '0.78rem' }}>Sin anexos subidos</span>
+                             </div>
+                           </div>
+                        )}
                       </div>
-                    ) : (
-                      <div style={{ padding: '0.75rem', background: 'var(--surface)', border: '1px dotted var(--border)', color: 'var(--text-3)', fontSize: '0.78rem', fontStyle: 'italic', borderRadius: '6px' }}>
-                        Sin archivos adjuntos para este integrante.
-                      </div>
-                    )}
+                    </div>
 
                   </div>
                 );

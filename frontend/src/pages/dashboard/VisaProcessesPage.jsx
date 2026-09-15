@@ -4,7 +4,7 @@ import {
   FileText, Plus, Search, ArrowRight, Trash2, Link as LinkIcon, 
   Eye, CheckCircle2, ChevronRight, Filter, Globe, Users, 
   FolderOpen, Sparkles, Copy, ExternalLink, ShieldCheck, Check, Clock, UserCheck
-} from 'lucide-react';
+, Printer } from 'lucide-react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -123,7 +123,7 @@ const VisaProcessesPage = () => {
     return (
       <div className="animate-in" style={{ padding: '0', maxWidth: '1200px', margin: '0 auto', textAlign: 'center', marginTop: '4rem' }}>
         <div style={{ background: 'var(--surface)', padding: '3rem', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-          <FolderOpen size={48} style={{ color: '#8B5CF6', marginBottom: '1rem' }} />
+          <FolderOpen size={48} style={{ color: 'var(--lime)', marginBottom: '1rem' }} />
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-1)', marginBottom: '0.5rem' }}>Sección en Construcción</h2>
           <p style={{ color: 'var(--text-2)', fontSize: '1rem' }}>Esta sección de Mis Trámites y Expedientes estará habilitada muy pronto para tu rol de agencia. ¡Estamos trabajando en ello!</p>
         </div>
@@ -148,7 +148,7 @@ const VisaProcessesPage = () => {
       {/* ── HEADER DE EXPEDIENTES Y TRÁMITES ── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '2rem' }}>
         <div>
-          <div style={{ fontSize: '0.75rem', color: '#8B5CF6', letterSpacing: '0.12em', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--lime)', letterSpacing: '0.12em', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <FolderOpen size={16} /> Data Room · Formularios & Expedientes Consulares
           </div>
           <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: 'var(--text-1)', letterSpacing: '-0.02em' }}>
@@ -162,7 +162,7 @@ const VisaProcessesPage = () => {
         <button 
           onClick={() => { setCreating(true); setWizardStep(1); }} 
           className="btn btn-primary"
-          style={{ background: '#8B5CF6', borderRadius: '10px', padding: '0.65rem 1.25rem', fontWeight: 700 }}
+          style={{ background: 'var(--lime)', borderRadius: '10px', padding: '0.65rem 1.25rem', fontWeight: 700 }}
         >
           <Plus size={18} /> Nuevo Expediente de Trámite
         </button>
@@ -172,7 +172,7 @@ const VisaProcessesPage = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
         
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-          <div style={{ width: 44, height: 44, borderRadius: '10px', background: '#F5F3FF', color: '#8B5CF6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 44, height: 44, borderRadius: '10px', background: 'var(--surface-2)', color: 'var(--lime)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <FolderOpen size={22} />
           </div>
           <div>
@@ -205,10 +205,10 @@ const VisaProcessesPage = () => {
 
       {/* ── WIZARD DE CREACIÓN MODERNIZADO ── */}
       {creating && (
-        <div className="panel animate-in" style={{ padding: '2rem', borderRadius: '16px', marginBottom: '2rem', border: '1px solid #8B5CF6', background: 'var(--surface)', boxShadow: '0 4px 12px rgba(139, 92, 246, 0.08)' }}>
+        <div className="panel animate-in" style={{ padding: '2rem', borderRadius: '16px', marginBottom: '2rem', border: '1px solid var(--lime)', background: 'var(--surface)', boxShadow: '0 4px 12px var(--lime-glow)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--surface-2)', paddingBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <div style={{ width: 36, height: 36, borderRadius: '10px', background: '#F5F3FF', color: '#8B5CF6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'var(--surface-2)', color: 'var(--lime)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Sparkles size={18} />
               </div>
               <div>
@@ -241,8 +241,8 @@ const VisaProcessesPage = () => {
                     style={{
                       padding: '1.25rem',
                       borderRadius: '12px',
-                      border: selectedCountry === item.name ? '2px solid #8B5CF6' : '1px solid var(--border)',
-                      background: selectedCountry === item.name ? '#F5F3FF' : 'var(--surface)',
+                      border: selectedCountry === item.name ? '2px solid var(--lime)' : '1px solid var(--border)',
+                      background: selectedCountry === item.name ? 'var(--surface-2)' : 'var(--surface)',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -257,7 +257,7 @@ const VisaProcessesPage = () => {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                <button type="button" onClick={() => setWizardStep(2)} className="btn btn-primary" style={{ background: '#8B5CF6' }}>
+                <button type="button" onClick={() => setWizardStep(2)} className="btn btn-primary" style={{ background: 'var(--lime)' }}>
                   Siguiente paso <ArrowRight size={16} />
                 </button>
               </div>
@@ -282,8 +282,8 @@ const VisaProcessesPage = () => {
                     style={{
                       padding: '1.25rem',
                       borderRadius: '12px',
-                      border: selectedGroup === g.name ? '2px solid #8B5CF6' : '1px solid var(--border)',
-                      background: selectedGroup === g.name ? '#F5F3FF' : 'var(--surface)',
+                      border: selectedGroup === g.name ? '2px solid var(--lime)' : '1px solid var(--border)',
+                      background: selectedGroup === g.name ? 'var(--surface-2)' : 'var(--surface)',
                       cursor: 'pointer',
                       transition: 'all 0.2s'
                     }}
@@ -296,7 +296,7 @@ const VisaProcessesPage = () => {
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                 <button type="button" onClick={() => setWizardStep(1)} className="btn btn-outline">Atrás</button>
-                <button type="button" onClick={() => setWizardStep(3)} className="btn btn-primary" style={{ background: '#8B5CF6' }}>
+                <button type="button" onClick={() => setWizardStep(3)} className="btn btn-primary" style={{ background: 'var(--lime)' }}>
                   Siguiente paso <ArrowRight size={16} />
                 </button>
               </div>
@@ -321,8 +321,8 @@ const VisaProcessesPage = () => {
                     style={{
                       padding: '1.25rem',
                       borderRadius: '12px',
-                      border: selectedPurpose === p.name ? '2px solid #8B5CF6' : '1px solid var(--border)',
-                      background: selectedPurpose === p.name ? '#F5F3FF' : 'var(--surface)',
+                      border: selectedPurpose === p.name ? '2px solid var(--lime)' : '1px solid var(--border)',
+                      background: selectedPurpose === p.name ? 'var(--surface-2)' : 'var(--surface)',
                       cursor: 'pointer'
                     }}
                   >
@@ -334,7 +334,7 @@ const VisaProcessesPage = () => {
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                 <button type="button" onClick={() => setWizardStep(2)} className="btn btn-outline">Atrás</button>
-                <button type="button" onClick={() => setWizardStep(4)} className="btn btn-primary" style={{ background: '#8B5CF6' }}>
+                <button type="button" onClick={() => setWizardStep(4)} className="btn btn-primary" style={{ background: 'var(--lime)' }}>
                   Siguiente paso <ArrowRight size={16} />
                 </button>
               </div>
@@ -446,7 +446,7 @@ const VisaProcessesPage = () => {
                     <tr key={p.id} style={{ borderBottom: '1px solid var(--surface-2)' }}>
                       
                       {/* ID EXPEDIENTE */}
-                      <td style={{ padding: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 800, color: '#8B5CF6' }}>
+                      <td style={{ padding: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 800, color: 'var(--lime)' }}>
                         #{p.id.toString().padStart(4, '0')}
                       </td>
 
@@ -487,22 +487,24 @@ const VisaProcessesPage = () => {
                       <td style={{ padding: '1rem', textAlign: 'right' }}>
                         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                           
-                          {/* BOTÓN COPIAR ENLACE PORTAL */}
+
+                          {/* BOTA"N VER FORMULARIO */}
                           <button 
-                            onClick={() => copyLink(p.id)} 
+                            onClick={() => navigate(`/dashboard/ds160`)} 
                             className="btn btn-sm btn-outline" 
-                            style={{ borderColor: 'var(--border)', color: '#059669', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem' }} 
-                            title="Copiar Enlace del Portal del Cliente"
+                            style={{ borderColor: '#2563EB', color: '#2563EB', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', fontWeight: 600 }} 
+                            title="Llenar Formulario DS-160"
                           >
-                            <Copy size={13} /> Link Cliente
+                            <FileText size={13} /> DS-160
                           </button>
 
-                          {/* BOTÓN VER EXPEDIENTE */}
+
+                          {/* BOTA"N VER EXPEDIENTE */}
                           <button 
                             onClick={() => navigate(`/dashboard/visa-processes/${p.id}`)} 
                             className="btn btn-sm btn-primary" 
-                            style={{ background: '#8B5CF6', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }} 
-                            title="Ver Diagnóstico IA y Datos"
+                            style={{ background: 'var(--lime)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }} 
+                            title="Ver Diagnostico IA y Datos"
                           >
                             <Eye size={13} /> Ver Expediente
                           </button>
