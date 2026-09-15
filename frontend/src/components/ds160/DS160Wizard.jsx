@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
 import './ds160-modern.css';
@@ -60,9 +60,29 @@ const DS160Wizard = ({ applicantId, isPublic = false, processId = null }) => {
     setFormData(prev => ({ ...prev, ...newData }));
   };
 
-  const handleSaveJSON = async () => {
+  const initialLoadRef = useRef(true);
+
+  // Debounced auto-save on formData change
+  useEffect(() => {
+    // Prevent saving on the first render or when data is empty
+    if (initialLoadRef.current) {
+      if (Object.keys(formData).length > 0) {
+        initialLoadRef.current = false;
+      }
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      // Quiet save in the background
+      handleSaveJSON(true);
+    }, 2000); // 2-second debounce
+
+    return () => clearTimeout(timer);
+  }, [formData]);
+
+  const handleSaveJSON = async (quiet = false) => {
     if (!applicantId && !isPublic) {
-      toast.error('No se ha especificado el solicitante');
+      if (!quiet) toast.error('No se ha especificado el solicitante');
       return;
     }
     
@@ -83,17 +103,23 @@ const DS160Wizard = ({ applicantId, isPublic = false, processId = null }) => {
 
       const res = await fetch(endpoint, options);
       if (res.ok) {
-        toast.success('Formulario guardado exitosamente.');
+        if (!quiet) toast.success('Formulario guardado exitosamente.');
       } else {
-        toast.error('Error al guardar el formulario.');
+        if (!quiet) toast.error('Error al guardar el formulario.');
       }
     } catch (e) {
-      toast.error('Error de red al guardar.');
+      if (!quiet) toast.error('Error de red al guardar.');
     }
   };
 
-  const nextStep = () => setCurrentStep(prev => prev + 1);
-  const prevStep = () => setCurrentStep(prev => prev - 1);
+  const handleNavigate = async (newStep) => {
+    await handleSaveJSON(true); // Save silently in the background
+    setCurrentStep(newStep);
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top for better UX
+  };
+
+  const nextStep = () => handleNavigate(currentStep + 1);
+  const prevStep = () => handleNavigate(currentStep - 1);
 
   const STEPS_CONFIG = [
     { id: 1, title: 'Personal 1', icon: <User size={18} />, group: 'Personal' },
@@ -143,7 +169,7 @@ const DS160Wizard = ({ applicantId, isPublic = false, processId = null }) => {
                   </div>
                 )}
                 <button
-                  onClick={() => setCurrentStep(step.id)}
+                  onClick={() => handleNavigate(step.id)}
                   style={{
                     width: '100%',
                     display: 'flex',

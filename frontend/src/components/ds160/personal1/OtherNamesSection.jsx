@@ -20,89 +20,78 @@ const OtherNamesSection = ({ data, updateData }) => {
   };
 
   return (
-    <div style={{ border: '1px solid #999', padding: '15px', marginBottom: '20px', backgroundColor: '#f9f9f9' }}>
-      <div style={{ marginBottom: '15px' }}>
-        <span className="tooltip_text" title="Otros nombres">
-          <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>
-            Have you ever used other names (i.e., maiden, religious, professional, alias, etc.)?
-          </label>
-        </span>
-        <div>
-          <label style={{ marginRight: '15px' }}>
-            <input 
-              type="radio" 
-              name="otherNames" 
-              value="Y" 
-              checked={data?.otherNames === 'Y'} 
-              onChange={() => updateData({ otherNames: 'Y' })} 
-            /> Yes
-          </label>
-          <label>
-            <input 
-              type="radio" 
-              name="otherNames" 
-              value="N" 
-              checked={data?.otherNames === 'N'} 
-              onChange={() => updateData({ otherNames: 'N' })} 
-            /> No
-          </label>
-        </div>
-        
-        <div style={{ fontSize: '11px', color: '#666', marginTop: '5px' }}>
-          <strong>Help: Other Names</strong><br/>
-          Other names used include your maiden name, religious name, professional name, or any other names which you are known by or have been known by in the past.
-        </div>
+    <div style={{ padding: '15px', marginBottom: '20px' }}>
+      <label style={{ display: 'block', marginBottom: '12px' }}>
+        Have you ever used other names (i.e., maiden, religious, professional, alias, etc.)?
+        <br />
+        <span style={{ fontSize: '12px', color: '#64748B', fontWeight: 400, textTransform: 'none' }}>¿Ha utilizado alguna vez otros nombres (de soltera, religiosos, profesionales, alias, etc.)?</span>
+      </label>
+      
+      <div style={{ display: 'inline-flex', gap: '8px', marginBottom: '20px', backgroundColor: '#F1F5F9', padding: '4px', borderRadius: '10px' }}>
+        <button 
+          type="button"
+          onClick={() => updateData({ otherNames: 'Y' })} 
+          style={{ width: '100px', padding: '8px 16px', borderRadius: '6px', border: 'none', backgroundColor: data?.otherNames === 'Y' ? '#FFFFFF' : 'transparent', color: data?.otherNames === 'Y' ? '#2563EB' : '#475569', fontWeight: data?.otherNames === 'Y' ? 700 : 500, cursor: 'pointer', transition: 'all 0.2s', boxShadow: data?.otherNames === 'Y' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none' }}
+        >
+          Sí (Yes)
+        </button>
+        <button 
+          type="button"
+          onClick={() => updateData({ otherNames: 'N' })} 
+          style={{ width: '100px', padding: '8px 16px', borderRadius: '6px', border: 'none', backgroundColor: data?.otherNames === 'N' ? '#FFFFFF' : 'transparent', color: data?.otherNames === 'N' ? '#2563EB' : '#475569', fontWeight: data?.otherNames === 'N' ? 700 : 500, cursor: 'pointer', transition: 'all 0.2s', boxShadow: data?.otherNames === 'N' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none' }}
+        >
+          No
+        </button>
       </div>
 
       {data?.otherNames === 'Y' && (
-        <div style={{ borderTop: '1px solid #ccc', paddingTop: '15px', marginTop: '15px' }}>
-          <h4 style={{ margin: '0 0 10px 0', fontSize: '13px' }}>Provide the following information:</h4>
+        <div style={{ border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC', padding: '20px', borderRadius: '12px' }}>
+          <h4 style={{ margin: '0 0 15px 0', fontSize: '14px', color: '#1E293B' }}>Proporcione los siguientes nombres adicionales:</h4>
           
           {otherNamesList.map((item, index) => (
-            <div key={index} style={{ marginBottom: '15px', paddingBottom: '15px', borderBottom: index < otherNamesList.length - 1 ? '1px dashed #ccc' : 'none' }}>
-              <div style={{ marginBottom: '10px' }}>
-                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '3px' }}>Other Surnames Used (maiden, religious, professional, aliases, etc.)</label>
-                <input 
-                  type="text" 
-                  value={item.surname} 
-                  onChange={(e) => handleChange(index, 'surname', e.target.value)}
-                  style={{ width: '400px', padding: '3px', border: '1px solid #7f9db9' }} 
-                />
+            <div key={index} style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: index < otherNamesList.length - 1 ? '1px dashed #CBD5E1' : 'none', position: 'relative' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div>
+                  <label style={{ fontSize: '12px' }}>Other Surnames (Otros Apellidos)</label>
+                  <input 
+                    type="text" 
+                    maxLength="33" 
+                    value={item.surname} 
+                    onChange={(e) => handleChange(index, 'surname', e.target.value)} 
+                    placeholder="Ej. GARCIA PEREZ"
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '12px' }}>Other Given Names (Otros Nombres)</label>
+                  <input 
+                    type="text" 
+                    maxLength="33" 
+                    value={item.givenName} 
+                    onChange={(e) => handleChange(index, 'givenName', e.target.value)} 
+                    placeholder="Ej. MARIA"
+                  />
+                </div>
               </div>
               
-              <div style={{ marginBottom: '10px' }}>
-                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '3px' }}>Other Given Names Used</label>
-                <input 
-                  type="text" 
-                  value={item.givenName} 
-                  onChange={(e) => handleChange(index, 'givenName', e.target.value)}
-                  style={{ width: '400px', padding: '3px', border: '1px solid #7f9db9' }} 
-                />
-              </div>
-
-              <div style={{ marginTop: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
                 <button 
-                  onClick={handleAdd} 
-                  style={{ marginRight: '10px', padding: '3px 10px', cursor: 'pointer' }}
+                  type="button"
+                  onClick={() => handleRemove(index)} 
+                  style={{ backgroundColor: 'transparent', color: '#EF4444', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}
                 >
-                  Add Another
+                  Eliminar este nombre
                 </button>
-                {otherNamesList.length > 1 && (
-                  <button 
-                    onClick={() => handleRemove(index)} 
-                    style={{ padding: '3px 10px', cursor: 'pointer', color: 'red' }}
-                  >
-                    Remove
-                  </button>
-                )}
               </div>
             </div>
           ))}
 
-          <div style={{ fontSize: '11px', color: '#666', marginTop: '10px', fontStyle: 'italic' }}>
-            <strong>Help: Other Names</strong><br/>
-            If you only have other surnames to enter, enter the same given names as above. Conversely, if you only have other given names to enter, enter the same surname as above.
-          </div>
+          <button 
+            type="button"
+            onClick={handleAdd}
+            style={{ backgroundColor: '#F1F5F9', color: '#334155', border: '1px solid #CBD5E1', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            + Añadir Otro Nombre
+          </button>
         </div>
       )}
     </div>

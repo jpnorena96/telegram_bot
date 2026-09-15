@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './ds160.css';
 
 import NameSection from './personal1/NameSection';
@@ -8,6 +8,21 @@ import DemographicsSection from './personal1/DemographicsSection';
 import BirthSection from './personal1/BirthSection';
 
 const PersonalInformation1 = ({ data, updateData }) => {
+  useEffect(() => {
+    // Set defaults if they are undefined
+    const defaults = {};
+    let shouldUpdate = false;
+
+    if (data?.nativeName === undefined) { defaults.nativeName = 'NA'; shouldUpdate = true; }
+    if (data?.otherNames === undefined) { defaults.otherNames = 'N'; shouldUpdate = true; }
+    if (data?.telecode === undefined) { defaults.telecode = 'N'; shouldUpdate = true; }
+    if (data?.marital === undefined) { defaults.marital = 'S'; shouldUpdate = true; }
+
+    if (shouldUpdate) {
+      updateData(defaults);
+    }
+  }, [data, updateData]);
+
   return (
     <div className="ds160-container" style={{ fontFamily: 'Arial, sans-serif', fontSize: '13px', color: '#333' }}>
       <table border="0" cellPadding="0" cellSpacing="0" style={{ textAlign: 'center', width: '100%', maxWidth: '600px', margin: '0' }}>
