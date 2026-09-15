@@ -237,6 +237,7 @@ CREATE TABLE IF NOT EXISTS `visa_bot_db_telegram`.`visa_applicants` (
   `passport_number` VARCHAR(100) NULL DEFAULT NULL,
   `ds160_confirmation` VARCHAR(100) NULL DEFAULT NULL,
   `form_data` LONGTEXT NULL DEFAULT NULL,
+  `ds160_json` LONGTEXT NULL DEFAULT NULL,
   `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   INDEX `process_id` (`process_id` ASC) VISIBLE,

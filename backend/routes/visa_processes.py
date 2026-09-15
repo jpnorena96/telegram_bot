@@ -132,6 +132,68 @@ def mark_process_ready(process_id: int, background_tasks: BackgroundTasks, curre
 
     return {"status": "ok", "message": "Expediente marcado como Listo para Alta. Automatización iniciada."}
 
+@router.put("/applicants/{applicant_id}/ds160")
+async def update_applicant_ds160(applicant_id: int, request: Request, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    data = await request.json()
+    import json
+    ds160_json_str = json.dumps(data)
+    
+    cursor = db.cursor()
+    # Ensure they own the process this applicant belongs to
+    cursor.execute("SELECT vp.user_id FROM visa_applicants va JOIN visa_processes vp ON va.process_id = vp.id WHERE va.id = %s", (applicant_id,))
+    row = cursor.fetchone()
+    
+    if not row or (current_user["roles"][0] != "ADMINISTRATOR" and row[0] != current_user["id"]):
+        cursor.close()
+        raise HTTPException(status_code=403, detail="Not authorized")
+        
+    cursor.execute("UPDATE visa_applicants SET ds160_json = %s WHERE id = %s", (ds160_json_str, applicant_id))
+    db.commit()
+    cursor.close()
+    return {"status": "success", "message": "DS-160 guardado en BD exitosamente."}
+
+@router.get("/applicants/{applicant_id}/ds160")
+def get_applicant_ds160(applicant_id: int, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT ds160_json FROM visa_applicants va JOIN visa_processes vp ON va.process_id = vp.id WHERE va.id = %s", (applicant_id,))
+    row = cursor.fetchone()
+    cursor.close()
+    if not row:
+        raise HTTPException(status_code=404, detail="No encontrado")
+    import json
+    return json.loads(row["ds160_json"]) if row["ds160_json"] else {}
+
+@router.post("/applicants/{applicant_id}/submit-ds160")
+def submit_ds160(applicant_id: int, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT ds160_json FROM visa_applicants va JOIN visa_processes vp ON va.process_id = vp.id WHERE va.id = %s", (applicant_id,))
+    row = cursor.fetchone()
+    cursor.close()
+    
+    if not row or not row["ds160_json"]:
+        raise HTTPException(status_code=400, detail="El DS-160 no está completo o no se encontró en la BD")
+        
+    import json
+    try:
+        datos = json.loads(row["ds160_json"])
+    except:
+        raise HTTPException(status_code=400, detail="El formato del DS-160 es inválido")
+    
+    try:
+        import sys
+        try:
+            from backend.visas.playwright_test import run_from_data
+        except ImportError:
+            from visas.playwright_test import run_from_data
+            
+        background_tasks.add_task(run_from_data, datos)
+        print(f"✅ Script de llenado DS-160 iniciado para el solicitante {applicant_id}")
+    except Exception as e:
+        print(f"❌ Error al iniciar el script DS-160: {e}")
+        raise HTTPException(status_code=500, detail="Error interno al lanzar la automatización")
+        
+    return {"status": "success", "message": "Llenado de DS-160 iniciado en segundo plano"}
+
 @router.post("/public/{process_id}/submit")
 async def submit_public_process(process_id: int, request: Request, db = Depends(get_db)):
     form = await request.form()

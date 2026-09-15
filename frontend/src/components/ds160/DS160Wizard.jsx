@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { api } from '../../services/api';
+import toast from 'react-hot-toast';
 import PersonalInformation1 from './PersonalInformation1';
 import PersonalInformation2 from './PersonalInformation2';
 import TravelInformation from './TravelInformation';
@@ -18,22 +20,55 @@ import SecurityBackground5 from './SecurityBackground5';
 import PhotoUpload from './PhotoUpload';
 import PhotoUploadSubmit from './PhotoUploadSubmit';
 
-const DS160Wizard = () => {
+const DS160Wizard = ({ applicantId }) => {
   const [formData, setFormData] = useState({});
   const [currentStep, setCurrentStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (applicantId) {
+      setLoading(true);
+      fetch(`${api.url}/visa-processes/applicants/${applicantId}/ds160`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      })
+      .then(res => res.ok ? res.json() : {})
+      .then(data => {
+        if (data && Object.keys(data).length > 0) {
+          setFormData(data);
+        }
+      })
+      .catch(err => console.error("Error loading DS160 data:", err))
+      .finally(() => setLoading(false));
+    }
+  }, [applicantId]);
 
   const updateData = (newData) => {
     setFormData(prev => ({ ...prev, ...newData }));
   };
 
-  const handleGenerateJSON = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(formData, null, 2));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "datos.json");
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
+  const handleSaveJSON = async () => {
+    if (!applicantId) {
+      toast.error('No se ha especificado el solicitante');
+      return;
+    }
+    
+    try {
+      const res = await fetch(`${api.url}/visa-processes/applicants/${applicantId}/ds160`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(formData)
+      });
+      if (res.ok) {
+        toast.success('Formulario guardado exitosamente en el expediente.');
+      } else {
+        toast.error('Error al guardar el formulario.');
+      }
+    } catch (e) {
+      toast.error('Error de red al guardar.');
+    }
   };
 
   const nextStep = () => setCurrentStep(prev => prev + 1);
@@ -76,10 +111,10 @@ const DS160Wizard = () => {
             </button>
             
             <button 
-              onClick={handleGenerateJSON}
+              onClick={handleSaveJSON}
               style={{ padding: '10px 20px', backgroundColor: '#10b981', color: 'white', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold' }}
             >
-              Generar JSON (Prueba)
+              Guardar DS-160
             </button>
             
             <button 

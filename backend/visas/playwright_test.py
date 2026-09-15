@@ -36,9 +36,10 @@ async def safe_check(page, selector):
     except Exception as e:
         print(f"Warning: Could not check {selector} - {e}")
 
-async def run():
-    with open('datos.json', 'r', encoding='utf-8') as f:
-        datos = json.load(f)
+async def run(datos=None):
+    if datos is None:
+        with open('datos.json', 'r', encoding='utf-8') as f:
+            datos = json.load(f)
 
     solver = TwoCaptcha(API_KEY)
 
@@ -1209,3 +1210,8 @@ async def run():
 
 if __name__ == "__main__":
     asyncio.run(run())
+
+def run_from_data(datos):
+    """Wrapper function to run the async Playwright script from a synchronous background task using DB data."""
+    import asyncio
+    asyncio.run(run(datos))

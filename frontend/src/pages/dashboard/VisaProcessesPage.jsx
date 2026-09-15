@@ -488,17 +488,6 @@ const VisaProcessesPage = () => {
                         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                           
 
-                          {/* BOTA"N VER FORMULARIO */}
-                          <button 
-                            onClick={() => navigate(`/dashboard/ds160`)} 
-                            className="btn btn-sm btn-outline" 
-                            style={{ borderColor: '#2563EB', color: '#2563EB', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', fontWeight: 600 }} 
-                            title="Llenar Formulario DS-160"
-                          >
-                            <FileText size={13} /> DS-160
-                          </button>
-
-
                           {/* BOTA"N VER EXPEDIENTE */}
                           <button 
                             onClick={() => navigate(`/dashboard/visa-processes/${p.id}`)} 

@@ -76,7 +76,7 @@ function App() {
           <Route path="visa-processes" element={<VisaProcessesPage />} />
           <Route path="visa-processes/:id" element={<VisaProcessDetailsPage />} />
           <Route path="billetera" element={<WalletPage />} />
-          <Route path="ds160" element={<DS160FormPage />} />
+          <Route path="ds160/:applicantId" element={<DS160FormPage />} />
         </Route>
       </Routes>
     </Router>

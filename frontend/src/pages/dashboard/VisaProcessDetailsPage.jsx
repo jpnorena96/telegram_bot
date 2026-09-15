@@ -366,14 +366,61 @@ const VisaProcessDetailsPage = () => {
                       </h4>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.75rem' }}>
                         
-                        {/* Botón PDF DS-160 */}
+                        {/* DS-160 Status and Buttons */}
+                        {app.ds160_json && Object.keys(app.ds160_json).length > 0 ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', gridColumn: '1 / -1', padding: '0.75rem', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#166534', fontWeight: 'bold' }}>
+                              <CheckCircle2 size={16} /> Estado DS-160: Completo
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                              <button 
+                                onClick={() => navigate(`/dashboard/ds160/${app.id}`)}
+                                className="btn btn-sm btn-outline"
+                                style={{ flex: 1, minWidth: '150px' }}
+                              >
+                                Editar DS-160
+                              </button>
+                              <button 
+                                onClick={async () => {
+                                  try {
+                                    const res = await fetch(`${api.url}/visa-processes/applicants/${app.id}/submit-ds160`, {
+                                      method: 'POST',
+                                      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                                    });
+                                    if(res.ok) toast.success("Automatización de DS-160 iniciada");
+                                    else toast.error("Error al iniciar automatización");
+                                  } catch (e) { toast.error("Error de conexión"); }
+                                }}
+                                className="btn btn-sm btn-primary"
+                                style={{ flex: 1, minWidth: '150px', background: '#2563EB', color: 'white', border: 'none' }}
+                              >
+                                Enviar / Dar de alta
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', gridColumn: '1 / -1', padding: '0.75rem', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#991B1B', fontWeight: 'bold' }}>
+                              <AlertCircle size={16} /> Estado DS-160: Pendiente de revisión final
+                            </div>
+                            <button 
+                              onClick={() => navigate(`/dashboard/ds160/${app.id}`)}
+                              className="btn btn-sm btn-primary"
+                              style={{ width: 'fit-content' }}
+                            >
+                              Llenar formulario final
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Botón PDF DS-160 (original data form) */}
                         <button 
                           onClick={() => window.open(`/ds160/print/${process.id}`, '_blank')} 
                           className="btn btn-sm" 
                           style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.8rem', background: '#F3F4F6', border: '1px solid var(--border)', borderRadius: '6px', color: '#111827', fontWeight: 600, width: '100%', cursor: 'pointer' }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Printer size={16} color="#2563EB" /> Formulario DS-160
+                            <Printer size={16} color="#2563EB" /> Ver PDF (Datos cliente)
                           </div>
                           <ExternalLink size={14} />
                         </button>

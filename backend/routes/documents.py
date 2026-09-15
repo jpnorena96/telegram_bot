@@ -127,6 +127,12 @@ def get_process_details(process_id: int, current_user: dict = Depends(get_curren
                 app["form_data"] = {}
         elif not app.get("form_data"):
             app["form_data"] = {}
+            
+        if app.get("ds160_json") and isinstance(app["ds160_json"], str):
+            try:
+                app["ds160_json"] = json.loads(app["ds160_json"])
+            except:
+                pass
 
         cursor.execute("SELECT * FROM visa_documents WHERE applicant_id = %s", (app["id"],))
         app["documents"] = cursor.fetchall()
