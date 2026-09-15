@@ -6,8 +6,12 @@ import io
 import requests
 from urllib.parse import urlparse
 from DrissionPage import ChromiumPage, ChromiumOptions
-import ddddocr
-from PIL import Image
+import cv2
+import pytesseract
+import numpy as np
+
+# Configurar ruta de Tesseract en Windows
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 TELEGRAM_TOKEN = "8451235369:AAFeoGdbIHfRyxAyaBgnV3O0V91zs-CbtMo"
 TELEGRAM_CHAT_ID = "TU_CHAT_ID_AQUI" # ⚠️ REEMPLAZAR CON TU CHAT ID DE TELEGRAM
@@ -164,31 +168,48 @@ def init_session_with_drission(proxy_url=None):
             os.remove(img_name)
         captcha_img_locator.get_screenshot(path=img_name)
         
-        logging.info("5. Procesando y resolviendo Captcha con ddddocr...")
+        logging.info("5. Procesando y resolviendo Captcha con OpenCV + Tesseract...")
         
-        # Procesamiento de imagen con PIL para limpiar ruido
         try:
-            img = Image.open(img_name)
-            img = img.convert("L") # Blanco y negro
-            # Binarización para eliminar ruido de fondo (ajustable)
-            threshold = 120
-            img = img.point(lambda p: p > threshold and 255)
+            # Leer imagen con OpenCV
+            img = cv2.imread(img_name)
             
-            img_byte_arr = io.BytesIO()
-            img.save(img_byte_arr, format='PNG')
-            img_bytes = img_byte_arr.getvalue()
+            # 1. Convertir a escala de grises
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            
+            # 2. Alto contraste de blanco y negro (Thresholding)
+            # Usamos OTSU para calcular el umbral óptimo automáticamente
+            _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+            
+            # 3. Filtros morfológicos (Erosion/Dilation)
+            # Creamos un kernel pequeño de 2x2 para eliminar ruido fino y líneas
+            kernel = np.ones((2, 2), np.uint8)
+            
+            # Erosion para eliminar puntos de ruido (que en BINARY_INV son blancos)
+            eroded = cv2.erode(thresh, kernel, iterations=1)
+            
+            # Dilatación para restaurar el grosor de las letras
+            processed = cv2.dilate(eroded, kernel, iterations=1)
+            
+            # Volver a invertir para que el texto sea negro y el fondo blanco, que Tesseract lee mejor
+            processed = cv2.bitwise_not(processed)
+            
+            # Guardamos la imagen procesada para depuración
+            cv2.imwrite("captcha_procesado.png", processed)
+            
+            # 4. Extraer texto con Tesseract
+            # Configuramos Tesseract para asumir una sola palabra (psm 8) y limitar caracteres
+            custom_config = r'--oem 3 --psm 8 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+            captcha_text = pytesseract.image_to_string(processed, config=custom_config).strip().upper()
+            
         except Exception as e:
-            logging.warning(f"Error procesando imagen: {e}. Usando original.")
-            with open(img_name, 'rb') as f:
-                img_bytes = f.read()
-
-        ocr = ddddocr.DdddOcr(show_ad=False)
-        captcha_text = ocr.classification(img_bytes).upper()
+            logging.error(f"Error en procesamiento OpenCV/Tesseract: {e}")
+            captcha_text = ""
         
         # Validación de captcha: si tiene caracteres raros o longitud inválida, reintentar
         import re
         if not re.match(r'^[A-Z0-9]{5}$', captcha_text):
-            logging.warning(f"❌ Captcha inválido generado por ddddocr: {captcha_text}. Reintentando...")
+            logging.warning(f"❌ Captcha inválido generado por OpenCV/Tesseract: {captcha_text}. Reintentando...")
             continue
             
         logging.info(f" -> CAPTCHA resuelto: {captcha_text}")

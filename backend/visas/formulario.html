@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>DS-160 Formulario CEAC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --p: #2563eb;
+      --pd: #1d4ed8;
+      --pl: #dbeafe;
+      --g: #059669;
+      --gl: #d1fae5;
+      --bg: #f1f5f9;
+      --card: #fff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --r: 12px;
+      --sh: 0 4px 24px rgba(0, 0, 0, .08)
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh
+    }
+
+    .app-header {
+      background: linear-gradient(135deg, #1e40af, #2563eb 60%, #0ea5e9);
+      color: #fff;
+      padding: 22px 32px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(37, 99, 235, .4)
+    }
+
+    .app-header h1 {
+      font-size: 1.6rem;
+      font-weight: 700
+    }
+
+    .app-header p {
+      font-size: .88rem;
+      opacity: .8;
+      margin-top: 4px
+    }
+
+    .progress-wrap {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 28px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .06)
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px
+    }
+
+    .step-label {
+      font-weight: 600;
+      color: var(--p);
+      font-size: .93rem
+    }
+
+    .step-counter {
+      color: var(--muted);
+      font-size: .83rem
+    }
+
+    .progress-bar-outer {
+      height: 8px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden
+    }
+
+    .progress-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, #2563eb, #0ea5e9);
+      border-radius: 99px;
+      transition: width .4s ease
+    }
+
+    .steps-dots {
+      display: flex;
+      gap: 5px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 10px 0 0
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: background .3s, transform .3s;
+      title: attr(title)
+    }
+
+    .dot.done {
+      background: var(--g)
+    }
+
+    .dot.active {
+      background: var(--p);
+      transform: scale(1.45)
+    }
+
+    .wizard-outer {
+      max-width: 860px;
+      margin: 28px auto;
+      padding: 0 14px 80px
+    }
+
+    .step-panel {
+      display: none;
+      animation: fu .3s ease
+    }
+
+    .step-panel.active {
+      display: block
+    }
+
+    @keyframes fu {
+      from {
+        opacity: 0;
+        transform: translateY(14px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--r);
+      box-shadow: var(--sh);
+      overflow: hidden;
+      margin-bottom: 22px
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, var(--p), #0ea5e9);
+      color: #fff;
+      padding: 18px 26px
+    }
+
+    .card-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .badge {
+      background: rgba(255, 255, 255, .2);
+      font-size: .7rem;
+      padding: 2px 9px;
+      border-radius: 99px;
+      font-weight: 500
+    }
+
+    .card-body {
+      padding: 26px
+    }
+
+    .row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 14px
+    }
+
+    .row>* {
+      flex: 1 1 160px
+    }
+
+    .full {
+      flex: 1 1 100% !important
+    }
+
+    label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: .04em
+    }
+
+    input[type=text],
+    input[type=email],
+    input[type=number],
+    select,
+    textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .91rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fafbfc;
+      transition: border-color .2s, box-shadow .2s
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--p);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, .1)
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 76px
+    }
+
+    .cbg {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 0
+    }
+
+    .cbg input[type=checkbox] {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--p);
+      cursor: pointer;
+      flex-shrink: 0
+    }
+
+    .cbg label {
+      margin: 0;
+      text-transform: none;
+      font-size: .87rem;
+      color: var(--text);
+      font-weight: 400;
+      cursor: pointer
+    }
+
+    h3 {
+      font-size: .93rem;
+      font-weight: 600;
+      color: var(--p);
+      margin: 18px 0 10px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid var(--pl)
+    }
+
+    .notice {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 11px 15px;
+      font-size: .86rem;
+      color: #92400e;
+      margin-bottom: 14px
+    }
+
+    .sec-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+      align-items: center;
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 9px 13px;
+      border: 1px solid var(--border)
+    }
+
+    .sec-row label {
+      flex: 1;
+      margin: 0;
+      font-size: .86rem;
+      text-transform: none;
+      font-weight: 500;
+      color: var(--text)
+    }
+
+    .sec-row select {
+      flex: 0 0 75px;
+      padding: 5px 7px
+    }
+
+    .sec-row input[type=text] {
+      flex: 1.2;
+      padding: 5px 9px;
+      font-size: .84rem
+    }
+
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 26px;
+      gap: 10px
+    }
+
+    .btn {
+      padding: 11px 26px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: .91rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      gap: 7px
+    }
+
+    .btn-prev {
+      background: #fff;
+      color: var(--p);
+      border: 1.5px solid var(--p)
+    }
+
+    .btn-prev:hover {
+      background: var(--pl)
+    }
+
+    .btn-next {
+      background: var(--p);
+      color: #fff
+    }
+
+    .btn-next:hover {
+      background: var(--pd);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, .35)
+    }
+
+    .btn-gen {
+      background: linear-gradient(135deg, var(--g), #10b981);
+      color: #fff;
+      padding: 13px 36px;
+      font-size: .98rem;
+      width: 100%;
+      justify-content: center;
+      margin-top: 6px;
+      box-shadow: 0 4px 16px rgba(5, 150, 105, .3)
+    }
+
+    .btn-gen:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(5, 150, 105, .4)
+    }
+
+    .success-box {
+      background: var(--gl);
+      border: 1.5px solid #6ee7b7;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 22px;
+      text-align: center
+    }
+
+    @media(max-width:600px) {
+      .card-body {
+        padding: 16px
+      }
+
+      .row {
+        flex-direction: column;
+        gap: 8px
+      }
+
+      .app-header h1 {
+        font-size: 1.25rem
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-header">
+    <h1>&#127482;&#127480; Formulario DS-160 &ndash; CEAC</h1>
+    <p>Complete cada sección en orden para generar su archivo datos.json</p>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span class="step-label" id="stepLabel">Paso 1 de 12</span>
+      <span class="step-counter" id="stepName">Personal Information 1</span>
+    </div>
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" id="progressBar" style="width:8%"></div>
+    </div>
+    <div class="steps-dots" id="stepsDots"></div>
+  </div>
+
+  <div class="wizard-outer">
+    <form id="ds160Form" onsubmit="return false">
+
+      <!-- PASO 1 -->
+      <div class="step-panel active" id="step-1">
+        <div class="card">
+          <div class="card-header">
+            <h2>&#128100; Personal Information 1 <span class="badge">S1</span></h2>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div><label>Apellido(s)</label><input type="text" id="surname" placeholder="GARCIA"></div>
+              <div><label>Nombre(s)</label><input type="text" id="givenName" placeholder="JUAN PABLO"></div>
+            </div>
+            <div class="row">
+              <div class="cbg"><input type="checkbox" id="otherSurnamesNA"><label for="otherSurnamesNA">Sin otros
+                  apellidos</label></div>
+              <div><label>Otros Apellidos</label><input type="text" id="otherSurnames"></div>
+            </div>
+            <div class="row">
+              <div><label>Día Nacimiento</label><select id="dobDay"></select></div>
+              <div><label>Mes</label><select id="dobMonth">
+                  <option value="1">ENE</option>
+                  <option value="2">FEB</option>
+                  <option value="3">MAR</option>
+                  <option value="4">ABR</option>
+                  <option value="5" selected>MAY</option>
+                  <option value="6">JUN</option>
+                  <option value="7">JUL</option>
+                  <option value="8">AGO</option>
+                  <option value="9">SEP</option>
+                  <option value="10">OCT</option>
+                  <option value="11">NOV</option>
+                  <option value="12">DIC</option>
+                </select></div>
+              <div><label>Año</label><input type="number" id="dobYear" value="1990" min="1900" max="2010"></div>
+            </div>
+            <div class="row">
+              <div><label>Ciudad Nac.</label><input type="text" id="pobCity" placeholder="BOGOTA"></div>
+              <div><label>Dpto./Estado Nac.</label><input type="text" id="pobState" placeholder="CUNDINAMARCA"></div>
+              <div><label>País Nac.</label><select id="pobCountry">
+                  <option value="COL" selected>COLOMBIA</option>
+                  <option value="MEX">MEXICO</option>
+                  <option value="BRZL">BRAZIL</option>
+                  <option value="ARG">ARGENTINA</option>
+                  <option value="PER">PERU</option>
+                  <option value="CHL">CHILE</option>
+                  <option value="VEN">VENEZUELA</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div><label>Género</label><select id="gender">
+                  <option value="M" selected>Masculino</option>
+                  <option value="F">Femenino</option>
+                </select></div>
+              <div><label>Estado Civil</label><select id="maritalStatus">
+                  <option value="S" selected>SOLTERO(A)</option>
+                  <option value="M">CASADO(A)</option>
+                  <option value="W">VIUDO(A)</option>
+                  <option value="D">DIVORCIADO(A)</option>
+                  <option value="C">UNION LIBRE</option>
+                  <option value="P">SEPARADO(A)</option>
+                </select></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 2 -->
+      <div class="step-panel" id="step-2">
+        <div class="card">
+          <div class="card-header">
+            <h2>&#128219; Personal Information 2 <span class="badge">S2</span></h2>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div><label>Nacionalidad</label><select id="nationality">
+                  <option value="COL" selected>COLOMBIA</option>
+                  <option value="MEX">MEXICO</option>
+                  <option value="BRZL">BRAZIL</option>
+                  <option value="ARG">ARGENTINA</option>
+                  <option value="USA">USA</option>
+                </select></div>
+              <div><label>Otra Nac.</label><select id="otherNationality">
+                  <option value="">Ninguna</option>
+                  <option value="USA">USA</option>
+                  <option value="SPN">SPAIN</option>
+                </select></div>
+              <div><label>Resid. perm. otro país</label><select id="permResidentOther">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div class="cbg"><input type="checkbox" id="nationalIdNA"><label for="nationalIdNA">Sin ID
+                  nacional</label></div>
+              <div><label>Cédula / ID Nacional</label><input type="text" id="nationalId" placeholder="1234567890"></div>
+            </div>
+            <div class="row">
+              <div class="cbg"><input type="checkbox" id="ssnNA"><label for="ssnNA">Sin SSN</label></div>
+              <div><label>Social Security # (EE.UU.)</label><input type="text" id="ssn" placeholder="000-00-0000"></div>
+            </div>
+            <div class="row">
+              <div class="cbg"><input type="checkbox" id="taxIdNA"><label for="taxIdNA">Sin Tax ID</label></div>
+              <div><label>U.S. Tax ID</label><input type="text" id="taxId"></div>
+            </div>
+            <h3>Redes Sociales</h3>
+            <div class="row">
+              <div><label>Plataforma</label><select id="socialMediaPlatform">
+                  <option value="NONE" selected>Ninguna</option>
+                  <option value="FACEBOOK">Facebook</option>
+                  <option value="INSTAGRAM">Instagram</option>
+                  <option value="TWITTER">Twitter/X</option>
+                  <option value="TIKTOK">TikTok</option>
+                  <option value="LINKEDIN">LinkedIn</option>
+                  <option value="YOUTUBE">YouTube</option>
+                  <option value="OTHER">Otra</option>
+                </select></div>
+              <div><label>Usuario / Handle</label><input type="text" id="socialMediaHandle" placeholder="@usuario">
+              </div>
+              <div><label>¿Otras redes?</label><select id="otherSocialMedia">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 3 -->
+      <div class="step-panel" id="step-3">
+        <div class="card">
+          <div class="card-header">
+            <h2>&#9992;&#65039; Travel Information <span class="badge">S3</span></h2>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div><label>Propósito del Viaje</label><select id="purposeOfTrip">
+                  <option value="B" selected>BUSINESS/PLEASURE (B1/B2)</option>
+                  <option value="F">STUDENT (F)</option>
+                  <option value="J">EXCHANGE VISITOR (J)</option>
+                  <option value="H">TEMP WORKER (H)</option>
+                  <option value="L">INTRACOMPANY (L)</option>
+                  <option value="O">EXTRAORDINARY (O)</option>
+                  <option value="TN">NAFTA (TN)</option>
+                  <option value="K">FIANCEE (K)</option>
+                  <option value="OTHER">OTHER</option>
+                </select></div>
+              <div><label>Especificar (OTHER)</label><input type="text" id="specifyPurpose" placeholder="TURISMO"></div>
+              <div><label>¿Planes específicos?</label><select id="specificTravelPlans">
+                  <option value="Y">Si</option>
+                  <option value="N" selected>No</option>
+                </select></div>
+            </div>
+            <h3>Llegada Estimada</h3>
+            <div class="row">
+              <div><label>Dia</label><select id="arrivalDay"></select></div>
+              <div><label>Mes</label><select id="arrivalMonth">
+                  <option value="1">ENE</option>
+                  <option value="2">FEB</option>
+                  <option value="3">MAR</option>
+                  <option value="4">ABR</option>
+                  <option value="5" selected>MAY</option>
+                  <option value="6">JUN</option>
+                  <option value="7">JUL</option>
+                  <option value="8">AGO</option>
+                  <option value="9">SEP</option>
+                  <option value="10">OCT</option>
+                  <option value="11">NOV</option>
+                  <option value="12">DIC</option>
+                </select></div>
+              <div><label>Año</label><input type="number" id="arrivalYear" value="2026"></div>
+              <div><label>Duración</label><input type="text" id="stayLength" value="30"></div>
+              <div><label>Unidad</label><select id="stayUnit">
+                  <option value="D" selected>Dias</option>
+                  <option value="W">Semanas</option>
+                  <option value="M">Meses</option>
+                  <option value="Y">Anos</option>
+                </select></div>
+            </div>
+            <h3>Vuelo de Llegada</h3>
+            <div class="row">
+              <div><label>Dia</label><select id="specificArrivalDay"></select></div>
+              <div><label>Mes</label><select id="specificArrivalMonth">
+                  <option value="1">ENE</option>
+                  <option value="2">FEB</option>
+                  <option value="3">MAR</option>
+                  <option value="4">ABR</option>
+                  <option value="5" selected>MAY</option>
+                  <option value="6">JUN</option>
+                  <option value="7">JUL</option>
+                  <option value="8">AGO</option>
+                  <option value="9">SEP</option>
+                  <option value="10">OCT</option>
+                  <option value="11">NOV</option>
+                  <option value="12">DIC</option>
+                </select></div>
+              <div><label>Año</label><input type="number" id="specificArrivalYear" value="2026"></div>
+              <div><label>Vuelo</label><input type="text" id="arrivalFlight" placeholder="AA1234"></div>
+              <div><label>Ciudad llegada</label><input type="text" id="arrivalCity" placeholder="MIAMI"></div>
+            </div>
+            <h3>Vuelo de Salida</h3>
+            <div class="row">
+              <div><label>Dia</label><select id="specificDepDay"></select></div>
+              <div><label>Mes</label><select id="specificDepMonth">
+                  <option value="1">ENE</option>
+                  <option value="2">FEB</option>
+                  <option value="3">MAR</option>
+                  <option value="4">ABR</option>
+                  <option value="5" selected>MAY</option>
+                  <option value="6">JUN</option>
+                  <option value="7">JUL</option>
+                  <option value="8">AGO</option>
+                  <option value="9">SEP</option>
+                  <option value="10">OCT</option>
+                  <option value="11">NOV</option>
+                  <option value="12">DIC</option>
+                </select></div>
+              <div><label>Año</label><input type="number" id="specificDepYear" value="2026"></div>
+              <div><label>Vuelo</label><input type="text" id="departureFlight" placeholder="AA5678"></div>
+              <div><label>Ciudad salida</label><input type="text" id="departureCity" placeholder="MIAMI"></div>
+            </div>
+            <div class="row">
+              <div class="full"><label>Lugares a Visitar</label><input type="text" id="locationsToVisit"
+                  placeholder="ORLANDO, MIAMI, NUEVA YORK"></div>
+            </div>
+            <h3>Dirección en EE.UU.</h3>
+            <div class="row">
+              <div style="flex:2"><label>Calle / Street 1</label><input type="text" id="usStreet1"
+                  placeholder="123 Disney Way"></div>
+              <div><label>Street 2</label><input type="text" id="usStreet2" placeholder="Apt 4B"></div>
+            </div>
+            <div class="row">
+              <div><label>Ciudad</label><input type="text" id="usCity" placeholder="Orlando"></div>
+              <div><label>Estado</label><select id="usState">
+                  <option value="">- State -</option>
+                  <option value="AL">AL</option>
+                  <option value="AK">AK</option>
+                  <option value="AZ">AZ</option>
+                  <option value="AR">AR</option>
+                  <option value="CA">CA</option>
+                  <option value="CO">CO</option>
+                  <option value="CT">CT</option>
+                  <option value="DE">DE</option>
+                  <option value="FL" selected>FL</option>
+                  <option value="GA">GA</option>
+                  <option value="HI">HI</option>
+                  <option value="ID">ID</option>
+                  <option value="IL">IL</option>
+                  <option value="IN">IN</option>
+                  <option value="IA">IA</option>
+                  <option value="KS">KS</option>
+                  <option value="KY">KY</option>
+                  <option value="LA">LA</option>
+                  <option value="ME">ME</option>
+                  <option value="MD">MD</option>
+                  <option value="MA">MA</option>
+                  <option value="MI">MI</option>
+                  <option value="MN">MN</option>
+                  <option value="MS">MS</option>
+                  <option value="MO">MO</option>
+                  <option value="MT">MT</option>
+                  <option value="NE">NE</option>
+                  <option value="NV">NV</option>
+                  <option value="NH">NH</option>
+                  <option value="NJ">NJ</option>
+                  <option value="NM">NM</option>
+                  <option value="NY">NY</option>
+                  <option value="NC">NC</option>
+                  <option value="ND">ND</option>
+                  <option value="OH">OH</option>
+                  <option value="OK">OK</option>
+                  <option value="OR">OR</option>
+                  <option value="PA">PA</option>
+                  <option value="RI">RI</option>
+                  <option value="SC">SC</option>
+                  <option value="SD">SD</option>
+                  <option value="TN">TN</option>
+                  <option value="TX">TX</option>
+                  <option value="UT">UT</option>
+                  <option value="VT">VT</option>
+                  <option value="VA">VA</option>
+                  <option value="WA">WA</option>
+                  <option value="WV">WV</option>
+                  <option value="WI">WI</option>
+                  <option value="WY">WY</option>
+                </select></div>
+              <div><label>ZIP</label><input type="text" id="usZip" placeholder="32830"></div>
+            </div>
+            <h3>Pagador del Viaje</h3>
+            <div class="row">
+              <div><label>¿Quién paga?</label><select id="whoIsPaying">
+                  <option value="S" selected>YO MISMO</option>
+                  <option value="P">OTRA PERSONA</option>
+                  <option value="C">EMPRESA</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div><label>Apellido</label><input type="text" id="payerSurname" placeholder="GARCIA"></div>
+              <div><label>Nombre</label><input type="text" id="payerGivenName" placeholder="CARLOS"></div>
+              <div><label>Teléfono</label><input type="text" id="payerPhone" placeholder="3001234567"></div>
+            </div>
+            <div class="row">
+              <div><label>Email</label><input type="email" id="payerEmail" placeholder="carlos@email.com"></div>
+              <div><label>Relación</label><input type="text" id="payerRelationship" placeholder="PADRE"></div>
+            </div>
+            <div class="row">
+              <div><label>Empresa Pagadora</label><input type="text" id="payerOrgName"></div>
+              <div><label>Tel. Empresa</label><input type="text" id="payerOrgPhone"></div>
+              <div><label>Rel. Empresa</label><input type="text" id="payerOrgRelationship"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 4 -->
+      <div class="step-panel" id="step-4">
+        <div class="card">
+          <div class="card-header">
+            <h2>&#128145; Travel Companions <span class="badge">S4</span></h2>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div><label>¿Viajan otros con usted?</label><select id="otherPersonsTravelingWithYou">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+              <div><label>¿Viaje en grupo?</label><select id="groupTravel">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+              <div><label>Nombre del Grupo</label><input type="text" id="groupName" placeholder="AGENCIA XYZ"></div>
+            </div>
+            <h3>Acompañantes</h3>
+            <div id="companionsList"></div>
+            <button type="button" class="btn btn-prev" onclick="addCompanion()" style="margin-top:8px">+ Agregar
+              Acompañante</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 5 -->
+      <div class="step-panel" id="step-5">
+        <div class="card">
+          <div class="card-header">
+            <h2>&#128083; Previous U.S. Travel <span class="badge">S5</span></h2>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div><label>¿Ha viajado antes a EE.UU.?</label><select id="prevUsTravel">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div><label>Dia última visita</label><select id="prevUsVisitDay"></select></div>
+              <div><label>Mes</label><select id="prevUsVisitMonth">
+                  <option value="1">ENE</option>
+                  <option value="2">FEB</option>
+                  <option value="3">MAR</option>
+                  <option value="4">ABR</option>
+                  <option value="5" selected>MAY</option>
+                  <option value="6">JUN</option>
+                  <option value="7">JUL</option>
+                  <option value="8">AGO</option>
+                  <option value="9">SEP</option>
+                  <option value="10">OCT</option>
+                  <option value="11">NOV</option>
+                  <option value="12">DIC</option>
+                </select></div>
+              <div><label>Año</label><input type="number" id="prevUsVisitYear" value="2019"></div>
+              <div><label>Duración</label><input type="text" id="prevUsVisitLOS" placeholder="30"></div>
+              <div><label>Unidad</label><select id="prevUsVisitLOS_CD">
+                  <option value="D" selected>Dias</option>
+                  <option value="W">Semanas</option>
+                  <option value="M">Meses</option>
+                </select></div>
+            </div>
+            <h3>Licencia EE.UU.</h3>
+            <div class="row">
+              <div><label>¿Tiene licencia EE.UU.?</label><select id="hasUsDriverLicense">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+              <div class="cbg"><input type="checkbox" id="prevUsDriverLicenseNA"><label>Sin número</label></div>
+              <div><label>Número licencia</label><input type="text" id="prevUsDriverLicenseNum"></div>
+              <div><label>Estado</label><select id="prevUsDriverLicenseState">
+                  <option value="">- State -</option>
+                  <option value="AL">AL</option>
+                  <option value="AK">AK</option>
+                  <option value="AZ">AZ</option>
+                  <option value="AR">AR</option>
+                  <option value="CA">CA</option>
+                  <option value="CO">CO</option>
+                  <option value="CT">CT</option>
+                  <option value="DE">DE</option>
+                  <option value="FL" selected>FL</option>
+                  <option value="GA">GA</option>
+                  <option value="HI">HI</option>
+                  <option value="ID">ID</option>
+                  <option value="IL">IL</option>
+                  <option value="IN">IN</option>
+                  <option value="IA">IA</option>
+                  <option value="KS">KS</option>
+                  <option value="KY">KY</option>
+                  <option value="LA">LA</option>
+                  <option value="ME">ME</option>
+                  <option value="MD">MD</option>
+                  <option value="MA">MA</option>
+                  <option value="MI">MI</option>
+                  <option value="MN">MN</option>
+                  <option value="MS">MS</option>
+                  <option value="MO">MO</option>
+                  <option value="MT">MT</option>
+                  <option value="NE">NE</option>
+                  <option value="NV">NV</option>
+                  <option value="NH">NH</option>
+                  <option value="NJ">NJ</option>
+                  <option value="NM">NM</option>
+                  <option value="NY">NY</option>
+                  <option value="NC">NC</option>
+                  <option value="ND">ND</option>
+                  <option value="OH">OH</option>
+                  <option value="OK">OK</option>
+                  <option value="OR">OR</option>
+                  <option value="PA">PA</option>
+                  <option value="RI">RI</option>
+                  <option value="SC">SC</option>
+                  <option value="SD">SD</option>
+                  <option value="TN">TN</option>
+                  <option value="TX">TX</option>
+                  <option value="UT">UT</option>
+                  <option value="VT">VT</option>
+                  <option value="VA">VA</option>
+                  <option value="WA">WA</option>
+                  <option value="WV">WV</option>
+                  <option value="WI">WI</option>
+                  <option value="WY">WY</option>
+                </select></div>
+            </div>
+            <h3>Visa Anterior</h3>
+            <div class="row">
+              <div><label>¿Tiene/tuvo visa?</label><select id="prevVisa">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div><label>Dia emisión</label><select id="prevVisaIssuedDay"></select></div>
+              <div><label>Mes</label><select id="prevVisaIssuedMonth">
+                  <option value="1">ENE</option>
+                  <option value="2">FEB</option>
+                  <option value="3">MAR</option>
+                  <option value="4">ABR</option>
+                  <option value="5" selected>MAY</option>
+                  <option value="6">JUN</option>
+                  <option value="7">JUL</option>
+                  <option value="8">AGO</option>
+                  <option value="9">SEP</option>
+                  <option value="10">OCT</option>
+                  <option value="11">NOV</option>
+                  <option value="12">DIC</option>
+                </select></div>
+              <div><label>Año</label><input type="number" id="prevVisaIssuedYear" value="2018"></div>
+              <div class="cbg" style="margin-top:24px"><input type="checkbox" id="prevVisaNumberNA"><label>Sin
+                  número</label></div>
+              <div><label>Número Visa</label><input type="text" id="prevVisaNumber" placeholder="A12345678"></div>
+            </div>
+            <div class="row">
+              <div><label>¿Mismo tipo?</label><select id="sameVisaType">
+                  <option value="Y" selected>Si</option>
+                  <option value="N">No</option>
+                </select></div>
+              <div><label>¿Mismo país?</label><select id="sameCountry">
+                  <option value="Y" selected>Si</option>
+                  <option value="N">No</option>
+                </select></div>
+              <div><label>¿10 dedos regist.?</label><select id="tenPrinted">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div><label>¿Visa perdida?</label><select id="lostVisa">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+              <div><label>¿Visa cancelada?</label><select id="cancelledVisa">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div><label>¿Le negaron visa?</label><select id="refusedVisa">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+              <div class="full"><label>Explicar negativa</label><input type="text" id="refusedVisaExplain"></div>
+            </div>
+            <div class="row">
+              <div><label>¿Petición inmigrante?</label><select id="immigrantPetition">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+              <div class="full"><label>Explicar</label><input type="text" id="immigrantPetitionExplain"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 6 -->
+      <div class="step-panel" id="step-6">
+        <div class="card">
+          <div class="card-header">
+            <h2>&#127968; Address, Phone &amp; Passport <span class="badge">S6-S7</span></h2>
+          </div>
+          <div class="card-body">
+            <h3>Dirección de Domicilio</h3>
+            <div class="row">
+              <div style="flex:2"><label>Calle / Street 1</label><input type="text" id="homeStreet1"
+                  placeholder="CRA 15 # 93-75"></div>
+              <div><label>Street 2</label><input type="text" id="homeStreet2" placeholder="APTO 301"></div>
+            </div>
+            <div class="row">
+              <div><label>Ciudad</label><input type="text" id="homeCity" placeholder="BOGOTA"></div>
+              <div class="cbg" style="margin-top:24px"><input type="checkbox" id="homeStateNA"><label>Estado N/A</label>
+              </div>
+              <div><label>Dpto./Estado</label><input type="text" id="homeState" placeholder="BOGOTA"></div>
+              <div class="cbg" style="margin-top:24px"><input type="checkbox" id="homeZipNA"><label>Sin ZIP</label>
+              </div>
+              <div><label>Código Postal</label><input type="text" id="homeZip" placeholder="110111"></div>
+            </div>
+            <div class="row">
+              <div><label>País</label><select id="homeCountry">
+                  <option value="COL" selected>COLOMBIA</option>
+                  <option value="MEX">MEXICO</option>
+                  <option value="BRZL">BRAZIL</option>
+                  <option value="ARG">ARGENTINA</option>
+                </select></div>
+              <div><label>¿Misma dirección postal?</label><select id="sameMailingAddress">
+                  <option value="Y" selected>Si</option>
+                  <option value="N">No</option>
+                </select></div>
+            </div>
+            <h3>Teléfonos y Email</h3>
+            <div class="row">
+              <div><label>Tel. Principal</label><input type="text" id="primaryPhone" placeholder="3001234567"></div>
+              <div class="cbg" style="margin-top:24px"><input type="checkbox" id="secondaryPhoneNA"><label>Sin
+                  secundario</label></div>
+              <div><label>Tel. Secundario</label><input type="text" id="secondaryPhone"></div>
+            </div>
+            <div class="row">
+              <div class="cbg"><input type="checkbox" id="workPhoneNA"><label>Sin tel. trabajo</label></div>
+              <div><label>Tel. Trabajo</label><input type="text" id="workPhone"></div>
+              <div><label>Email</label><input type="email" id="emailAddress" placeholder="correo@email.com"></div>
+              <div><label>Otros Emails</label><input type="text" id="otherEmails"></div>
+            </div>
+            <h3>Pasaporte</h3>
+            <div class="row">
+              <div><label>Tipo Pasaporte</label><select id="passportType">
+                  <option value="R" selected>REGULAR</option>
+                  <option value="D">DIPLOMATIC</option>
+                  <option value="O">OFFICIAL</option>
+                  <option value="L">LAISSEZ PASSER</option>
+                  <option value="OTHER">OTHER</option>
+                </select></div>
+              <div><label>Número Pasaporte</label><input type="text" id="passportNumber" placeholder="CC123456"></div>
+              <div class="cbg" style="margin-top:24px"><input type="checkbox" id="passportBookNumberNA"
+                  checked><label>Sin Book #</label></div>
+              <div><label>Passport Book #</label><input type="text" id="passportBookNumber"></div>
+            </div>
+            <div class="row">
+              <div><label>País emisor</label><select id="passportIssuedCountry">
+                  <option value="COL" selected>COLOMBIA</option>
+                  <option value="MEX">MEXICO</option>
+                  <option value="USA">USA</option>
+                </select></div>
+              <div><label>Ciudad emisora</label><input type="text" id="passportIssuedCity" placeholder="BOGOTA"></div>
+              <div><label>Estado emisor</label><input type="text" id="passportIssuedState" placeholder="BOGOTA"></div>
+              <div><label>País emisión (región)</label><select id="passportIssuedCountryRegion">
+                  <option value="COL" selected>COLOMBIA</option>
+                  <option value="MEX">MEXICO</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div><label>Dia emisión</label><select id="passportIssuedDay"></select></div>
+              <div><label>Mes emisión</label><select id="passportIssuedMonth">
+                  <option value="1">ENE</option>
+                  <option value="2">FEB</option>
+                  <option value="3">MAR</option>
+                  <option value="4">ABR</option>
+                  <option value="5" selected>MAY</option>
+                  <option value="6">JUN</option>
+                  <option value="7">JUL</option>
+                  <option value="8">AGO</option>
+                  <option value="9">SEP</option>
+                  <option value="10">OCT</option>
+                  <option value="11">NOV</option>
+                  <option value="12">DIC</option>
+                </select></div>
+              <div><label>Año emisión</label><input type="number" id="passportIssuedYear" value="2018"></div>
+            </div>
+            <div class="row">
+              <div class="cbg"><input type="checkbox" id="passportExpireNA"><label>No expira</label></div>
+              <div><label>Dia expiración</label><select id="passportExpireDay"></select></div>
+              <div><label>Mes expiración</label><select id="passportExpireMonth">
+                  <option value="1">ENE</option>
+                  <option value="2">FEB</option>
+                  <option value="3">MAR</option>
+                  <option value="4">ABR</option>
+                  <option value="5" selected>MAY</option>
+                  <option value="6">JUN</option>
+                  <option value="7">JUL</option>
+                  <option value="8">AGO</option>
+                  <option value="9">SEP</option>
+                  <option value="10">OCT</option>
+                  <option value="11">NOV</option>
+                  <option value="12">DIC</option>
+                </select></div>
+              <div><label>Año expiración</label><input type="number" id="passportExpireYear" value="2028"></div>
+            </div>
+            <div class="row">
+              <div><label>¿Pasaporte perdido/robado?</label><select id="lostPassport">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 7 -->
+      <div class="step-panel" id="step-7">
+        <div class="card">
+          <div class="card-header">
+            <h2>&#128222; U.S. Point of Contact <span class="badge">S8</span></h2>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="cbg"><input type="checkbox" id="pocNameNA"><label for="pocNameNA">No conoce el nombre</label>
+              </div>
+              <div><label>Apellido</label><input type="text" id="pocSurname" placeholder="MARTINEZ"></div>
+              <div><label>Nombre</label><input type="text" id="pocGivenName" placeholder="CARLOS"></div>
+            </div>
+            <div class="row">
+              <div class="cbg"><input type="checkbox" id="pocOrgNA"><label for="pocOrgNA">Sin organización</label></div>
+              <div><label>Organización</label><input type="text" id="pocOrgName" placeholder="HOTEL ORLANDO"></div>
+            </div>
+            <div class="row">
+              <div><label>Relación</label><select id="pocRelationship">
+                  <option value="C">CO-WORKER</option>
+                  <option value="E">EMPLOYER</option>
+                  <option value="F">FRIEND</option>
+                  <option value="G">GRANDPARENT</option>
+                  <option value="H">SPOUSE</option>
+                  <option value="O" selected>OTHER RELATIVE</option>
+                  <option value="P">PARENT</option>
+                  <option value="S">SCHOOL</option>
+                  <option value="T">OTHER</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div style="flex:2"><label>Dirección L1</label><input type="text" id="pocStreet1"
+                  placeholder="123 Disney Way"></div>
+              <div><label>L2</label><input type="text" id="pocStreet2"></div>
+            </div>
+            <div class="row">
+              <div><label>Ciudad</label><input type="text" id="pocCity" placeholder="Orlando"></div>
+              <div><label>Estado</label><select id="pocState">
+                  <option value="">- State -</option>
+                  <option value="AL">AL</option>
+                  <option value="AK">AK</option>
+                  <option value="AZ">AZ</option>
+                  <option value="AR">AR</option>
+                  <option value="CA">CA</option>
+                  <option value="CO">CO</option>
+                  <option value="CT">CT</option>
+                  <option value="DE">DE</option>
+                  <option value="FL" selected>FL</option>
+                  <option value="GA">GA</option>
+                  <option value="HI">HI</option>
+                  <option value="ID">ID</option>
+                  <option value="IL">IL</option>
+                  <option value="IN">IN</option>
+                  <option value="IA">IA</option>
+                  <option value="KS">KS</option>
+                  <option value="KY">KY</option>
+                  <option value="LA">LA</option>
+                  <option value="ME">ME</option>
+                  <option value="MD">MD</option>
+                  <option value="MA">MA</option>
+                  <option value="MI">MI</option>
+                  <option value="MN">MN</option>
+                  <option value="MS">MS</option>
+                  <option value="MO">MO</option>
+                  <option value="MT">MT</option>
+                  <option value="NE">NE</option>
+                  <option value="NV">NV</option>
+                  <option value="NH">NH</option>
+                  <option value="NJ">NJ</option>
+                  <option value="NM">NM</option>
+                  <option value="NY">NY</option>
+                  <option value="NC">NC</option>
+                  <option value="ND">ND</option>
+                  <option value="OH">OH</option>
+                  <option value="OK">OK</option>
+                  <option value="OR">OR</option>
+                  <option value="PA">PA</option>
+                  <option value="RI">RI</option>
+                  <option value="SC">SC</option>
+                  <option value="SD">SD</option>
+                  <option value="TN">TN</option>
+                  <option value="TX">TX</option>
+                  <option value="UT">UT</option>
+                  <option value="VT">VT</option>
+                  <option value="VA">VA</option>
+                  <option value="WA">WA</option>
+                  <option value="WV">WV</option>
+                  <option value="WI">WI</option>
+                  <option value="WY">WY</option>
+                </select></div>
+              <div><label>ZIP</label><input type="text" id="pocZipCode" placeholder="32830"></div>
+            </div>
+            <div class="row">
+              <div><label>Teléfono</label><input type="text" id="pocPhone" placeholder="4075551234"></div>
+              <div class="cbg" style="margin-top:24px"><input type="checkbox" id="pocEmailNA"><label>Sin Email</label>
+              </div>
+              <div><label>Email</label><input type="email" id="pocEmail"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 8 -->
+      <div class="step-panel" id="step-8">
+        <div class="card">
+          <div class="card-header">
+            <h2>&#128106; Family Information <span class="badge">S9</span></h2>
+          </div>
+          <div class="card-body">
+            <h3>Padre / Father</h3>
+            <div class="row">
+              <div class="cbg"><input type="checkbox" id="fatherSurnameNA"><label>Apellido N/A</label></div>
+              <div><label>Apellido</label><input type="text" id="fatherSurname" placeholder="GARCIA"></div>
+              <div class="cbg"><input type="checkbox" id="fatherGivenNameNA"><label>Nombre N/A</label></div>
+              <div><label>Nombre</label><input type="text" id="fatherGivenName" placeholder="ANTONIO"></div>
+            </div>
+            <div class="row">
+              <div class="cbg"><input type="checkbox" id="fatherDobNA"><label>Fecha N/A</label></div>
+              <div><label>Dia</label><select id="fatherDobDay"></select></div>
+              <div><label>Mes</label><select id="fatherDobMonth">
+                  <option value="1">ENE</option>
+                  <option value="2">FEB</option>
+                  <option value="3">MAR</option>
+                  <option value="4">ABR</option>
+                  <option value="5" selected>MAY</option>
+                  <option value="6">JUN</option>
+                  <option value="7">JUL</option>
+                  <option value="8">AGO</option>
+                  <option value="9">SEP</option>
+                  <option value="10">OCT</option>
+                  <option value="11">NOV</option>
+                  <option value="12">DIC</option>
+                </select></div>
+              <div><label>Año</label><input type="number" id="fatherDobYear" value="1960" style="width:80px"></div>
+              <div><label>¿En EE.UU.?</label><select id="fatherInUS">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+            </div>
+            <h3>Madre / Mother</h3>
+            <div class="row">
+              <div class="cbg"><input type="checkbox" id="motherSurnameNA"><label>Apellido N/A</label></div>
+              <div><label>Apellido</label><input type="text" id="motherSurname" placeholder="LOPEZ"></div>
+              <div class="cbg"><input type="checkbox" id="motherGivenNameNA"><label>Nombre N/A</label></div>
+              <div><label>Nombre</label><input type="text" id="motherGivenName" placeholder="MARIA"></div>
+            </div>
+            <div class="row">
+              <div class="cbg"><input type="checkbox" id="motherDobNA"><label>Fecha N/A</label></div>
+              <div><label>Dia</label><select id="motherDobDay"></select></div>
+              <div><label>Mes</label><select id="motherDobMonth">
+                  <option value="1">ENE</option>
+                  <option value="2">FEB</option>
+                  <option value="3">MAR</option>
+                  <option value="4">ABR</option>
+                  <option value="5" selected>MAY</option>
+                  <option value="6">JUN</option>
+                  <option value="7">JUL</option>
+                  <option value="8">AGO</option>
+                  <option value="9">SEP</option>
+                  <option value="10">OCT</option>
+                  <option value="11">NOV</option>
+                  <option value="12">DIC</option>
+                </select></div>
+              <div><label>Año</label><input type="number" id="motherDobYear" value="1962" style="width:80px"></div>
+              <div><label>¿En EE.UU.?</label><select id="motherInUS">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div><label>¿Familiares inmediatos EE.UU.?</label><select id="hasImmediateRelativesUS">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+              <div><label>¿Otros familiares EE.UU.?</label><select id="hasOtherRelativesUS">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 9 -->
+      <div class="step-panel" id="step-9">
+        <div class="card">
+          <div class="card-header">
+            <h2>&#128188; Work / Education / Training <span class="badge">S10</span></h2>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div><label>Ocupación Principal</label><select id="primaryOccupation">
+                  <option value="A">AGRICULTURE</option>
+                  <option value="C">CONSULTING</option>
+                  <option value="ED">EDUCATION</option>
+                  <option value="EN">ENGINEERING</option>
+                  <option value="F">FINANCE/BANKING</option>
+                  <option value="G">GOVERNMENT</option>
+                  <option value="HC">HEALTH CARE</option>
+                  <option value="I">INFORMATION TECHNOLOGY</option>
+                  <option value="L">LEGAL</option>
+                  <option value="M">MANAGEMENT</option>
+                  <option value="MF">MANUFACTURING</option>
+                  <option value="N">NOT EMPLOYED</option>
+                  <option value="O" selected>OTHER</option>
+                  <option value="RT">RETIRED</option>
+                  <option value="SCI">SCIENCE/RESEARCH</option>
+                  <option value="SD">STUDENT</option>
+                  <option value="SVC">SERVICE</option>
+                  <option value="TRN">TRANSPORTATION</option>
+                </select></div>
+              <div><label>Especificar (OTHER)</label><input type="text" id="explainOtherOccupation"
+                  placeholder="SOFTWARE DEVELOPER"></div>
+            </div>
+            <h3>Empresa / Institución Actual</h3>
+            <div class="row">
+              <div><label>Nombre</label><input type="text" id="empSchName" placeholder="TECH SOLUTIONS SAS"></div>
+              <div><label>Teléfono</label><input type="text" id="empSchPhone" placeholder="3105551234"></div>
+            </div>
+            <div class="row">
+              <div style="flex:2"><label>Dirección 1</label><input type="text" id="empSchAddr1" placeholder="CALLE 123">
+              </div>
+              <div><label>Dirección 2</label><input type="text" id="empSchAddr2"></div>
+            </div>
+            <div class="row">
+              <div><label>Ciudad</label><input type="text" id="empSchCity" placeholder="BOGOTA"></div>
+              <div class="cbg" style="margin-top:24px"><input type="checkbox" id="empSchStateNA"><label>Estado
+                  N/A</label></div>
+              <div><label>Estado</label><input type="text" id="empSchState" placeholder="BOGOTA"></div>
+              <div class="cbg" style="margin-top:24px"><input type="checkbox" id="empSchZipNA" checked><label>ZIP
+                  N/A</label></div>
+              <div><label>ZIP</label><input type="text" id="empSchZip"></div>
+              <div><label>País</label><select id="empSchCountry">
+                  <option value="COL" selected>COLOMBIA</option>
+                  <option value="MEX">MEXICO</option>
+                  <option value="USA">USA</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div><label>Inicio Dia</label><select id="empStartDateDay"></select></div>
+              <div><label>Mes</label><select id="empStartDateMonth">
+                  <option value="1">ENE</option>
+                  <option value="2">FEB</option>
+                  <option value="3">MAR</option>
+                  <option value="4">ABR</option>
+                  <option value="5" selected>MAY</option>
+                  <option value="6">JUN</option>
+                  <option value="7">JUL</option>
+                  <option value="8">AGO</option>
+                  <option value="9">SEP</option>
+                  <option value="10">OCT</option>
+                  <option value="11">NOV</option>
+                  <option value="12">DIC</option>
+                </select></div>
+              <div><label>Año</label><input type="number" id="empStartDateYear" value="2020" style="width:80px"></div>
+              <div class="cbg" style="margin-top:24px"><input type="checkbox" id="empSalaryNA"><label>Salario
+                  N/A</label></div>
+              <div><label>Salario Mensual</label><input type="text" id="empSalary" placeholder="5000000"></div>
+            </div>
+            <div class="row">
+              <div class="full"><label>Descripción Funciones</label><textarea id="empDuties" rows="3"
+                  placeholder="DESARROLLO DE APLICACIONES WEB Y MOVILES."></textarea></div>
+            </div>
+            <h3>Empleo Anterior</h3>
+            <div class="row">
+              <div><label>¿Tuvo empleo anterior?</label><select id="prevEmployed">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div><label>Empresa</label><input type="text" id="prevEmpName" placeholder="CLOUD SOLUTIONS LTDA"></div>
+              <div><label>Teléfono</label><input type="text" id="prevEmpPhone" placeholder="3001234567"></div>
+              <div><label>Cargo</label><input type="text" id="prevEmpJobTitle" placeholder="JUNIOR DEVELOPER"></div>
+            </div>
+            <div class="row">
+              <div style="flex:2"><label>Dirección 1</label><input type="text" id="prevEmpAddr1"
+                  placeholder="CRA 15 # 100-20"></div>
+              <div><label>Dirección 2</label><input type="text" id="prevEmpAddr2"></div>
+            </div>
+            <div class="row">
+              <div><label>Ciudad</label><input type="text" id="prevEmpCity" placeholder="BOGOTA"></div>
+              <div class="cbg" style="margin-top:24px"><input type="checkbox" id="prevEmpStateNA"><label>Estado
+                  N/A</label></div>
+              <div><label>Estado</label><input type="text" id="prevEmpState" placeholder="BOGOTA"></div>
+              <div class="cbg" style="margin-top:24px"><input type="checkbox" id="prevEmpZipNA" checked><label>ZIP
+                  N/A</label></div>
+              <div><label>ZIP</label><input type="text" id="prevEmpZip"></div>
+              <div><label>País</label><select id="prevEmpCountry">
+                  <option value="COL" selected>COLOMBIA</option>
+                  <option value="MEX">MEXICO</option>
+                  <option value="USA">USA</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div class="cbg"><input type="checkbox" id="prevEmpSupervisorSurnameNA"><label>Apellido sup. N/A</label>
+              </div>
+              <div><label>Apellido Supervisor</label><input type="text" id="prevEmpSupervisorSurname"
+                  placeholder="MARTINEZ"></div>
+              <div class="cbg"><input type="checkbox" id="prevEmpSupervisorGivenNameNA"><label>Nombre sup. N/A</label>
+              </div>
+              <div><label>Nombre Supervisor</label><input type="text" id="prevEmpSupervisorGivenName"
+                  placeholder="ROBERTO"></div>
+            </div>
+            <div class="row">
+              <div><label>Desde Dia</label><select id="prevEmpFromDay"></select></div>
+              <div><label>Mes</label><select id="prevEmpFromMonth">
+                  <option value="JAN" selected>JAN</option>
+                  <option value="FEB">FEB</option>
+                  <option value="MAR">MAR</option>
+                  <option value="APR">APR</option>
+                  <option value="MAY">MAY</option>
+                  <option value="JUN">JUN</option>
+                  <option value="JUL">JUL</option>
+                  <option value="AUG">AUG</option>
+                  <option value="SEP">SEP</option>
+                  <option value="OCT">OCT</option>
+                  <option value="NOV">NOV</option>
+                  <option value="DEC">DEC</option>
+                </select></div>
+              <div><label>Año</label><input type="number" id="prevEmpFromYear" value="2015" style="width:72px"></div>
+              <div><label>Hasta Dia</label><select id="prevEmpToDay"></select></div>
+              <div><label>Mes</label><select id="prevEmpToMonth">
+                  <option value="JAN" selected>JAN</option>
+                  <option value="FEB">FEB</option>
+                  <option value="MAR">MAR</option>
+                  <option value="APR">APR</option>
+                  <option value="MAY">MAY</option>
+                  <option value="JUN">JUN</option>
+                  <option value="JUL">JUL</option>
+                  <option value="AUG">AUG</option>
+                  <option value="SEP">SEP</option>
+                  <option value="OCT">OCT</option>
+                  <option value="NOV">NOV</option>
+                  <option value="DEC">DEC</option>
+                </select></div>
+              <div><label>Año</label><input type="number" id="prevEmpToYear" value="2020" style="width:72px"></div>
+            </div>
+            <div class="row">
+              <div class="full"><label>Funciones Anteriores</label><textarea id="prevEmpDuties" rows="2"
+                  placeholder="MANTENIMIENTO DE SERVIDORES Y CREACION DE APIs."></textarea></div>
+            </div>
+            <h3>Educación Previa</h3>
+            <div class="row">
+              <div><label>¿Tuvo estudios previos?</label><select id="prevEduc">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div><label>Institución</label><input type="text" id="prevEducName" placeholder="UNIVERSIDAD NACIONAL">
+              </div>
+              <div><label>Carrera</label><input type="text" id="prevEducCourse" placeholder="INGENIERIA DE SISTEMAS">
+              </div>
+            </div>
+            <div class="row">
+              <div style="flex:2"><label>Dirección 1</label><input type="text" id="prevEducAddr1"
+                  placeholder="CIUDAD UNIVERSITARIA"></div>
+              <div><label>Dirección 2</label><input type="text" id="prevEducAddr2"></div>
+            </div>
+            <div class="row">
+              <div><label>Ciudad</label><input type="text" id="prevEducCity" placeholder="BOGOTA"></div>
+              <div class="cbg" style="margin-top:24px"><input type="checkbox" id="prevEducStateNA"><label>Estado
+                  N/A</label></div>
+              <div><label>Estado</label><input type="text" id="prevEducState" placeholder="BOGOTA"></div>
+              <div class="cbg" style="margin-top:24px"><input type="checkbox" id="prevEducZipNA" checked><label>ZIP
+                  N/A</label></div>
+              <div><label>ZIP</label><input type="text" id="prevEducZip"></div>
+              <div><label>País</label><select id="prevEducCountry">
+                  <option value="COL" selected>COLOMBIA</option>
+                  <option value="MEX">MEXICO</option>
+                  <option value="USA">USA</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div><label>Desde Dia</label><select id="prevEducFromDay"></select></div>
+              <div><label>Mes</label><select id="prevEducFromMonth">
+                  <option value="JAN" selected>JAN</option>
+                  <option value="FEB">FEB</option>
+                  <option value="MAR">MAR</option>
+                  <option value="APR">APR</option>
+                  <option value="MAY">MAY</option>
+                  <option value="JUN">JUN</option>
+                  <option value="JUL">JUL</option>
+                  <option value="AUG">AUG</option>
+                  <option value="SEP">SEP</option>
+                  <option value="OCT">OCT</option>
+                  <option value="NOV">NOV</option>
+                  <option value="DEC">DEC</option>
+                </select></div>
+              <div><label>Año</label><input type="number" id="prevEducFromYear" value="2010" style="width:72px"></div>
+              <div><label>Hasta Dia</label><select id="prevEducToDay"></select></div>
+              <div><label>Mes</label><select id="prevEducToMonth">
+                  <option value="JAN" selected>JAN</option>
+                  <option value="FEB">FEB</option>
+                  <option value="MAR">MAR</option>
+                  <option value="APR">APR</option>
+                  <option value="MAY">MAY</option>
+                  <option value="JUN">JUN</option>
+                  <option value="JUL">JUL</option>
+                  <option value="AUG">AUG</option>
+                  <option value="SEP">SEP</option>
+                  <option value="OCT">OCT</option>
+                  <option value="NOV">NOV</option>
+                  <option value="DEC">DEC</option>
+                </select></div>
+              <div><label>Año</label><input type="number" id="prevEducToYear" value="2014" style="width:72px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 10 -->
+      <div class="step-panel" id="step-10">
+        <div class="card">
+          <div class="card-header">
+            <h2>&#128203; Work/Education Additional <span class="badge">S11</span></h2>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div><label>¿Clan/tribu?</label><select id="belongsToClanTribe">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+              <div><label>Nombre clan</label><input type="text" id="clanTribeName"></div>
+            </div>
+            <div class="row">
+              <div><label>Idioma(s)</label><input type="text" id="languageName1" value="SPANISH"></div>
+              <div><label>¿Ha visitado otros países?</label><select id="countriesVisited">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+              <div><label>País visitado</label><select id="countryVisited1">
+                  <option value="">-</option>
+                  <option value="USA">USA</option>
+                  <option value="MEX">MEXICO</option>
+                  <option value="CAN">CANADA</option>
+                  <option value="SPN">SPAIN</option>
+                  <option value="GBR">UK</option>
+                </select></div>
+            </div>
+            <div class="row">
+              <div><label>¿Pertenece a org.?</label><select id="belongToOrg">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+              <div><label>Nombre organización</label><input type="text" id="orgName1" placeholder="CRUZ ROJA"></div>
+            </div>
+            <div class="row">
+              <div><label>¿Habilidades especializadas?</label><select id="specializedSkills">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+              <div><label>Explicación</label><input type="text" id="specializedSkillsExpl"></div>
+            </div>
+            <h3>Servicio Militar</h3>
+            <div class="row">
+              <div><label>¿Servicio militar?</label><select id="militaryService">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+              <div><label>País</label><select id="militaryCountry">
+                  <option value="COL" selected>COLOMBIA</option>
+                  <option value="MEX">MEXICO</option>
+                  <option value="USA">USA</option>
+                </select></div>
+              <div><label>Rama</label><input type="text" id="militaryBranch" placeholder="EJERCITO"></div>
+              <div><label>Rango</label><input type="text" id="militaryRank" placeholder="SOLDADO"></div>
+              <div><label>Especialidad</label><input type="text" id="militarySpecialty" placeholder="INFANTERIA"></div>
+            </div>
+            <div class="row">
+              <div><label>Desde Dia</label><select id="militaryFromDay"></select></div>
+              <div><label>Mes</label><select id="militaryFromMonth">
+                  <option value="JAN" selected>JAN</option>
+                  <option value="FEB">FEB</option>
+                  <option value="MAR">MAR</option>
+                  <option value="APR">APR</option>
+                  <option value="MAY">MAY</option>
+                  <option value="JUN">JUN</option>
+                  <option value="JUL">JUL</option>
+                  <option value="AUG">AUG</option>
+                  <option value="SEP">SEP</option>
+                  <option value="OCT">OCT</option>
+                  <option value="NOV">NOV</option>
+                  <option value="DEC">DEC</option>
+                </select></div>
+              <div><label>Año</label><input type="number" id="militaryFromYear" value="2010" style="width:72px"></div>
+              <div><label>Hasta Dia</label><select id="militaryToDay"></select></div>
+              <div><label>Mes</label><select id="militaryToMonth">
+                  <option value="JAN" selected>JAN</option>
+                  <option value="FEB">FEB</option>
+                  <option value="MAR">MAR</option>
+                  <option value="APR">APR</option>
+                  <option value="MAY">MAY</option>
+                  <option value="JUN">JUN</option>
+                  <option value="JUL">JUL</option>
+                  <option value="AUG">AUG</option>
+                  <option value="SEP">SEP</option>
+                  <option value="OCT">OCT</option>
+                  <option value="NOV">NOV</option>
+                  <option value="DEC">DEC</option>
+                </select></div>
+              <div><label>Año</label><input type="number" id="militaryToYear" value="2011" style="width:72px"></div>
+            </div>
+            <div class="row">
+              <div><label>¿Org. insurgente?</label><select id="insurgentOrg">
+                  <option value="N" selected>No</option>
+                  <option value="Y">Si</option>
+                </select></div>
+              <div><label>Explicación</label><input type="text" id="insurgentOrgExpl"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 11 -->
+      <div class="step-panel" id="step-11">
+        <div class="card">
+          <div class="card-header">
+            <h2>&#128272; Security Background Partes 1-3 <span class="badge">S12-S14</span></h2>
+          </div>
+          <div class="card-body">
+            <div class="notice">Para la mayoria de solicitantes <strong>todas las respuestas son No</strong>. Solo
+              seleccione Si si verdaderamente aplica.</div>
+            <h3>Parte 1: Salud</h3>
+            <div class="sec-row"><label>¿Enfermedad comunicable?</label><select id="sec1Disease">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec1DiseaseExpl" placeholder="Detalle (si Si)"></div>
+            <div class="sec-row"><label>¿Desorden mental/fisico peligroso?</label><select id="sec1Disorder">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec1DisorderExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Adiccion a drogas o alcohol?</label><select id="sec1Druguser">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec1DruguserExpl" placeholder="Detalle"></div>
+            <h3>Parte 2: Crimen</h3>
+            <div class="sec-row"><label>¿Arrestado o condenado?</label><select id="sec2Arrested">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec2ArrestedExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Violacion sustancias controladas?</label><select id="sec2Substances">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec2SubstancesExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Prostitucion?</label><select id="sec2Prostitution">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec2ProstitutionExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Lavado de dinero?</label><select id="sec2MoneyLaundering">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec2MoneyLaunderingExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Trafico de personas?</label><select id="sec2Trafficking">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec2TraffickingExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Asistio trafico?</label><select id="sec2AssistedTrafficking">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec2AssistedTraffickingExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Relacionado con trafico?</label><select id="sec2RelatedTrafficking">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec2RelatedTraffickingExpl" placeholder="Detalle"></div>
+            <h3>Parte 3: Terrorismo / Genocidio</h3>
+            <div class="sec-row"><label>¿Actividad ilegal?</label><select id="sec3IllegalActivity">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec3IllegalActivityExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Actividad terrorista?</label><select id="sec3TerroristActivity">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec3TerroristActivityExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Apoyo terrorismo?</label><select id="sec3TerroristSupport">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec3TerroristSupportExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Org. terrorista?</label><select id="sec3TerroristOrg">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec3TerroristOrgExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Rel. con terrorismo?</label><select id="sec3TerroristRel">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec3TerroristRelExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Genocidio?</label><select id="sec3Genocide">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec3GenocideExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Tortura?</label><select id="sec3Torture">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec3TortureExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Violencia extrajudicial?</label><select id="sec3ExViolence">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec3ExViolenceExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Nino soldado?</label><select id="sec3ChildSoldier">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec3ChildSoldierExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Libertad religiosa?</label><select id="sec3ReligiousFreedom">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec3ReligiousFreedomExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Control de poblacion?</label><select id="sec3PopulationControls">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec3PopulationControlsExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Trasplante ilegal organos?</label><select id="sec3Transplant">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec3TransplantExpl" placeholder="Detalle"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 12 -->
+      <div class="step-panel" id="step-12">
+        <div class="card">
+          <div class="card-header">
+            <h2>&#128271; Security Partes 4-5 + Foto <span class="badge">S15-S16</span></h2>
+          </div>
+          <div class="card-body">
+            <div class="notice">Para la mayoria de solicitantes <strong>todas las respuestas son No</strong>.</div>
+            <h3>Parte 4: Inmigracion</h3>
+            <div class="sec-row"><label>¿Fraude de inmigracion?</label><select id="sec4ImmigrationFraud">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec4ImmigrationFraudExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Deportado alguna vez?</label><select id="sec4Deport">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec4DeportExpl" placeholder="Detalle"></div>
+            <h3>Parte 5: Otros</h3>
+            <div class="sec-row"><label>¿Custodia ilegal de menores?</label><select id="sec5ChildCustody">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec5ChildCustodyExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Violacion de voto en EE.UU.?</label><select id="sec5VotingViolation">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec5VotingViolationExpl" placeholder="Detalle"></div>
+            <div class="sec-row"><label>¿Renuncio ciudadania para evadir impuestos?</label><select id="sec5RenounceExp">
+                <option value="N" selected>No</option>
+                <option value="Y">Si</option>
+              </select><input type="text" id="sec5RenounceExpExpl" placeholder="Detalle"></div>
+            <h3>Foto</h3>
+            <div class="row">
+              <div class="full"><label>Ruta de la foto (ej: foto.jpg)</label><input type="text" id="photoPath"
+                  value="foto.jpg" placeholder="foto.jpg"></div>
+            </div>
+            <div class="success-box">
+              <p style="font-size:1rem;font-weight:600;color:var(--g);margin-bottom:10px">Completo todos los pasos!</p>
+              <p style="font-size:.87rem;color:#065f46;margin-bottom:16px">Haga clic para descargar el archivo
+                <strong>datos.json</strong>
+              </p>
+              <button type="button" class="btn btn-gen" onclick="generarJSON()">Descargar datos.json</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+            <div class="nav-bar" id="navBar">
+        <button type="button" class="btn btn-prev" id="btnPrev" onclick="goStep(-1)" style="visibility:hidden">Anterior</button>
+        <button type="button" class="btn btn-gen" onclick="generarJSON()" style="width: auto; margin: 0; box-shadow: 0 4px 12px rgba(5, 150, 105, .2); font-size: 0.91rem; padding: 11px 26px;">⬇️ Generar JSON</button>
+        <button type="button" class="btn btn-next" id="btnNext" onclick="goStep(1)">Siguiente</button>
+      </div>
+
+    </form>
+  </div>
+
+  <script>
+    const TOTAL = 12, NAMES = ['Personal Info 1', 'Personal Info 2', 'Travel Information', 'Travel Companions', 'Previous U.S. Travel', 'Address, Phone & Passport', 'U.S. Point of Contact', 'Family Information', 'Work / Education', 'Additional Work/Educ.', 'Security Parts 1-3', 'Security Parts 4-5 & Foto'];
+    let cur = 1;
+    function buildDots() { const c = document.getElementById('stepsDots'); for (let i = 1; i <= TOTAL; i++) { const d = document.createElement('div'); d.className = 'dot' + (i === 1 ? ' active' : ''); d.title = NAMES[i - 1]; d.onclick = () => jumpStep(i); c.appendChild(d); } }
+    function updateProgress() { const pct = Math.round(cur / TOTAL * 100); document.getElementById('progressBar').style.width = pct + '%'; document.getElementById('stepLabel').textContent = 'Paso ' + cur + ' de ' + TOTAL; document.getElementById('stepName').textContent = NAMES[cur - 1]; document.querySelectorAll('.dot').forEach((d, i) => { d.className = 'dot'; if (i + 1 < cur) d.classList.add('done'); else if (i + 1 === cur) d.classList.add('active'); }); document.getElementById('btnPrev').style.visibility = cur === 1 ? 'hidden' : 'visible'; document.getElementById('btnNext').style.display = cur === TOTAL ? 'none' : 'flex'; }
+    function goStep(dir) { const n = cur + dir; if (n < 1 || n > TOTAL) return; document.getElementById('step-' + cur).classList.remove('active'); cur = n; document.getElementById('step-' + cur).classList.add('active'); updateProgress(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    function jumpStep(n) { document.getElementById('step-' + cur).classList.remove('active'); cur = n; document.getElementById('step-' + cur).classList.add('active'); updateProgress(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    const SDAYS = ['dobDay', 'arrivalDay', 'specificArrivalDay', 'specificDepDay', 'prevUsVisitDay', 'prevVisaIssuedDay', 'passportIssuedDay', 'passportExpireDay', 'fatherDobDay', 'motherDobDay', 'empStartDateDay', 'prevEmpFromDay', 'prevEmpToDay', 'prevEducFromDay', 'prevEducToDay', 'militaryFromDay', 'militaryToDay'];
+    function poblarDias() { SDAYS.forEach(id => { const s = document.getElementById(id); if (!s) return; const v = s.value; s.innerHTML = '<option value="">--</option>'; for (let d = 1; d <= 31; d++) { const o = document.createElement('option'); o.value = d; o.textContent = d; if (d == v) o.selected = true; s.appendChild(o); } }); }
+    let companions = [];
+    function addCompanion() { companions.push({ surname: '', givenName: '', relationship: 'SPOUSE' }); renderCompanions(); }
+    function removeCompanion(i) { companions.splice(i, 1); renderCompanions(); }
+    function renderCompanions() { const c = document.getElementById('companionsList'); c.innerHTML = companions.map((_, i) => `<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:9px;"><div style="font-weight:600;font-size:.85rem;color:#2563eb;margin-bottom:7px">Acompañante ${i + 1}</div><div class="row"><div><label>Apellido</label><input type="text" id="csn${i}" placeholder="GARCIA" oninput="companions[${i}].surname=this.value.toUpperCase()"></div><div><label>Nombre</label><input type="text" id="cgn${i}" placeholder="ANA" oninput="companions[${i}].givenName=this.value.toUpperCase()"></div><div><label>Relacion</label><select id="crl${i}" onchange="companions[${i}].relationship=this.value"><option value="SPOUSE" selected>SPOUSE</option><option value="CHILD">CHILD</option><option value="PARENT">PARENT</option><option value="SIBLING">SIBLING</option><option value="OTHER">OTHER</option></select></div><div style="flex:0"><button type="button" onclick="removeCompanion(${i})" style="margin-top:22px;background:#fee2e2;border:none;padding:7px 11px;border-radius:6px;cursor:pointer;color:#dc2626">x</button></div></div></div>`).join(''); }
+    function g(id) { const e = document.getElementById(id); if (!e) return ''; return e.type === 'checkbox' ? e.checked : e.value; }
+    function gt(id) { const v = g(id); return typeof v === 'string' ? v.trim().toUpperCase() : v; }
+    function generarJSON() {
+      const datos = {
+        surnames: gt('surnames'), givenNames: gt('givenNames'), nativeName: gt('nativeName'), nativeNameText: gt('nativeNameText'), otherNames: g('otherNames'), telecode: g('telecode'),
+        gender: g('gender'), marital: g('marital'),
+        dobDay: g('dobDay'), dobMonth: g('dobMonth'), dobYear: g('dobYear'),
+        pobCity: gt('pobCity'), pobState: gt('pobState'), pobCountry: g('pobCountry'),
+        nationality: g('nationality'), otherNationality: g('otherNationality'), permResidentOther: g('permResidentOther'),
+        nationalIdNA: g('nationalIdNA'), nationalId: g('nationalId'), ssnNA: g('ssnNA'), ssn: g('ssn'), taxIdNA: g('taxIdNA'), taxId: g('taxId'),
+        socialMediaPlatform: g('socialMediaPlatform'), socialMediaHandle: g('socialMediaHandle'), otherSocialMedia: g('otherSocialMedia'),
+        purposeOfTrip: g('purposeOfTrip'), specifyPurpose: gt('specifyPurpose'), specificTravelPlans: g('specificTravelPlans'),
+        arrivalDay: g('arrivalDay'), arrivalMonth: g('arrivalMonth'), arrivalYear: g('arrivalYear'), stayLength: g('stayLength'), stayUnit: g('stayUnit'),
+        specificArrivalDay: g('specificArrivalDay'), specificArrivalMonth: g('specificArrivalMonth'), specificArrivalYear: g('specificArrivalYear'),
+        arrivalFlight: gt('arrivalFlight'), arrivalCity: gt('arrivalCity'),
+        specificDepDay: g('specificDepDay'), specificDepMonth: g('specificDepMonth'), specificDepYear: g('specificDepYear'),
+        departureFlight: gt('departureFlight'), departureCity: gt('departureCity'), locationsToVisit: gt('locationsToVisit'),
+        usStreet1: gt('usStreet1'), usStreet2: gt('usStreet2'), usCity: gt('usCity'), usState: g('usState'), usZip: g('usZip'),
+        whoIsPaying: g('whoIsPaying'), payerSurname: gt('payerSurname'), payerGivenName: gt('payerGivenName'),
+        payerPhone: g('payerPhone'), payerEmail: g('payerEmail'), payerRelationship: g('payerRelationship'),
+        payerOrgName: gt('payerOrgName'), payerOrgPhone: g('payerOrgPhone'), payerOrgRelationship: g('payerOrgRelationship'),
+        otherPersonsTravelingWithYou: g('otherPersonsTravelingWithYou'), groupTravel: g('groupTravel'), groupName: gt('groupName'), companions: companions,
+        prevUsTravel: g('prevUsTravel'), prevUsVisitDay: g('prevUsVisitDay'), prevUsVisitMonth: g('prevUsVisitMonth'), prevUsVisitYear: g('prevUsVisitYear'),
+        prevUsVisitLOS: g('prevUsVisitLOS'), prevUsVisitLOS_CD: g('prevUsVisitLOS_CD'),
+        hasUsDriverLicense: g('hasUsDriverLicense'), prevUsDriverLicenseNA: g('prevUsDriverLicenseNA'),
+        prevUsDriverLicenseNum: g('prevUsDriverLicenseNum'), prevUsDriverLicenseState: g('prevUsDriverLicenseState'),
+        prevVisa: g('prevVisa'), prevVisaIssuedDay: g('prevVisaIssuedDay'), prevVisaIssuedMonth: g('prevVisaIssuedMonth'), prevVisaIssuedYear: g('prevVisaIssuedYear'),
+        prevVisaNumberNA: g('prevVisaNumberNA'), prevVisaNumber: g('prevVisaNumber'), sameVisaType: g('sameVisaType'), sameCountry: g('sameCountry'),
+        tenPrinted: g('tenPrinted'), lostVisa: g('lostVisa'), cancelledVisa: g('cancelledVisa'),
+        refusedVisa: g('refusedVisa'), refusedVisaExplain: g('refusedVisaExplain'),
+        immigrantPetition: g('immigrantPetition'), immigrantPetitionExplain: g('immigrantPetitionExplain'),
+        homeStreet1: gt('homeStreet1'), homeStreet2: gt('homeStreet2'), homeCity: gt('homeCity'), homeStateNA: g('homeStateNA'), homeState: gt('homeState'),
+        homeZipNA: g('homeZipNA'), homeZip: g('homeZip'), homeCountry: g('homeCountry'), sameMailingAddress: g('sameMailingAddress'),
+        primaryPhone: g('primaryPhone'), secondaryPhoneNA: g('secondaryPhoneNA'), secondaryPhone: g('secondaryPhone'),
+        workPhoneNA: g('workPhoneNA'), workPhone: g('workPhone'), emailAddress: g('emailAddress'), otherEmails: g('otherEmails'),
+        passportType: g('passportType'), passportNumber: gt('passportNumber'), passportBookNumberNA: g('passportBookNumberNA'), passportBookNumber: g('passportBookNumber'),
+        passportIssuedCountry: g('passportIssuedCountry'), passportIssuedCity: gt('passportIssuedCity'), passportIssuedState: gt('passportIssuedState'),
+        passportIssuedCountryRegion: g('passportIssuedCountryRegion'), passportIssuedDay: g('passportIssuedDay'), passportIssuedMonth: g('passportIssuedMonth'), passportIssuedYear: g('passportIssuedYear'),
+        passportExpireNA: g('passportExpireNA'), passportExpireDay: g('passportExpireDay'), passportExpireMonth: g('passportExpireMonth'), passportExpireYear: g('passportExpireYear'), lostPassport: g('lostPassport'),
+        pocNameNA: g('pocNameNA'), pocSurname: gt('pocSurname'), pocGivenName: gt('pocGivenName'), pocOrgNA: g('pocOrgNA'), pocOrgName: gt('pocOrgName'), pocRelationship: g('pocRelationship'),
+        pocStreet1: g('pocStreet1'), pocStreet2: g('pocStreet2'), pocCity: g('pocCity'), pocState: g('pocState'), pocZipCode: g('pocZipCode'), pocPhone: g('pocPhone'), pocEmailNA: g('pocEmailNA'), pocEmail: g('pocEmail'),
+        fatherSurnameNA: g('fatherSurnameNA'), fatherSurname: gt('fatherSurname'), fatherGivenNameNA: g('fatherGivenNameNA'), fatherGivenName: gt('fatherGivenName'),
+        fatherDobNA: g('fatherDobNA'), fatherDobDay: g('fatherDobDay'), fatherDobMonth: g('fatherDobMonth'), fatherDobYear: g('fatherDobYear'), fatherInUS: g('fatherInUS'),
+        motherSurnameNA: g('motherSurnameNA'), motherSurname: gt('motherSurname'), motherGivenNameNA: g('motherGivenNameNA'), motherGivenName: gt('motherGivenName'),
+        motherDobNA: g('motherDobNA'), motherDobDay: g('motherDobDay'), motherDobMonth: g('motherDobMonth'), motherDobYear: g('motherDobYear'), motherInUS: g('motherInUS'),
+        hasImmediateRelativesUS: g('hasImmediateRelativesUS'), hasOtherRelativesUS: g('hasOtherRelativesUS'),
+        primaryOccupation: g('primaryOccupation'), explainOtherOccupation: gt('explainOtherOccupation'),
+        empSchName: gt('empSchName'), empSchAddr1: gt('empSchAddr1'), empSchAddr2: gt('empSchAddr2'), empSchCity: gt('empSchCity'),
+        empSchStateNA: g('empSchStateNA'), empSchState: gt('empSchState'), empSchZipNA: g('empSchZipNA'), empSchZip: g('empSchZip'), empSchPhone: g('empSchPhone'), empSchCountry: g('empSchCountry'),
+        empStartDateDay: g('empStartDateDay'), empStartDateMonth: g('empStartDateMonth'), empStartDateYear: g('empStartDateYear'),
+        empSalaryNA: g('empSalaryNA'), empSalary: g('empSalary'), empDuties: gt('empDuties'),
+        prevEmployed: g('prevEmployed'), prevEmpName: gt('prevEmpName'), prevEmpAddr1: gt('prevEmpAddr1'), prevEmpAddr2: gt('prevEmpAddr2'), prevEmpCity: gt('prevEmpCity'),
+        prevEmpStateNA: g('prevEmpStateNA'), prevEmpState: gt('prevEmpState'), prevEmpZipNA: g('prevEmpZipNA'), prevEmpZip: g('prevEmpZip'), prevEmpCountry: g('prevEmpCountry'), prevEmpPhone: g('prevEmpPhone'), prevEmpJobTitle: gt('prevEmpJobTitle'),
+        prevEmpSupervisorSurnameNA: g('prevEmpSupervisorSurnameNA'), prevEmpSupervisorSurname: gt('prevEmpSupervisorSurname'),
+        prevEmpSupervisorGivenNameNA: g('prevEmpSupervisorGivenNameNA'), prevEmpSupervisorGivenName: gt('prevEmpSupervisorGivenName'),
+        prevEmpFromDay: g('prevEmpFromDay'), prevEmpFromMonth: g('prevEmpFromMonth'), prevEmpFromYear: g('prevEmpFromYear'),
+        prevEmpToDay: g('prevEmpToDay'), prevEmpToMonth: g('prevEmpToMonth'), prevEmpToYear: g('prevEmpToYear'), prevEmpDuties: gt('prevEmpDuties'),
+        prevEduc: g('prevEduc'), prevEducName: gt('prevEducName'), prevEducAddr1: gt('prevEducAddr1'), prevEducAddr2: gt('prevEducAddr2'), prevEducCity: gt('prevEducCity'),
+        prevEducStateNA: g('prevEducStateNA'), prevEducState: gt('prevEducState'), prevEducZipNA: g('prevEducZipNA'), prevEducZip: g('prevEducZip'), prevEducCountry: g('prevEducCountry'), prevEducCourse: gt('prevEducCourse'),
+        prevEducFromDay: g('prevEducFromDay'), prevEducFromMonth: g('prevEducFromMonth'), prevEducFromYear: g('prevEducFromYear'),
+        prevEducToDay: g('prevEducToDay'), prevEducToMonth: g('prevEducToMonth'), prevEducToYear: g('prevEducToYear'),
+        belongsToClanTribe: g('belongsToClanTribe'), clanTribeName: gt('clanTribeName'), languageName1: gt('languageName1'),
+        countriesVisited: g('countriesVisited'), countryVisited1: g('countryVisited1'), belongToOrg: g('belongToOrg'), orgName1: gt('orgName1'),
+        specializedSkills: g('specializedSkills'), specializedSkillsExpl: gt('specializedSkillsExpl'),
+        militaryService: g('militaryService'), militaryCountry: g('militaryCountry'), militaryBranch: gt('militaryBranch'), militaryRank: gt('militaryRank'), militarySpecialty: gt('militarySpecialty'),
+        militaryFromDay: g('militaryFromDay'), militaryFromMonth: g('militaryFromMonth'), militaryFromYear: g('militaryFromYear'),
+        militaryToDay: g('militaryToDay'), militaryToMonth: g('militaryToMonth'), militaryToYear: g('militaryToYear'),
+        insurgentOrg: g('insurgentOrg'), insurgentOrgExpl: gt('insurgentOrgExpl'),
+        sec1Disease: g('sec1Disease'), sec1DiseaseExpl: g('sec1DiseaseExpl'), sec1Disorder: g('sec1Disorder'), sec1DisorderExpl: g('sec1DisorderExpl'), sec1Druguser: g('sec1Druguser'), sec1DruguserExpl: g('sec1DruguserExpl'),
+        sec2Arrested: g('sec2Arrested'), sec2ArrestedExpl: g('sec2ArrestedExpl'), sec2Substances: g('sec2Substances'), sec2SubstancesExpl: g('sec2SubstancesExpl'),
+        sec2Prostitution: g('sec2Prostitution'), sec2ProstitutionExpl: g('sec2ProstitutionExpl'), sec2MoneyLaundering: g('sec2MoneyLaundering'), sec2MoneyLaunderingExpl: g('sec2MoneyLaunderingExpl'),
+        sec2Trafficking: g('sec2Trafficking'), sec2TraffickingExpl: g('sec2TraffickingExpl'), sec2AssistedTrafficking: g('sec2AssistedTrafficking'), sec2AssistedTraffickingExpl: g('sec2AssistedTraffickingExpl'),
+        sec2RelatedTrafficking: g('sec2RelatedTrafficking'), sec2RelatedTraffickingExpl: g('sec2RelatedTraffickingExpl'),
+        sec3IllegalActivity: g('sec3IllegalActivity'), sec3IllegalActivityExpl: g('sec3IllegalActivityExpl'), sec3TerroristActivity: g('sec3TerroristActivity'), sec3TerroristActivityExpl: g('sec3TerroristActivityExpl'),
+        sec3TerroristSupport: g('sec3TerroristSupport'), sec3TerroristSupportExpl: g('sec3TerroristSupportExpl'), sec3TerroristOrg: g('sec3TerroristOrg'), sec3TerroristOrgExpl: g('sec3TerroristOrgExpl'),
+        sec3TerroristRel: g('sec3TerroristRel'), sec3TerroristRelExpl: g('sec3TerroristRelExpl'), sec3Genocide: g('sec3Genocide'), sec3GenocideExpl: g('sec3GenocideExpl'),
+        sec3Torture: g('sec3Torture'), sec3TortureExpl: g('sec3TortureExpl'), sec3ExViolence: g('sec3ExViolence'), sec3ExViolenceExpl: g('sec3ExViolenceExpl'),
+        sec3ChildSoldier: g('sec3ChildSoldier'), sec3ChildSoldierExpl: g('sec3ChildSoldierExpl'), sec3ReligiousFreedom: g('sec3ReligiousFreedom'), sec3ReligiousFreedomExpl: g('sec3ReligiousFreedomExpl'),
+        sec3PopulationControls: g('sec3PopulationControls'), sec3PopulationControlsExpl: g('sec3PopulationControlsExpl'), sec3Transplant: g('sec3Transplant'), sec3TransplantExpl: g('sec3TransplantExpl'),
+        sec4ImmigrationFraud: g('sec4ImmigrationFraud'), sec4ImmigrationFraudExpl: g('sec4ImmigrationFraudExpl'), sec4Deport: g('sec4Deport'), sec4DeportExpl: g('sec4DeportExpl'),
+        sec5ChildCustody: g('sec5ChildCustody'), sec5ChildCustodyExpl: g('sec5ChildCustodyExpl'), sec5VotingViolation: g('sec5VotingViolation'), sec5VotingViolationExpl: g('sec5VotingViolationExpl'),
+        sec5RenounceExp: g('sec5RenounceExp'), sec5RenounceExpExpl: g('sec5RenounceExpExpl'),
+        photoPath: g('photoPath')
+      };
+      const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'datos.json'; a.click(); URL.revokeObjectURL(url);
+      alert('Archivo datos.json generado exitosamente. Revise su carpeta de Descargas.');
+    }
+    window.onload = function () { buildDots(); poblarDias(); updateProgress(); };
+  </script>
+</body>
+
+</html>
