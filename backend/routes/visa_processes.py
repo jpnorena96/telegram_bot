@@ -312,3 +312,49 @@ def delete_process(process_id: int, current_user: dict = Depends(get_current_use
     
     return {"status": "success", "message": "Expediente eliminado correctamente"}
 
+@router.get("/public/processes/{process_id}/ds160")
+def get_public_process_ds160(process_id: int, db = Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT id, ds160_json FROM visa_applicants WHERE visa_process_id = %s ORDER BY id ASC LIMIT 1", (process_id,))
+    applicant = cursor.fetchone()
+    cursor.close()
+    
+    if applicant and applicant["ds160_json"]:
+        import json
+        try:
+            return json.loads(applicant["ds160_json"])
+        except Exception:
+            return {}
+    return {}
+
+@router.put("/public/processes/{process_id}/ds160")
+async def update_public_process_ds160(process_id: int, request: Request, db = Depends(get_db)):
+    data = await request.json()
+    import json
+    ds160_json_str = json.dumps(data)
+    
+    cursor = db.cursor(dictionary=True)
+    # Check if a primary applicant exists
+    cursor.execute("SELECT id FROM visa_applicants WHERE visa_process_id = %s ORDER BY id ASC LIMIT 1", (process_id,))
+    applicant = cursor.fetchone()
+    
+    if applicant:
+        cursor.execute(
+            "UPDATE visa_applicants SET ds160_json = %s WHERE id = %s",
+            (ds160_json_str, applicant["id"])
+        )
+    else:
+        # Extract full_name from the data if possible (PersonalInformation1 -> fullName)
+        full_name = data.get("personal1", {}).get("fullName", "Solicitante Principal")
+        cursor.execute(
+            "INSERT INTO visa_applicants (visa_process_id, full_name, relationship, ds160_json) VALUES (%s, %s, %s, %s)",
+            (process_id, full_name, "primary", ds160_json_str)
+        )
+        
+    # Update process status to "En Progreso" if it's new
+    cursor.execute("UPDATE visa_processes SET status = 'En Progreso' WHERE id = %s AND status = 'Pendiente'", (process_id,))
+    
+    db.commit()
+    cursor.close()
+    
+    return {"status": "ok", "message": "Datos de DS-160 guardados"}

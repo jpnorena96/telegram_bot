@@ -20,13 +20,24 @@ import SecurityBackground5 from './SecurityBackground5';
 import PhotoUpload from './PhotoUpload';
 import PhotoUploadSubmit from './PhotoUploadSubmit';
 
-const DS160Wizard = ({ applicantId }) => {
+const DS160Wizard = ({ applicantId, isPublic = false, processId = null }) => {
   const [formData, setFormData] = useState({});
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (applicantId) {
+    if (isPublic && processId) {
+      setLoading(true);
+      fetch(`${api.url}/visa-processes/public/processes/${processId}/ds160`)
+      .then(res => res.ok ? res.json() : {})
+      .then(data => {
+        if (data && Object.keys(data).length > 0) {
+          setFormData(data);
+        }
+      })
+      .catch(err => console.error("Error loading DS160 data:", err))
+      .finally(() => setLoading(false));
+    } else if (applicantId) {
       setLoading(true);
       fetch(`${api.url}/visa-processes/applicants/${applicantId}/ds160`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
@@ -40,29 +51,36 @@ const DS160Wizard = ({ applicantId }) => {
       .catch(err => console.error("Error loading DS160 data:", err))
       .finally(() => setLoading(false));
     }
-  }, [applicantId]);
+  }, [applicantId, isPublic, processId]);
 
   const updateData = (newData) => {
     setFormData(prev => ({ ...prev, ...newData }));
   };
 
   const handleSaveJSON = async () => {
-    if (!applicantId) {
+    if (!applicantId && !isPublic) {
       toast.error('No se ha especificado el solicitante');
       return;
     }
     
     try {
-      const res = await fetch(`${api.url}/visa-processes/applicants/${applicantId}/ds160`, {
+      let endpoint = '';
+      let options = {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
-      });
+      };
+
+      if (isPublic && processId) {
+        endpoint = `${api.url}/visa-processes/public/processes/${processId}/ds160`;
+      } else {
+        endpoint = `${api.url}/visa-processes/applicants/${applicantId}/ds160`;
+        options.headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
+      }
+
+      const res = await fetch(endpoint, options);
       if (res.ok) {
-        toast.success('Formulario guardado exitosamente en el expediente.');
+        toast.success('Formulario guardado exitosamente.');
       } else {
         toast.error('Error al guardar el formulario.');
       }

@@ -488,6 +488,19 @@ const VisaProcessesPage = () => {
                         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                           
 
+                          {/* BOTÓN COPIAR ENLACE CLIENTE */}
+                          <button 
+                            onClick={() => {
+                              navigator.clipboard.writeText(`${window.location.origin}/client-portal/${p.id}`);
+                              toast.success('Enlace copiado al portapapeles');
+                            }}
+                            className="btn btn-sm btn-outline" 
+                            style={{ borderColor: '#6366F1', color: '#6366F1', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', fontWeight: 600 }} 
+                            title="Copiar link para el cliente"
+                          >
+                            <Copy size={13} /> Link Cliente
+                          </button>
+
                           {/* BOTA"N VER EXPEDIENTE */}
                           <button 
                             onClick={() => navigate(`/dashboard/visa-processes/${p.id}`)} 
