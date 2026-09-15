@@ -51,15 +51,7 @@ const PersonalInformation1 = ({ data, updateData }) => {
       
       <br />
       
-      <div className="error-message" style={{ color: 'Red', backgroundColor: 'White', padding: '10px', marginBottom: '15px' }}>
-        Please correct all areas in error as indicated below. Once you have finished, click 'Save' or 'Next' to continue completing your online application form.
-        <ul style={{ marginTop: '5px', paddingLeft: '25px', listStyleType: 'disc' }}>
-          <li>Surnames has not been completed.</li>
-          <li>Given Names has not been completed.</li>
-          <li>Full Name in Native Alphabet has not been completed.</li>
-          <li>Marital Status has not been completed.</li>
-        </ul>
-      </div>
+
 
       <div className="note" style={{ marginBottom: '20px', fontWeight: 'bold', fontSize: '12px' }}>
         NOTE: Data on this page must match the information as it is written in your passport.

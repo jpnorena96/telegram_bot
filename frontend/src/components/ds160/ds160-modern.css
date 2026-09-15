@@ -1,0 +1,143 @@
+/* ds160-modern.css */
+
+/* Hide the old legacy burden/OMB tables entirely */
+.ds160-modern-wrapper .burden {
+  display: none !important;
+}
+
+/* Global typography override for the entire DS160 section */
+.ds160-modern-wrapper .ds160-container {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  font-size: 14px !important;
+  color: #1E293B !important;
+}
+
+/* Convert all the legacy border-boxes (like <div style="border: 1px solid #999">) to modern cards */
+.ds160-modern-wrapper div[style*="border: 1px solid #999"],
+.ds160-modern-wrapper div[style*="border: 1px solid rgb(153, 153, 153)"],
+.ds160-modern-wrapper .panel-legacy {
+  border: 1px solid #E2E8F0 !important;
+  background-color: #FFFFFF !important;
+  border-radius: 16px !important;
+  padding: 32px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05) !important;
+  margin-bottom: 24px !important;
+}
+
+/* Inputs and Selects styling */
+.ds160-modern-wrapper input[type="text"],
+.ds160-modern-wrapper input[type="email"],
+.ds160-modern-wrapper input[type="number"],
+.ds160-modern-wrapper input[type="date"],
+.ds160-modern-wrapper select,
+.ds160-modern-wrapper textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 14px 16px !important;
+  border: 1px solid #CBD5E1 !important;
+  border-radius: 10px !important;
+  font-size: 15px !important;
+  background-color: #F8FAFC !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  color: #0F172A !important;
+  margin-top: 4px !important;
+}
+
+/* Hover and Focus states for inputs */
+.ds160-modern-wrapper input[type="text"]:hover,
+.ds160-modern-wrapper select:hover,
+.ds160-modern-wrapper textarea:hover {
+  background-color: #F1F5F9 !important;
+}
+
+.ds160-modern-wrapper input[type="text"]:focus,
+.ds160-modern-wrapper select:focus,
+.ds160-modern-wrapper textarea:focus {
+  border-color: #3B82F6 !important;
+  background-color: #FFFFFF !important;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15) !important;
+  outline: none !important;
+}
+
+/* Disabled state */
+.ds160-modern-wrapper input:disabled,
+.ds160-modern-wrapper select:disabled {
+  background-color: #E2E8F0 !important;
+  color: #94A3B8 !important;
+  cursor: not-allowed !important;
+  border-color: #CBD5E1 !important;
+}
+
+/* Labels */
+.ds160-modern-wrapper label {
+  font-weight: 600 !important;
+  color: #475569 !important;
+  font-size: 13px !important;
+  margin-bottom: 8px !important;
+  display: block !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Checkboxes and Radios */
+.ds160-modern-wrapper input[type="checkbox"],
+.ds160-modern-wrapper input[type="radio"] {
+  width: 18px !important;
+  height: 18px !important;
+  accent-color: #3B82F6 !important;
+  cursor: pointer !important;
+  margin-right: 8px !important;
+  position: relative !important;
+  top: 4px !important;
+}
+
+/* Tooltip text hints (e.g. "(por ejemplo: JUAN MIGUEL)") */
+.ds160-modern-wrapper .tooltip_text {
+  color: #64748B !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+/* Fix table layouts from old CEAC */
+.ds160-modern-wrapper table {
+  width: 100% !important;
+  max-width: 100% !important;
+  border-collapse: collapse !important;
+}
+
+.ds160-modern-wrapper td {
+  padding-bottom: 12px !important;
+  padding-right: 12px !important;
+}
+
+/* Headers */
+.ds160-modern-wrapper h2 {
+  color: #0F172A !important;
+  border-bottom: 2px solid #F1F5F9 !important;
+  padding-bottom: 16px !important;
+  font-size: 1.8rem !important;
+  font-weight: 800 !important;
+  margin-bottom: 32px !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* Error Messages */
+.ds160-modern-wrapper .error-message {
+  background-color: #FEF2F2 !important;
+  border: 1px solid #FCA5A5 !important;
+  color: #991B1B !important;
+  border-radius: 12px !important;
+  padding: 16px 20px !important;
+  font-weight: 500 !important;
+  margin-bottom: 24px !important;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.05) !important;
+}
+
+/* Remove old CEAC red asterisk styles and replace with modern ones if possible */
+.ds160-modern-wrapper span[style*="color: Red"] {
+  color: #EF4444 !important;
+  font-weight: 800 !important;
+}
